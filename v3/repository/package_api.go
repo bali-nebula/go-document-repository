@@ -167,7 +167,7 @@ type Persistent interface {
 		bag not.CitationLike,
 		message not.CitationLike,
 	)
-	ReturnMessage(
+	ReleaseMessage(
 		bag not.CitationLike,
 		message not.CitationLike,
 	)

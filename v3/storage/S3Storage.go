@@ -157,7 +157,7 @@ func (v *s3Storage_) DeleteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *s3Storage_) ReturnMessage(
+func (v *s3Storage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

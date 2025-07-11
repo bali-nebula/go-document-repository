@@ -157,7 +157,7 @@ func (v *remoteStorage_) DeleteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) ReturnMessage(
+func (v *remoteStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

@@ -157,7 +157,7 @@ func (v *cachedStorage_) DeleteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *cachedStorage_) ReturnMessage(
+func (v *cachedStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

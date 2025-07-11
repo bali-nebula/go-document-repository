@@ -157,7 +157,7 @@ func (v *validatedStorage_) DeleteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *validatedStorage_) ReturnMessage(
+func (v *validatedStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

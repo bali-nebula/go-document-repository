@@ -231,7 +231,7 @@ func (v *documentRepository_) RejectMessage(
 	var bag = fra.NameFromString(source)
 	var bagCitation = v.storage_.ReadCitation(bag)
 	var messageCitation = v.notary_.CiteDraft(message)
-	v.storage_.ReturnMessage(bagCitation, messageCitation)
+	v.storage_.ReleaseMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) DeleteBag(

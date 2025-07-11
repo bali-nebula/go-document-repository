@@ -157,7 +157,7 @@ func (v *localStorage_) DeleteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *localStorage_) ReturnMessage(
+func (v *localStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
