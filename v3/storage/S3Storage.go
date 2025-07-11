@@ -129,14 +129,6 @@ func (v *s3Storage_) WriteContract(
 	return result_
 }
 
-func (v *s3Storage_) MessageAvailable(
-	bag not.CitationLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
 func (v *s3Storage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
@@ -145,14 +137,7 @@ func (v *s3Storage_) MessageCount(
 	return result_
 }
 
-func (v *s3Storage_) AddMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *s3Storage_) RetrieveMessage(
+func (v *s3Storage_) ReadMessage(
 	bag not.CitationLike,
 ) not.ContractLike {
 	var result_ not.ContractLike
@@ -160,20 +145,25 @@ func (v *s3Storage_) RetrieveMessage(
 	return result_
 }
 
-func (v *s3Storage_) ReturnMessage(
+func (v *s3Storage_) WriteMessage(
+	bag not.CitationLike,
 	message not.ContractLike,
-) bool {
-	var result_ bool
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *s3Storage_) DeleteMessage(
-	message not.ContractLike,
-) bool {
-	var result_ bool
+	bag not.CitationLike,
+	message not.CitationLike,
+) {
 	// TBD - Add the method implementation.
-	return result_
+}
+
+func (v *s3Storage_) ReturnMessage(
+	bag not.CitationLike,
+	message not.CitationLike,
+) {
+	// TBD - Add the method implementation.
 }
 
 // PROTECTED INTERFACE

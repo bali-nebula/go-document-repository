@@ -129,14 +129,6 @@ func (v *remoteStorage_) WriteContract(
 	return result_
 }
 
-func (v *remoteStorage_) MessageAvailable(
-	bag not.CitationLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
 func (v *remoteStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
@@ -145,14 +137,7 @@ func (v *remoteStorage_) MessageCount(
 	return result_
 }
 
-func (v *remoteStorage_) AddMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *remoteStorage_) RetrieveMessage(
+func (v *remoteStorage_) ReadMessage(
 	bag not.CitationLike,
 ) not.ContractLike {
 	var result_ not.ContractLike
@@ -160,20 +145,25 @@ func (v *remoteStorage_) RetrieveMessage(
 	return result_
 }
 
-func (v *remoteStorage_) ReturnMessage(
+func (v *remoteStorage_) WriteMessage(
+	bag not.CitationLike,
 	message not.ContractLike,
-) bool {
-	var result_ bool
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *remoteStorage_) DeleteMessage(
-	message not.ContractLike,
-) bool {
-	var result_ bool
+	bag not.CitationLike,
+	message not.CitationLike,
+) {
 	// TBD - Add the method implementation.
-	return result_
+}
+
+func (v *remoteStorage_) ReturnMessage(
+	bag not.CitationLike,
+	message not.CitationLike,
+) {
+	// TBD - Add the method implementation.
 }
 
 // PROTECTED INTERFACE

@@ -153,23 +153,22 @@ type Persistent interface {
 	WriteContract(
 		contract not.ContractLike,
 	) not.CitationLike
-	MessageAvailable(
-		bag not.CitationLike,
-	) bool
 	MessageCount(
 		bag not.CitationLike,
 	) uint
-	AddMessage(
+	ReadMessage(
+		bag not.CitationLike,
+	) not.ContractLike
+	WriteMessage(
 		bag not.CitationLike,
 		message not.ContractLike,
 	)
-	RetrieveMessage(
-		bag not.CitationLike,
-	) not.ContractLike
-	ReturnMessage(
-		message not.ContractLike,
-	) bool
 	DeleteMessage(
-		message not.ContractLike,
-	) bool
+		bag not.CitationLike,
+		message not.CitationLike,
+	)
+	ReturnMessage(
+		bag not.CitationLike,
+		message not.CitationLike,
+	)
 }
