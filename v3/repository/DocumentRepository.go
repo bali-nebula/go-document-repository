@@ -244,7 +244,10 @@ func (v *documentRepository_) DeleteBag(
 func (v *documentRepository_) PublishEvent(
 	event not.DraftLike,
 ) {
-	// TBD - Add the method implementation.
+	var bag = fra.NameFromString("/nebula/bag/Events")
+	var citation = v.storage_.ReadCitation(bag)
+	var contract = v.notary_.NotarizeDraft(event)
+	v.storage_.WriteMessage(citation, contract)
 }
 
 // Attribute Methods
