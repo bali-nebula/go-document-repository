@@ -33,6 +33,7 @@ package repository
 
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE DECLARATIONS
@@ -64,50 +65,53 @@ of a concrete document-repository-like class.
 type DocumentRepositoryLike interface {
 	// Principal Methods
 	GetClass() DocumentRepositoryClassLike
-	SaveDocument(
-		document not.DocumentLike,
+	SaveDraft(
+		draft not.DraftLike,
 	) not.CitationLike
-	RetrieveDocument(
+	RetrieveDraft(
 		citation not.CitationLike,
-	) not.DocumentLike
-	DiscardDocument(
+	) not.DraftLike
+	DiscardDraft(
 		citation not.CitationLike,
-	) bool
-	NotarizeDocument(
-		name string,
-		document not.DocumentLike,
+	)
+	NotarizeDraft(
+		name fra.NameLike,
+		draft not.DraftLike,
 	) not.ContractLike
 	RetrieveContract(
-		name string,
+		name fra.NameLike,
 	) not.ContractLike
-	CheckoutDocument(
-		name string,
+	CheckoutDraft(
+		name fra.NameLike,
 		level uint,
-	) not.DocumentLike
+	) not.DraftLike
 	CreateBag(
-		name string,
-		permissions string,
+		name fra.NameLike,
+		permissions fra.ResourceLike,
 		capacity uint,
-		lease uint,
+		leasetime uint,
 	)
 	MessageCount(
-		bag string,
+		bag fra.NameLike,
 	) uint
 	PostMessage(
-		bag string,
-		message not.DocumentLike,
+		bag fra.NameLike,
+		message not.DraftLike,
 	)
 	RetrieveMessage(
-		bag string,
-	) not.ContractLike
+		bag fra.NameLike,
+	) not.DraftLike
 	AcceptMessage(
-		message not.ContractLike,
+		message not.DraftLike,
 	)
 	RejectMessage(
-		message not.ContractLike,
+		message not.DraftLike,
+	)
+	DeleteBag(
+		name fra.NameLike,
 	)
 	PublishEvent(
-		event not.DocumentLike,
+		event not.DraftLike,
 	)
 }
 
@@ -119,53 +123,53 @@ persistent data storage mechanisms.
 */
 type Persistent interface {
 	CitationExists(
-		name string,
+		name fra.NameLike,
 	) bool
 	ReadCitation(
-		name string,
-	) string
+		name fra.NameLike,
+	) not.CitationLike
 	WriteCitation(
-		name string,
-		citation string,
+		name fra.NameLike,
+		citation not.CitationLike,
 	)
-	DocumentExists(
-		citation string,
+	DraftExists(
+		citation not.CitationLike,
 	) bool
-	ReadDocument(
-		citation string,
-	) string
-	WriteDocument(
-		document string,
-	) string
-	DeleteDocument(
-		citation string,
-	) string
+	ReadDraft(
+		citation not.CitationLike,
+	) not.DraftLike
+	WriteDraft(
+		draft not.DraftLike,
+	) not.CitationLike
+	DeleteDraft(
+		citation not.CitationLike,
+	) bool
 	ContractExists(
-		citation string,
+		citation not.CitationLike,
 	) bool
 	ReadContract(
-		citation string,
-	) string
+		citation not.CitationLike,
+	) not.ContractLike
 	WriteContract(
-		contract string,
-	) string
+		contract not.ContractLike,
+	) not.CitationLike
 	MessageAvailable(
-		bag string,
+		bag not.CitationLike,
 	) bool
 	MessageCount(
-		bag string,
+		bag not.CitationLike,
 	) uint
 	AddMessage(
-		bag string,
-		message string,
-	) string
+		bag not.CitationLike,
+		message not.ContractLike,
+	)
 	RetrieveMessage(
-		bag string,
-	) string
+		bag not.CitationLike,
+	) not.ContractLike
 	ReturnMessage(
-		message string,
-	)
+		message not.ContractLike,
+	) bool
 	DeleteMessage(
-		message string,
-	)
+		message not.ContractLike,
+	) bool
 }

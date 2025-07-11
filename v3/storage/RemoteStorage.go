@@ -12,7 +12,10 @@
 
 package storage
 
-import ()
+import (
+	not "github.com/bali-nebula/go-digital-notary/v3"
+	fra "github.com/craterdog/go-component-framework/v7"
+)
 
 // CLASS INTERFACE
 
@@ -48,7 +51,7 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 // Persistent Methods
 
 func (v *remoteStorage_) CitationExists(
-	name string,
+	name fra.NameLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -56,54 +59,54 @@ func (v *remoteStorage_) CitationExists(
 }
 
 func (v *remoteStorage_) ReadCitation(
-	name string,
-) string {
-	var result_ string
+	name fra.NameLike,
+) not.CitationLike {
+	var result_ not.CitationLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteCitation(
-	name string,
-	citation string,
+	name fra.NameLike,
+	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) DocumentExists(
-	citation string,
+func (v *remoteStorage_) DraftExists(
+	citation not.CitationLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) ReadDocument(
-	citation string,
-) string {
-	var result_ string
+func (v *remoteStorage_) ReadDraft(
+	citation not.CitationLike,
+) not.DraftLike {
+	var result_ not.DraftLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) WriteDocument(
-	document string,
-) string {
-	var result_ string
+func (v *remoteStorage_) WriteDraft(
+	draft not.DraftLike,
+) not.CitationLike {
+	var result_ not.CitationLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) DeleteDocument(
-	citation string,
-) string {
-	var result_ string
+func (v *remoteStorage_) DeleteDraft(
+	citation not.CitationLike,
+) bool {
+	var result_ bool
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) ContractExists(
-	citation string,
+	citation not.CitationLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -111,23 +114,23 @@ func (v *remoteStorage_) ContractExists(
 }
 
 func (v *remoteStorage_) ReadContract(
-	citation string,
-) string {
-	var result_ string
+	citation not.CitationLike,
+) not.ContractLike {
+	var result_ not.ContractLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteContract(
-	contract string,
-) string {
-	var result_ string
+	contract not.ContractLike,
+) not.CitationLike {
+	var result_ not.CitationLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) MessageAvailable(
-	bag string,
+	bag not.CitationLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -135,7 +138,7 @@ func (v *remoteStorage_) MessageAvailable(
 }
 
 func (v *remoteStorage_) MessageCount(
-	bag string,
+	bag not.CitationLike,
 ) uint {
 	var result_ uint
 	// TBD - Add the method implementation.
@@ -143,32 +146,34 @@ func (v *remoteStorage_) MessageCount(
 }
 
 func (v *remoteStorage_) AddMessage(
-	bag string,
-	message string,
-) string {
-	var result_ string
+	bag not.CitationLike,
+	message not.ContractLike,
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *remoteStorage_) RetrieveMessage(
-	bag string,
-) string {
-	var result_ string
+	bag not.CitationLike,
+) not.ContractLike {
+	var result_ not.ContractLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) ReturnMessage(
-	message string,
-) {
+	message not.ContractLike,
+) bool {
+	var result_ bool
 	// TBD - Add the method implementation.
+	return result_
 }
 
 func (v *remoteStorage_) DeleteMessage(
-	message string,
-) {
+	message not.ContractLike,
+) bool {
+	var result_ bool
 	// TBD - Add the method implementation.
+	return result_
 }
 
 // PROTECTED INTERFACE

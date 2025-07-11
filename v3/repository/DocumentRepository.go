@@ -13,8 +13,12 @@
 package repository
 
 import (
+	fmt "fmt"
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	bal "github.com/bali-nebula/go-document-notation/v3"
+	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
+	stc "strconv"
 )
 
 // CLASS INTERFACE
@@ -39,6 +43,8 @@ func (c *documentRepositoryClass_) DocumentRepository(
 	}
 	var instance = &documentRepository_{
 		// Initialize the instance attributes.
+		notary_:  notary,
+		storage_: storage,
 	}
 	return instance
 }
@@ -55,102 +61,174 @@ func (v *documentRepository_) GetClass() DocumentRepositoryClassLike {
 	return documentRepositoryClass()
 }
 
-func (v *documentRepository_) SaveDocument(
-	document not.DocumentLike,
+func (v *documentRepository_) SaveDraft(
+	draft not.DraftLike,
 ) not.CitationLike {
-	var result_ not.CitationLike
-	// TBD - Add the method implementation.
-	return result_
+	var citation = v.storage_.WriteDraft(draft)
+	return citation
 }
 
-func (v *documentRepository_) RetrieveDocument(
+func (v *documentRepository_) RetrieveDraft(
 	citation not.CitationLike,
-) not.DocumentLike {
-	var result_ not.DocumentLike
-	// TBD - Add the method implementation.
-	return result_
+) not.DraftLike {
+	var draft = v.storage_.ReadDraft(citation)
+	return draft
 }
 
-func (v *documentRepository_) DiscardDocument(
+func (v *documentRepository_) DiscardDraft(
 	citation not.CitationLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
+) {
+	v.storage_.DeleteDraft(citation)
 }
 
-func (v *documentRepository_) NotarizeDocument(
-	name string,
-	document not.DocumentLike,
+func (v *documentRepository_) NotarizeDraft(
+	name fra.NameLike,
+	draft not.DraftLike,
 ) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
+	if v.storage_.CitationExists(name) {
+		var message = fmt.Sprintf(
+			"Attempted to notarize a draft document using an existing name: %v",
+			name,
+		)
+		panic(message)
+	}
+	var contract = v.notary_.NotarizeDraft(draft)
+	var citation = v.storage_.WriteContract(contract)
+	v.storage_.WriteCitation(name, citation)
+	return contract
 }
 
 func (v *documentRepository_) RetrieveContract(
-	name string,
+	name fra.NameLike,
 ) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
+	var citation = v.storage_.ReadCitation(name)
+	if uti.IsUndefined(citation) {
+		var message = fmt.Sprintf(
+			"Attempted to retrieve a non-existent contract with name: %v",
+			name,
+		)
+		panic(message)
+	}
+	var contract = v.storage_.ReadContract(citation)
+	return contract
 }
 
-func (v *documentRepository_) CheckoutDocument(
-	name string,
+func (v *documentRepository_) CheckoutDraft(
+	name fra.NameLike,
 	level uint,
-) not.DocumentLike {
-	var result_ not.DocumentLike
-	// TBD - Add the method implementation.
-	return result_
+) not.DraftLike {
+	var citation = v.storage_.ReadCitation(name)
+	if uti.IsUndefined(citation) {
+		var message = fmt.Sprintf(
+			"Attempted to checkout a non-existent contract with name: %v",
+			name,
+		)
+		panic(message)
+	}
+	var contract = v.storage_.ReadContract(citation)
+	var draft = contract.GetDraft()
+	var component = draft.GetComponent()
+	var type_ = draft.GetType()
+	var tag = draft.GetTag()
+	var version = draft.GetVersion()
+	var permissions = draft.GetPermissions()
+	var previous = citation
+	var nextVersion = fra.VersionClass().GetNextVersion(
+		version,
+		uti.Ordinal(level),
+	)
+	draft = not.Draft(
+		component,
+		type_,
+		tag,
+		nextVersion,
+		permissions,
+		previous,
+	)
+	return draft
 }
 
 func (v *documentRepository_) CreateBag(
-	name string,
-	permissions string,
+	name fra.NameLike,
+	permissions fra.ResourceLike,
 	capacity uint,
-	lease uint,
+	leasetime uint,
 ) {
-	// TBD - Add the method implementation.
+	var component = bal.ParseSource(
+		`[
+    $capacity: ` + stc.Itoa(int(capacity)) + `
+    $leasetime: ` + stc.Itoa(int(leasetime)) + `
+]`,
+	).GetComponent()
+	var type_ = fra.ResourceFromString("<bali:/nebula/types/Bag:v1>")
+	var tag = fra.TagWithSize(20)
+	var version = fra.VersionFromString("v1")
+	var previous not.CitationLike
+	var draft = not.Draft(
+		component,
+		type_,
+		tag,
+		version,
+		permissions,
+		previous,
+	)
+	var contract = v.notary_.NotarizeDraft(draft)
+	var citation = v.storage_.WriteContract(contract)
+	v.storage_.WriteCitation(name, citation)
 }
 
 func (v *documentRepository_) MessageCount(
-	bag string,
+	bag fra.NameLike,
 ) uint {
-	var result_ uint
-	// TBD - Add the method implementation.
-	return result_
+	var citation = v.storage_.ReadCitation(bag)
+	return v.storage_.MessageCount(citation)
 }
 
 func (v *documentRepository_) PostMessage(
-	bag string,
-	message not.DocumentLike,
+	bag fra.NameLike,
+	message not.DraftLike,
 ) {
-	// TBD - Add the method implementation.
+	var citation = v.storage_.ReadCitation(bag)
+	var contract = v.storage_.ReadContract(citation)
+	var source = contract.GetDraft().AsString()
+	var document = bal.ParseSource(source)
+	source = not.DraftClass().ExtractAttribute("$capacity", document)
+	var capacity, _ = stc.Atoi(source)
+	var count = v.storage_.MessageCount(citation)
+	if count < uint(capacity) {
+		var contract = v.notary_.NotarizeDraft(message)
+		v.storage_.AddMessage(citation, contract)
+	}
 }
 
 func (v *documentRepository_) RetrieveMessage(
-	bag string,
-) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
+	bag fra.NameLike,
+) not.DraftLike {
+	var citation = v.storage_.ReadCitation(bag)
+	var contract = v.storage_.RetrieveMessage(citation)
+	var message = contract.GetDraft()
+	return message
 }
 
 func (v *documentRepository_) AcceptMessage(
-	message not.ContractLike,
+	message not.DraftLike,
+) {
+}
+
+func (v *documentRepository_) RejectMessage(
+	message not.DraftLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
-func (v *documentRepository_) RejectMessage(
-	message not.ContractLike,
+func (v *documentRepository_) DeleteBag(
+	name fra.NameLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *documentRepository_) PublishEvent(
-	event not.DocumentLike,
+	event not.DraftLike,
 ) {
 	// TBD - Add the method implementation.
 }
@@ -165,6 +243,8 @@ func (v *documentRepository_) PublishEvent(
 
 type documentRepository_ struct {
 	// Declare the instance attributes.
+	notary_  not.NotaryLike
+	storage_ Persistent
 }
 
 // Class Structure
