@@ -99,10 +99,8 @@ func (v *s3Storage_) WriteDraft(
 
 func (v *s3Storage_) DeleteDraft(
 	citation not.CitationLike,
-) bool {
-	var result_ bool
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *s3Storage_) ContractExists(

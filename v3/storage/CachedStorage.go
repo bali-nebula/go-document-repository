@@ -99,10 +99,8 @@ func (v *cachedStorage_) WriteDraft(
 
 func (v *cachedStorage_) DeleteDraft(
 	citation not.CitationLike,
-) bool {
-	var result_ bool
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *cachedStorage_) ContractExists(

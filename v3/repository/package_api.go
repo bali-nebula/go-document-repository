@@ -108,7 +108,7 @@ type DocumentRepositoryLike interface {
 		message not.DraftLike,
 	)
 	DeleteBag(
-		name fra.NameLike,
+		bag fra.NameLike,
 	)
 	PublishEvent(
 		event not.DraftLike,
@@ -143,7 +143,7 @@ type Persistent interface {
 	) not.CitationLike
 	DeleteDraft(
 		citation not.CitationLike,
-	) bool
+	)
 	ContractExists(
 		citation not.CitationLike,
 	) bool

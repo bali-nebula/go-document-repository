@@ -99,10 +99,8 @@ func (v *validatedStorage_) WriteDraft(
 
 func (v *validatedStorage_) DeleteDraft(
 	citation not.CitationLike,
-) bool {
-	var result_ bool
+) {
 	// TBD - Add the method implementation.
-	return result_
 }
 
 func (v *validatedStorage_) ContractExists(

@@ -225,13 +225,20 @@ func (v *documentRepository_) AcceptMessage(
 func (v *documentRepository_) RejectMessage(
 	message not.DraftLike,
 ) {
-	// TBD - Add the method implementation.
+	var source = message.AsString()
+	var document = bal.ParseSource(source)
+	source = not.DraftClass().ExtractAttribute("$bag", document)
+	var bag = fra.NameFromString(source)
+	var bagCitation = v.storage_.ReadCitation(bag)
+	var messageCitation = v.notary_.CiteDraft(message)
+	v.storage_.ReturnMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) DeleteBag(
-	name fra.NameLike,
+	bag fra.NameLike,
 ) {
-	// TBD - Add the method implementation.
+	var citation = v.storage_.ReadCitation(bag)
+	v.storage_.DeleteDraft(citation)
 }
 
 func (v *documentRepository_) PublishEvent(
