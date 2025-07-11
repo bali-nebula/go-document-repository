@@ -189,16 +189,8 @@ func (v *documentRepository_) PostMessage(
 	message not.DraftLike,
 ) {
 	var citation = v.storage_.ReadCitation(bag)
-	var contract = v.storage_.ReadContract(citation)
-	var source = contract.GetDraft().AsString()
-	var document = bal.ParseSource(source)
-	source = not.DraftClass().ExtractAttribute("$capacity", document)
-	var capacity, _ = stc.Atoi(source)
-	var count = v.storage_.MessageCount(citation)
-	if count < uint(capacity) {
-		var contract = v.notary_.NotarizeDraft(message)
-		v.storage_.WriteMessage(citation, contract)
-	}
+	var contract = v.notary_.NotarizeDraft(message)
+	v.storage_.WriteMessage(citation, contract)
 }
 
 func (v *documentRepository_) RetrieveMessage(
