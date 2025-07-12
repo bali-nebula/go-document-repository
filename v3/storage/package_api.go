@@ -29,6 +29,7 @@ on interfaces, not on each other.
 package storage
 
 import (
+	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 )
 
@@ -55,7 +56,10 @@ concrete local-storage-like class.
 */
 type LocalStorageClassLike interface {
 	// Constructor Methods
-	LocalStorage() LocalStorageLike
+	LocalStorage(
+		notary not.DigitalNotaryLike,
+		directory string,
+	) LocalStorageLike
 }
 
 /*

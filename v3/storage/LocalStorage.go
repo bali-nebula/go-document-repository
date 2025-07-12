@@ -15,6 +15,7 @@ package storage
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // CLASS INTERFACE
@@ -27,9 +28,20 @@ func LocalStorageClass() LocalStorageClassLike {
 
 // Constructor Methods
 
-func (c *localStorageClass_) LocalStorage() LocalStorageLike {
+func (c *localStorageClass_) LocalStorage(
+	notary not.DigitalNotaryLike,
+	directory string,
+) LocalStorageLike {
+	if uti.IsUndefined(notary) {
+		panic("The \"notary\" attribute is required by this class.")
+	}
+	if uti.IsUndefined(directory) {
+		panic("The \"directory\" attribute is required by this class.")
+	}
 	var instance = &localStorage_{
 		// Initialize the instance attributes.
+		notary_:    notary,
+		directory_: directory,
 	}
 	return instance
 }
@@ -53,78 +65,86 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 func (v *localStorage_) CitationExists(
 	name fra.NameLike,
 ) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "citations" + name.AsString()
+	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadCitation(
 	name fra.NameLike,
 ) not.CitationLike {
-	var result_ not.CitationLike
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "citations" + name.AsString()
+	var source = uti.ReadFile(path)
+	var citation = not.CitationFromString(source)
+	return citation
 }
 
 func (v *localStorage_) WriteCitation(
 	name fra.NameLike,
 	citation not.CitationLike,
 ) {
-	// TBD - Add the method implementation.
+	var path = v.directory_ + "citations" + name.AsString()
+	var source = citation.AsString()
+	uti.WriteFile(path, source)
 }
 
 func (v *localStorage_) DraftExists(
 	citation not.CitationLike,
 ) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "drafts" + v.dereference(citation)
+	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadDraft(
 	citation not.CitationLike,
 ) not.DraftLike {
-	var result_ not.DraftLike
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var source = uti.ReadFile(path)
+	var draft = not.DraftFromString(source)
+	return draft
 }
 
 func (v *localStorage_) WriteDraft(
 	draft not.DraftLike,
 ) not.CitationLike {
-	var result_ not.CitationLike
-	// TBD - Add the method implementation.
-	return result_
+	var citation = v.notary_.CiteDraft(draft)
+	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var source = draft.AsString()
+	uti.WriteFile(path, source)
+	return citation
 }
 
 func (v *localStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
-	// TBD - Add the method implementation.
+	var path = v.directory_ + "drafts" + v.dereference(citation)
+	uti.RemovePath(path)
 }
 
 func (v *localStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "contracts" + v.dereference(citation)
+	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadContract(
 	citation not.CitationLike,
 ) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "contracts" + v.dereference(citation)
+	var source = uti.ReadFile(path)
+	var contract = not.ContractFromString(source)
+	return contract
 }
 
 func (v *localStorage_) WriteContract(
 	contract not.ContractLike,
 ) not.CitationLike {
-	var result_ not.CitationLike
-	// TBD - Add the method implementation.
-	return result_
+	var draft = contract.GetDraft()
+	var citation = v.notary_.CiteDraft(draft)
+	var path = v.directory_ + "contracts" + v.dereference(citation)
+	var source = contract.AsString()
+	uti.WriteFile(path, source)
+	return citation
 }
 
 func (v *localStorage_) MessageCount(
@@ -168,10 +188,20 @@ func (v *localStorage_) ReleaseMessage(
 
 // Private Methods
 
+func (v *localStorage_) dereference(
+	citation not.CitationLike,
+) string {
+	var tag = citation.GetTag()
+	var version = citation.GetVersion()
+	return tag.AsString()[1:] + "/" + version.AsString()
+}
+
 // Instance Structure
 
 type localStorage_ struct {
 	// Declare the instance attributes.
+	notary_    not.DigitalNotaryLike
+	directory_ string
 }
 
 // Class Structure

@@ -32,7 +32,7 @@ func DocumentRepositoryClass() DocumentRepositoryClassLike {
 // Constructor Methods
 
 func (c *documentRepositoryClass_) DocumentRepository(
-	notary not.NotaryLike,
+	notary not.DigitalNotaryLike,
 	storage Persistent,
 ) DocumentRepositoryLike {
 	if uti.IsUndefined(notary) {
@@ -252,7 +252,7 @@ func (v *documentRepository_) PublishEvent(
 
 type documentRepository_ struct {
 	// Declare the instance attributes.
-	notary_  not.NotaryLike
+	notary_  not.DigitalNotaryLike
 	storage_ Persistent
 }
 

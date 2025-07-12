@@ -50,7 +50,7 @@ concrete document-repository-like class.
 type DocumentRepositoryClassLike interface {
 	// Constructor Methods
 	DocumentRepository(
-		notary not.NotaryLike,
+		notary not.DigitalNotaryLike,
 		storage Persistent,
 	) DocumentRepositoryLike
 }
