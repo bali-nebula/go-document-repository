@@ -13,9 +13,12 @@
 package storage
 
 import (
+	ran "crypto/rand"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
+	big "math/big"
+	osx "os"
 )
 
 // CLASS INTERFACE
@@ -90,14 +93,14 @@ func (v *localStorage_) WriteCitation(
 func (v *localStorage_) DraftExists(
 	citation not.CitationLike,
 ) bool {
-	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var path = v.directory_ + "drafts/" + v.dereference(citation)
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadDraft(
 	citation not.CitationLike,
 ) not.DraftLike {
-	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var path = v.directory_ + "drafts/" + v.dereference(citation)
 	var source = uti.ReadFile(path)
 	var draft = not.DraftFromString(source)
 	return draft
@@ -107,7 +110,7 @@ func (v *localStorage_) WriteDraft(
 	draft not.DraftLike,
 ) not.CitationLike {
 	var citation = v.notary_.CiteDraft(draft)
-	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var path = v.directory_ + "drafts/" + v.dereference(citation)
 	var source = draft.AsString()
 	uti.WriteFile(path, source)
 	return citation
@@ -116,21 +119,21 @@ func (v *localStorage_) WriteDraft(
 func (v *localStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
-	var path = v.directory_ + "drafts" + v.dereference(citation)
+	var path = v.directory_ + "drafts/" + v.dereference(citation)
 	uti.RemovePath(path)
 }
 
 func (v *localStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
-	var path = v.directory_ + "contracts" + v.dereference(citation)
+	var path = v.directory_ + "contracts/" + v.dereference(citation)
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadContract(
 	citation not.CitationLike,
 ) not.ContractLike {
-	var path = v.directory_ + "contracts" + v.dereference(citation)
+	var path = v.directory_ + "contracts/" + v.dereference(citation)
 	var source = uti.ReadFile(path)
 	var contract = not.ContractFromString(source)
 	return contract
@@ -141,7 +144,7 @@ func (v *localStorage_) WriteContract(
 ) not.CitationLike {
 	var draft = contract.GetDraft()
 	var citation = v.notary_.CiteDraft(draft)
-	var path = v.directory_ + "contracts" + v.dereference(citation)
+	var path = v.directory_ + "contracts/" + v.dereference(citation)
 	var source = contract.AsString()
 	uti.WriteFile(path, source)
 	return citation
@@ -150,38 +153,68 @@ func (v *localStorage_) WriteContract(
 func (v *localStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
-	var result_ uint
-	// TBD - Add the method implementation.
-	return result_
+	var path = v.directory_ + "bags/available/" + v.dereference(bag)
+	var messages = uti.ReadDirectory(path)
+	return uint(len(messages))
 }
 
 func (v *localStorage_) ReadMessage(
 	bag not.CitationLike,
 ) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
+	var contract not.ContractLike
+	for tries := 5; tries > 0; tries-- {
+		var available = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
+		var processing = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
+		var messages = uti.ReadDirectory(available)
+		var count = len(messages)
+		if count == 0 {
+			// No messages in the bag, try again...
+			continue
+		}
+		var index, _ = ran.Int(ran.Reader, big.NewInt(int64(count)))
+		var message = messages[index.Int64()]
+		var err = osx.Rename(available+message, processing+message)
+		if err != nil {
+			// Someone got there first, try again...
+			continue
+		}
+		var source = uti.ReadFile(processing + message)
+		contract = not.ContractFromString(source)
+		break
+	}
+	return contract
 }
 
 func (v *localStorage_) WriteMessage(
 	bag not.CitationLike,
 	message not.ContractLike,
 ) {
-	// TBD - Add the method implementation.
+	var path = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
+	var draft = message.GetDraft()
+	var citation = v.notary_.CiteDraft(draft)
+	path += v.dereference(citation)
+	var source = message.AsString()
+	uti.WriteFile(path, source)
 }
 
 func (v *localStorage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	// TBD - Add the method implementation.
+	var path = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
+	path += v.dereference(message)
+	uti.RemovePath(path)
 }
 
 func (v *localStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	// TBD - Add the method implementation.
+	var processing = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
+	var available = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
+	var filename = v.dereference(message)
+	// If Rename() fails the lease has already expired so nothing else to do.
+	var _ = osx.Rename(processing+filename, available+filename)
 }
 
 // PROTECTED INTERFACE
