@@ -75,31 +75,31 @@ type DocumentRepositoryLike interface {
 		citation not.CitationLike,
 	)
 	NotarizeDraft(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 		draft not.DraftLike,
 	) not.ContractLike
 	RetrieveContract(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 	) not.ContractLike
 	CheckoutDraft(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 		level uint,
 	) not.DraftLike
 	CreateBag(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 		permissions fra.ResourceLike,
 		capacity uint,
 		leasetime uint,
 	)
 	MessageCount(
-		bag fra.NameLike,
+		bag fra.ResourceLike,
 	) uint
 	PostMessage(
-		bag fra.NameLike,
+		bag fra.ResourceLike,
 		message not.DraftLike,
 	)
 	RetrieveMessage(
-		bag fra.NameLike,
+		bag fra.ResourceLike,
 	) not.DraftLike
 	AcceptMessage(
 		message not.DraftLike,
@@ -108,7 +108,7 @@ type DocumentRepositoryLike interface {
 		message not.DraftLike,
 	)
 	DeleteBag(
-		bag fra.NameLike,
+		bag fra.ResourceLike,
 	)
 	PublishEvent(
 		event not.DraftLike,
@@ -123,13 +123,13 @@ persistent data storage mechanisms.
 */
 type Persistent interface {
 	CitationExists(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 	) bool
 	ReadCitation(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 	) not.CitationLike
 	WriteCitation(
-		name fra.NameLike,
+		resource fra.ResourceLike,
 		citation not.CitationLike,
 	)
 	DraftExists(

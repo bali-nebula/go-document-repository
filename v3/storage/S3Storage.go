@@ -51,7 +51,7 @@ func (v *s3Storage_) GetClass() S3StorageClassLike {
 // Persistent Methods
 
 func (v *s3Storage_) CitationExists(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -59,7 +59,7 @@ func (v *s3Storage_) CitationExists(
 }
 
 func (v *s3Storage_) ReadCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) not.CitationLike {
 	var result_ not.CitationLike
 	// TBD - Add the method implementation.
@@ -67,7 +67,7 @@ func (v *s3Storage_) ReadCitation(
 }
 
 func (v *s3Storage_) WriteCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.

@@ -19,6 +19,7 @@ import (
 	uti "github.com/craterdog/go-missing-utilities/v7"
 	big "math/big"
 	osx "os"
+	sts "strings"
 )
 
 // CLASS INTERFACE
@@ -66,26 +67,26 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 // Persistent Methods
 
 func (v *localStorage_) CitationExists(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) bool {
-	var path = v.directory_ + "citations" + name.AsString()
+	var path = v.directory_ + "citations" + v.extractPath(resource)
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) not.CitationLike {
-	var path = v.directory_ + "citations" + name.AsString()
+	var path = v.directory_ + "citations" + v.extractPath(resource)
 	var source = uti.ReadFile(path)
 	var citation = not.CitationFromString(source)
 	return citation
 }
 
 func (v *localStorage_) WriteCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	citation not.CitationLike,
 ) {
-	var path = v.directory_ + "citations" + name.AsString()
+	var path = v.directory_ + "citations" + v.extractPath(resource)
 	var source = citation.AsString()
 	uti.WriteFile(path, source)
 }
@@ -227,6 +228,12 @@ func (v *localStorage_) dereference(
 	var tag = citation.GetTag()
 	var version = citation.GetVersion()
 	return tag.AsString()[1:] + "/" + version.AsString()
+}
+
+func (v *localStorage_) extractPath(
+	resource fra.ResourceLike,
+) string {
+	return sts.ReplaceAll(resource.GetPath(), ":", "/")
 }
 
 // Instance Structure

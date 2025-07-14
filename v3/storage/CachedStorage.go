@@ -51,7 +51,7 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 // Persistent Methods
 
 func (v *cachedStorage_) CitationExists(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -59,7 +59,7 @@ func (v *cachedStorage_) CitationExists(
 }
 
 func (v *cachedStorage_) ReadCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) not.CitationLike {
 	var result_ not.CitationLike
 	// TBD - Add the method implementation.
@@ -67,7 +67,7 @@ func (v *cachedStorage_) ReadCitation(
 }
 
 func (v *cachedStorage_) WriteCitation(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.

@@ -82,30 +82,30 @@ func (v *documentRepository_) DiscardDraft(
 }
 
 func (v *documentRepository_) NotarizeDraft(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	draft not.DraftLike,
 ) not.ContractLike {
-	if v.storage_.CitationExists(name) {
+	if v.storage_.CitationExists(resource) {
 		var message = fmt.Sprintf(
-			"Attempted to notarize a draft document using an existing name: %v",
-			name,
+			"Attempted to notarize a draft document using an existing resource: %v",
+			resource,
 		)
 		panic(message)
 	}
 	var contract = v.notary_.NotarizeDraft(draft)
 	var citation = v.storage_.WriteContract(contract)
-	v.storage_.WriteCitation(name, citation)
+	v.storage_.WriteCitation(resource, citation)
 	return contract
 }
 
 func (v *documentRepository_) RetrieveContract(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 ) not.ContractLike {
-	var citation = v.storage_.ReadCitation(name)
+	var citation = v.storage_.ReadCitation(resource)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
-			"Attempted to retrieve a non-existent contract with name: %v",
-			name,
+			"Attempted to retrieve a non-existent contract with resource: %v",
+			resource,
 		)
 		panic(message)
 	}
@@ -114,14 +114,14 @@ func (v *documentRepository_) RetrieveContract(
 }
 
 func (v *documentRepository_) CheckoutDraft(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	level uint,
 ) not.DraftLike {
-	var citation = v.storage_.ReadCitation(name)
+	var citation = v.storage_.ReadCitation(resource)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
-			"Attempted to checkout a non-existent contract with name: %v",
-			name,
+			"Attempted to checkout a non-existent contract with resource: %v",
+			resource,
 		)
 		panic(message)
 	}
@@ -149,7 +149,7 @@ func (v *documentRepository_) CheckoutDraft(
 }
 
 func (v *documentRepository_) CreateBag(
-	name fra.NameLike,
+	resource fra.ResourceLike,
 	permissions fra.ResourceLike,
 	capacity uint,
 	leasetime uint,
@@ -174,18 +174,18 @@ func (v *documentRepository_) CreateBag(
 	)
 	var contract = v.notary_.NotarizeDraft(draft)
 	var citation = v.storage_.WriteContract(contract)
-	v.storage_.WriteCitation(name, citation)
+	v.storage_.WriteCitation(resource, citation)
 }
 
 func (v *documentRepository_) MessageCount(
-	bag fra.NameLike,
+	bag fra.ResourceLike,
 ) uint {
 	var citation = v.storage_.ReadCitation(bag)
 	return v.storage_.MessageCount(citation)
 }
 
 func (v *documentRepository_) PostMessage(
-	bag fra.NameLike,
+	bag fra.ResourceLike,
 	message not.DraftLike,
 ) {
 	var citation = v.storage_.ReadCitation(bag)
@@ -194,7 +194,7 @@ func (v *documentRepository_) PostMessage(
 }
 
 func (v *documentRepository_) RetrieveMessage(
-	bag fra.NameLike,
+	bag fra.ResourceLike,
 ) not.DraftLike {
 	var citation = v.storage_.ReadCitation(bag)
 	var contract = v.storage_.ReadMessage(citation)
@@ -208,7 +208,7 @@ func (v *documentRepository_) AcceptMessage(
 	var source = message.AsString()
 	var document = bal.ParseSource(source)
 	source = not.DraftClass().ExtractAttribute("$bag", document)
-	var bag = fra.NameFromString(source)
+	var bag = fra.ResourceFromString(source)
 	var bagCitation = v.storage_.ReadCitation(bag)
 	var messageCitation = v.notary_.CiteDraft(message)
 	v.storage_.DeleteMessage(bagCitation, messageCitation)
@@ -220,14 +220,14 @@ func (v *documentRepository_) RejectMessage(
 	var source = message.AsString()
 	var document = bal.ParseSource(source)
 	source = not.DraftClass().ExtractAttribute("$bag", document)
-	var bag = fra.NameFromString(source)
+	var bag = fra.ResourceFromString(source)
 	var bagCitation = v.storage_.ReadCitation(bag)
 	var messageCitation = v.notary_.CiteDraft(message)
 	v.storage_.ReleaseMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) DeleteBag(
-	bag fra.NameLike,
+	bag fra.ResourceLike,
 ) {
 	var citation = v.storage_.ReadCitation(bag)
 	v.storage_.DeleteDraft(citation)
@@ -236,7 +236,7 @@ func (v *documentRepository_) DeleteBag(
 func (v *documentRepository_) PublishEvent(
 	event not.DraftLike,
 ) {
-	var bag = fra.NameFromString("/nebula/bag/Events")
+	var bag = fra.ResourceFromString("bali:/nebula/bags/events")
 	var citation = v.storage_.ReadCitation(bag)
 	var contract = v.notary_.NotarizeDraft(event)
 	v.storage_.WriteMessage(citation, contract)
