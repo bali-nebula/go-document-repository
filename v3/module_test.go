@@ -27,7 +27,7 @@ func TestLocalStorage(t *tes.T) {
 	uti.RemakeDirectory(testDirectory)
 	var ssm = not.Ssm(testDirectory)
 	var hsm = ssm
-	var notary = not.DigitalNotary(ssm, hsm)
+	var notary = not.DigitalNotary(testDirectory, ssm, hsm)
 	notary.ForgetKey()
 	notary.GenerateKey()
 	var storage = rep.LocalStorage(notary, testDirectory)
@@ -36,7 +36,7 @@ func TestLocalStorage(t *tes.T) {
 	var type_ = fra.ResourceFromString("<bali:/examples/Angle:v1>")
 	var tag = fra.TagWithSize(20)
 	var version = fra.VersionFromString("v1.2.3")
-	var permissions = fra.ResourceFromString("<bali:/permissions/public:v1>")
+	var permissions = fra.ResourceFromString("<bali:/permissions/Public:v1>")
 	var previous not.CitationLike
 	var draft = not.Draft(
 		component,
@@ -50,7 +50,7 @@ func TestLocalStorage(t *tes.T) {
 	var same = repository.RetrieveDraft(citation)
 	ass.Equal(t, draft.AsString(), same.AsString())
 	repository.DiscardDraft(citation)
-	var resource = fra.ResourceFromString("<bali:/contracts/Test:v1.2.3>")
+	var resource = fra.ResourceFromString("<bali:/test/Contract:v1.2.3>")
 	var contract = repository.NotarizeDraft(resource, draft)
 	var same2 = repository.RetrieveContract(resource)
 	ass.Equal(t, contract.AsString(), same2.AsString())

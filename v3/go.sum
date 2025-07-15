@@ -1,5 +1,5 @@
-github.com/bali-nebula/go-digital-notary/v3 v3.5.0 h1:istD3nWldg5U+NcSAJVBTeeWTFe35YvjmUjniZ4DCtI=
-github.com/bali-nebula/go-digital-notary/v3 v3.5.0/go.mod h1:AN3Ig44c33VhviZcrCrwVaZinjzwC1GpkEz5qrvo8VA=
+github.com/bali-nebula/go-digital-notary/v3 v3.6.0 h1:/asy+6nuY3dJX0avbBJJ0seoKnTIfd12WYZdjcOHdfw=
+github.com/bali-nebula/go-digital-notary/v3 v3.6.0/go.mod h1:AN3Ig44c33VhviZcrCrwVaZinjzwC1GpkEz5qrvo8VA=
 github.com/bali-nebula/go-document-notation/v3 v3.2.0 h1:kX9qEsHiM8bOIEcDBGr+gj3trbslt2UVMxQ/ircY8Lo=
 github.com/bali-nebula/go-document-notation/v3 v3.2.0/go.mod h1:y41SctwWPSH1R3uspHqrK6Zwfd5cnnFUw/dO3bsRuYs=
 github.com/craterdog/go-component-framework/v7 v7.12.0 h1:qwLj3BoEeD0i+y58Gqos5M9nCcnp3cE7ZttiOQnLS0M=
