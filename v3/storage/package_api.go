@@ -31,6 +31,7 @@ package storage
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
+	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE DECLARATIONS
@@ -46,7 +47,9 @@ concrete cached-storage-like class.
 */
 type CachedStorageClassLike interface {
 	// Constructor Methods
-	CachedStorage() CachedStorageLike
+	CachedStorage(
+		storage rep.Persistent,
+	) CachedStorageLike
 }
 
 /*
@@ -69,7 +72,10 @@ concrete remote-storage-like class.
 */
 type RemoteStorageClassLike interface {
 	// Constructor Methods
-	RemoteStorage() RemoteStorageLike
+	RemoteStorage(
+		notary not.DigitalNotaryLike,
+		service fra.ResourceLike,
+	) RemoteStorageLike
 }
 
 /*
@@ -79,7 +85,9 @@ s3-storage-like class.
 */
 type S3StorageClassLike interface {
 	// Constructor Methods
-	S3Storage() S3StorageLike
+	S3Storage(
+		notary not.DigitalNotaryLike,
+	) S3StorageLike
 }
 
 /*
@@ -89,7 +97,10 @@ concrete validated-storage-like class.
 */
 type ValidatedStorageClassLike interface {
 	// Constructor Methods
-	ValidatedStorage() ValidatedStorageLike
+	ValidatedStorage(
+		notary not.DigitalNotaryLike,
+		storage rep.Persistent,
+	) ValidatedStorageLike
 }
 
 // INSTANCE DECLARATIONS

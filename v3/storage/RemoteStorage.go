@@ -15,6 +15,7 @@ package storage
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // CLASS INTERFACE
@@ -27,9 +28,20 @@ func RemoteStorageClass() RemoteStorageClassLike {
 
 // Constructor Methods
 
-func (c *remoteStorageClass_) RemoteStorage() RemoteStorageLike {
+func (c *remoteStorageClass_) RemoteStorage(
+	notary not.DigitalNotaryLike,
+	service fra.ResourceLike,
+) RemoteStorageLike {
+	if uti.IsUndefined(notary) {
+		panic("The \"notary\" attribute is required by this class.")
+	}
+	if uti.IsUndefined(service) {
+		panic("The \"service\" attribute is required by this class.")
+	}
 	var instance = &remoteStorage_{
 		// Initialize the instance attributes.
+		notary_:  notary,
+		service_: service,
 	}
 	return instance
 }
@@ -164,6 +176,12 @@ func (v *remoteStorage_) ReleaseMessage(
 	// TBD - Add the method implementation.
 }
 
+func (v *remoteStorage_) WriteEvent(
+	event not.ContractLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 // PROTECTED INTERFACE
 
 // Private Methods
@@ -172,6 +190,8 @@ func (v *remoteStorage_) ReleaseMessage(
 
 type remoteStorage_ struct {
 	// Declare the instance attributes.
+	notary_  not.DigitalNotaryLike
+	service_ fra.ResourceLike
 }
 
 // Class Structure

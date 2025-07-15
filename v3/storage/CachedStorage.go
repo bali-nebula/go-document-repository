@@ -14,7 +14,9 @@ package storage
 
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // CLASS INTERFACE
@@ -27,9 +29,15 @@ func CachedStorageClass() CachedStorageClassLike {
 
 // Constructor Methods
 
-func (c *cachedStorageClass_) CachedStorage() CachedStorageLike {
+func (c *cachedStorageClass_) CachedStorage(
+	storage rep.Persistent,
+) CachedStorageLike {
+	if uti.IsUndefined(storage) {
+		panic("The \"storage\" attribute is required by this class.")
+	}
 	var instance = &cachedStorage_{
 		// Initialize the instance attributes.
+		storage_: storage,
 	}
 	return instance
 }
@@ -164,6 +172,12 @@ func (v *cachedStorage_) ReleaseMessage(
 	// TBD - Add the method implementation.
 }
 
+func (v *cachedStorage_) WriteEvent(
+	event not.ContractLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 // PROTECTED INTERFACE
 
 // Private Methods
@@ -172,6 +186,7 @@ func (v *cachedStorage_) ReleaseMessage(
 
 type cachedStorage_ struct {
 	// Declare the instance attributes.
+	storage_ rep.Persistent
 }
 
 // Class Structure

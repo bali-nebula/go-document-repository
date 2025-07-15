@@ -42,6 +42,15 @@ func (c *localStorageClass_) LocalStorage(
 	if uti.IsUndefined(directory) {
 		panic("The \"directory\" attribute is required by this class.")
 	}
+	if !sts.HasSuffix(directory, "/") {
+		directory += "/"
+	}
+	uti.MakeDirectory(directory + "citations")
+	uti.MakeDirectory(directory + "drafts")
+	uti.MakeDirectory(directory + "contracts")
+	uti.MakeDirectory(directory + "available")
+	uti.MakeDirectory(directory + "processing")
+	uti.MakeDirectory(directory + "events")
 	var instance = &localStorage_{
 		// Initialize the instance attributes.
 		notary_:    notary,
@@ -67,42 +76,53 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 // Persistent Methods
 
 func (v *localStorage_) CitationExists(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) bool {
-	var path = v.directory_ + "citations" + v.extractPath(resource)
+	var path = v.directory_ + "citations"
+	path += v.getNamePath(name)
+	path += "/" + v.getNameFilename(name)
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) not.CitationLike {
-	var path = v.directory_ + "citations" + v.extractPath(resource)
-	var source = uti.ReadFile(path)
+	var filename = v.directory_ + "citations"
+	filename += v.getNamePath(name)
+	filename += "/" + v.getNameFilename(name)
+	var source = uti.ReadFile(filename)
 	var citation = not.CitationFromString(source)
 	return citation
 }
 
 func (v *localStorage_) WriteCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 	citation not.CitationLike,
 ) {
-	var path = v.directory_ + "citations" + v.extractPath(resource)
+	var path = v.directory_ + "citations"
+	path += v.getNamePath(name)
+	uti.MakeDirectory(path)
+	var filename = path + "/" + v.getNameFilename(name)
 	var source = citation.AsString()
-	uti.WriteFile(path, source)
+	uti.WriteFile(filename, source)
 }
 
 func (v *localStorage_) DraftExists(
 	citation not.CitationLike,
 ) bool {
-	var path = v.directory_ + "drafts/" + v.dereference(citation)
+	var path = v.directory_ + "drafts/"
+	path += v.getCitationTag(citation) + "/"
+	path += v.getCitationVersion(citation) + ".bali"
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadDraft(
 	citation not.CitationLike,
 ) not.DraftLike {
-	var path = v.directory_ + "drafts/" + v.dereference(citation)
-	var source = uti.ReadFile(path)
+	var filename = v.directory_ + "drafts/"
+	filename += v.getCitationTag(citation) + "/"
+	filename += v.getCitationVersion(citation) + ".bali"
+	var source = uti.ReadFile(filename)
 	var draft = not.DraftFromString(source)
 	return draft
 }
@@ -111,31 +131,44 @@ func (v *localStorage_) WriteDraft(
 	draft not.DraftLike,
 ) not.CitationLike {
 	var citation = v.notary_.CiteDraft(draft)
-	var path = v.directory_ + "drafts/" + v.dereference(citation)
+	var path = v.directory_ + "drafts/"
+	path += v.getCitationTag(citation) + "/"
+	uti.MakeDirectory(path)
+	var filename = path + v.getCitationVersion(citation) + ".bali"
 	var source = draft.AsString()
-	uti.WriteFile(path, source)
+	uti.WriteFile(filename, source)
 	return citation
 }
 
 func (v *localStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
-	var path = v.directory_ + "drafts/" + v.dereference(citation)
-	uti.RemovePath(path)
+	var path = v.directory_ + "drafts/" + v.getCitationTag(citation)
+	var filename = path + "/" + v.getCitationVersion(citation) + ".bali"
+	uti.RemovePath(filename)
+	var filenames = uti.ReadDirectory(path)
+	if len(filenames) == 0 {
+		// This was the last version of the draft so remove the directory too.
+		uti.RemovePath(path)
+	}
 }
 
 func (v *localStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
-	var path = v.directory_ + "contracts/" + v.dereference(citation)
+	var path = v.directory_ + "contracts/"
+	path += v.getCitationTag(citation) + "/"
+	path += v.getCitationVersion(citation) + ".bali"
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadContract(
 	citation not.CitationLike,
 ) not.ContractLike {
-	var path = v.directory_ + "contracts/" + v.dereference(citation)
-	var source = uti.ReadFile(path)
+	var filename = v.directory_ + "contracts/"
+	filename += v.getCitationTag(citation) + "/"
+	filename += v.getCitationVersion(citation) + ".bali"
+	var source = uti.ReadFile(filename)
 	var contract = not.ContractFromString(source)
 	return contract
 }
@@ -145,16 +178,19 @@ func (v *localStorage_) WriteContract(
 ) not.CitationLike {
 	var draft = contract.GetDraft()
 	var citation = v.notary_.CiteDraft(draft)
-	var path = v.directory_ + "contracts/" + v.dereference(citation)
+	var path = v.directory_ + "contracts/"
+	path += v.getCitationTag(citation) + "/"
+	uti.MakeDirectory(path)
+	var filename = path + v.getCitationVersion(citation) + ".bali"
 	var source = contract.AsString()
-	uti.WriteFile(path, source)
+	uti.WriteFile(filename, source)
 	return citation
 }
 
 func (v *localStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
-	var path = v.directory_ + "bags/available/" + v.dereference(bag)
+	var path = v.directory_ + "available/" + v.getCitationTag(bag)
 	var messages = uti.ReadDirectory(path)
 	return uint(len(messages))
 }
@@ -162,78 +198,101 @@ func (v *localStorage_) MessageCount(
 func (v *localStorage_) ReadMessage(
 	bag not.CitationLike,
 ) not.ContractLike {
-	var contract not.ContractLike
+	var message not.ContractLike
+	var available = v.directory_ + "/available/" + v.getCitationTag(bag)
+	var processing = v.directory_ + "/processing/" + v.getCitationTag(bag)
 	for tries := 5; tries > 0; tries-- {
-		var available = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
-		var processing = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
-		var messages = uti.ReadDirectory(available)
-		var count = len(messages)
+		var filenames = uti.ReadDirectory(available)
+		var count = len(filenames)
 		if count == 0 {
 			// No messages in the bag, try again...
 			continue
 		}
 		var index, _ = ran.Int(ran.Reader, big.NewInt(int64(count)))
-		var message = messages[index.Int64()]
-		var err = osx.Rename(available+message, processing+message)
+		var filename = "/" + filenames[index.Int64()]
+		var err = osx.Rename(available+filename, processing+filename)
 		if err != nil {
 			// Someone got there first, try again...
 			continue
 		}
-		var source = uti.ReadFile(processing + message)
-		contract = not.ContractFromString(source)
+		var source = uti.ReadFile(processing + filename)
+		message = not.ContractFromString(source)
 		break
 	}
-	return contract
+	return message
 }
 
 func (v *localStorage_) WriteMessage(
 	bag not.CitationLike,
 	message not.ContractLike,
 ) {
-	var path = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
+	var path = v.directory_ + "available/" + v.getCitationTag(bag)
+	uti.MakeDirectory(path)
 	var draft = message.GetDraft()
 	var citation = v.notary_.CiteDraft(draft)
-	path += v.dereference(citation)
+	var filename = path + "/" + v.getCitationTag(citation) + ".bali"
 	var source = message.AsString()
-	uti.WriteFile(path, source)
+	uti.WriteFile(filename, source)
 }
 
 func (v *localStorage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	var path = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
-	path += v.dereference(message)
-	uti.RemovePath(path)
+	var path = v.directory_ + "processing/" + v.getCitationTag(bag)
+	var filename = path + "/" + v.getCitationTag(message) + ".bali"
+	uti.RemovePath(filename)
 }
 
 func (v *localStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	var processing = v.directory_ + "bags/" + v.dereference(bag) + "/processing/"
-	var available = v.directory_ + "bags/" + v.dereference(bag) + "/available/"
-	var filename = v.dereference(message)
+	var available = v.directory_ + "/available/" + v.getCitationTag(bag) + "/"
+	var processing = v.directory_ + "/processing/" + v.getCitationTag(bag) + "/"
+	var filename = v.getCitationTag(message) + ".bali"
 	// If Rename() fails the lease has already expired so nothing else to do.
 	var _ = osx.Rename(processing+filename, available+filename)
+}
+
+func (v *localStorage_) WriteEvent(
+	event not.ContractLike,
+) {
+	var draft = event.GetDraft()
+	var citation = v.notary_.CiteDraft(draft)
+	var filename = v.directory_ + "/events/" + v.getCitationTag(citation) + ".bali"
+	var source = event.AsString()
+	uti.WriteFile(filename, source)
 }
 
 // PROTECTED INTERFACE
 
 // Private Methods
 
-func (v *localStorage_) dereference(
+func (v *localStorage_) getCitationTag(
 	citation not.CitationLike,
 ) string {
 	var tag = citation.GetTag()
-	var version = citation.GetVersion()
-	return tag.AsString()[1:] + "/" + version.AsString()
+	return tag.AsString()[1:] // Remove the leading "#" character.
 }
 
-func (v *localStorage_) extractPath(
-	resource fra.ResourceLike,
+func (v *localStorage_) getCitationVersion(
+	citation not.CitationLike,
 ) string {
-	return sts.ReplaceAll(resource.GetPath(), ":", "/")
+	var version = citation.GetVersion()
+	return version.AsString()
+}
+
+func (v *localStorage_) getNamePath(
+	name fra.ResourceLike,
+) string {
+	return sts.Split(name.GetPath(), ":")[0]
+}
+
+func (v *localStorage_) getNameFilename(
+	name fra.ResourceLike,
+) string {
+	return sts.Split(name.GetPath(), ":")[1] + ".bali"
 }
 
 // Instance Structure

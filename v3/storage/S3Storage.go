@@ -15,6 +15,7 @@ package storage
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // CLASS INTERFACE
@@ -27,9 +28,15 @@ func S3StorageClass() S3StorageClassLike {
 
 // Constructor Methods
 
-func (c *s3StorageClass_) S3Storage() S3StorageLike {
+func (c *s3StorageClass_) S3Storage(
+	notary not.DigitalNotaryLike,
+) S3StorageLike {
+	if uti.IsUndefined(notary) {
+		panic("The \"notary\" attribute is required by this class.")
+	}
 	var instance = &s3Storage_{
 		// Initialize the instance attributes.
+		notary_: notary,
 	}
 	return instance
 }
@@ -164,6 +171,12 @@ func (v *s3Storage_) ReleaseMessage(
 	// TBD - Add the method implementation.
 }
 
+func (v *s3Storage_) WriteEvent(
+	event not.ContractLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 // PROTECTED INTERFACE
 
 // Private Methods
@@ -172,6 +185,7 @@ func (v *s3Storage_) ReleaseMessage(
 
 type s3Storage_ struct {
 	// Declare the instance attributes.
+	notary_ not.DigitalNotaryLike
 }
 
 // Class Structure

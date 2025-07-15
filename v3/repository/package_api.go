@@ -171,4 +171,7 @@ type Persistent interface {
 		bag not.CitationLike,
 		message not.CitationLike,
 	)
+	WriteEvent(
+		event not.ContractLike,
+	)
 }

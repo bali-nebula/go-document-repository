@@ -236,10 +236,8 @@ func (v *documentRepository_) DeleteBag(
 func (v *documentRepository_) PublishEvent(
 	event not.DraftLike,
 ) {
-	var bag = fra.ResourceFromString("bali:/nebula/bags/events")
-	var citation = v.storage_.ReadCitation(bag)
 	var contract = v.notary_.NotarizeDraft(event)
-	v.storage_.WriteMessage(citation, contract)
+	v.storage_.WriteEvent(contract)
 }
 
 // Attribute Methods

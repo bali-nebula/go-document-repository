@@ -14,7 +14,9 @@ package storage
 
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // CLASS INTERFACE
@@ -27,9 +29,20 @@ func ValidatedStorageClass() ValidatedStorageClassLike {
 
 // Constructor Methods
 
-func (c *validatedStorageClass_) ValidatedStorage() ValidatedStorageLike {
+func (c *validatedStorageClass_) ValidatedStorage(
+	notary not.DigitalNotaryLike,
+	storage rep.Persistent,
+) ValidatedStorageLike {
+	if uti.IsUndefined(notary) {
+		panic("The \"notary\" attribute is required by this class.")
+	}
+	if uti.IsUndefined(storage) {
+		panic("The \"storage\" attribute is required by this class.")
+	}
 	var instance = &validatedStorage_{
 		// Initialize the instance attributes.
+		notary_:  notary,
+		storage_: storage,
 	}
 	return instance
 }
@@ -164,6 +177,12 @@ func (v *validatedStorage_) ReleaseMessage(
 	// TBD - Add the method implementation.
 }
 
+func (v *validatedStorage_) WriteEvent(
+	event not.ContractLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 // PROTECTED INTERFACE
 
 // Private Methods
@@ -172,6 +191,8 @@ func (v *validatedStorage_) ReleaseMessage(
 
 type validatedStorage_ struct {
 	// Declare the instance attributes.
+	notary_  not.DigitalNotaryLike
+	storage_ rep.Persistent
 }
 
 // Class Structure
