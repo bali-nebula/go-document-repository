@@ -11,7 +11,6 @@
 package module_test
 
 import (
-	fmt "fmt"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	doc "github.com/bali-nebula/go-document-notation/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3"
@@ -66,7 +65,6 @@ func TestLocalStorage(t *tes.T) {
 
 	// Checkout a new draft of the contract document.
 	draft = repository.CheckoutDraft(resource, 2)
-	fmt.Println(draft.AsString())
 	ass.NotEqual(t, draft.AsString(), same.AsString())
 
 	// Create a new message bag.
@@ -84,7 +82,6 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, 0, repository.MessageCount(bag))
 
 	// Reject the message.
-	fmt.Println(contract.AsString())
 	repository.RejectMessage(contract)
 	ass.Equal(t, 1, repository.MessageCount(bag))
 

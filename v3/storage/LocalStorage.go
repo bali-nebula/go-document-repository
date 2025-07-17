@@ -317,9 +317,11 @@ func (v *localStorage_) ReleaseMessage(
 func (v *localStorage_) WriteEvent(
 	event not.ContractLike,
 ) {
+	var path = v.directory_ + "events/"
+	uti.MakeDirectory(path)
 	var draft = event.GetDraft()
 	var citation = v.notary_.CiteDraft(draft)
-	var filename = v.directory_ + "/events/" + v.getCitationTag(citation) + ".bali"
+	var filename = path + v.getCitationTag(citation) + ".bali"
 	var source = event.AsString()
 	uti.WriteFile(filename, source)
 }

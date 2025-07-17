@@ -57,7 +57,8 @@ func (c *documentRepositoryClass_) ExtractBag(
 	document doc.DocumentLike,
 ) fra.ResourceLike {
 	var bag fra.ResourceLike
-	var component = document.GetComponent()
+	var draft = not.DraftClass().ExtractDraft(document)
+	var component = draft.GetComponent()
 	var collection = component.GetAny().(doc.CollectionLike)
 	var attributes = collection.GetAny().(doc.AttributesLike)
 	var associations = attributes.GetAssociations()
