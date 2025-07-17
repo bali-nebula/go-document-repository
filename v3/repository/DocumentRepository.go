@@ -18,6 +18,7 @@ import (
 	doc "github.com/bali-nebula/go-document-notation/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
+	stc "strconv"
 )
 
 // CLASS INTERFACE
@@ -123,19 +124,19 @@ func (v *documentRepository_) DiscardDraft(
 }
 
 func (v *documentRepository_) NotarizeDraft(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 	draft not.DraftLike,
 ) not.ContractLike {
-	if v.storage_.CitationExists(resource) {
+	if v.storage_.CitationExists(name) {
 		var message = fmt.Sprintf(
-			"Attempted to notarize a draft document using an existing resource: %v",
-			resource,
+			"Attempted to notarize a draft document using an existing name: %v",
+			name,
 		)
 		panic(message)
 	}
 	var contract = v.notary_.NotarizeDraft(draft)
 	var citation = v.storage_.WriteContract(contract)
-	v.storage_.WriteCitation(resource, citation)
+	v.storage_.WriteCitation(name, citation)
 	return contract
 }
 
@@ -145,7 +146,7 @@ func (v *documentRepository_) RetrieveContract(
 	var citation = v.storage_.ReadCitation(contract)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
-			"Attempted to retrieve a non-existent contract with resource: %v",
+			"Attempted to retrieve a non-existent contract with name: %v",
 			contract,
 		)
 		panic(message)
@@ -155,12 +156,12 @@ func (v *documentRepository_) RetrieveContract(
 
 func (v *documentRepository_) CheckoutDraft(
 	contract fra.ResourceLike,
-	level uint,
+	level int,
 ) not.DraftLike {
 	var citation = v.storage_.ReadCitation(contract)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
-			"Attempted to checkout a non-existent contract with resource: %v",
+			"Attempted to checkout a non-existent contract with name: %v",
 			contract,
 		)
 		panic(message)
@@ -188,12 +189,24 @@ func (v *documentRepository_) CheckoutDraft(
 }
 
 func (v *documentRepository_) CreateBag(
-	resource fra.ResourceLike,
-	bag not.DraftLike,
+	name fra.ResourceLike,
+	permissions fra.ResourceLike,
+	capacity int,
+	leasetime int,
 ) {
-	var contract = v.notary_.NotarizeDraft(bag)
-	var citation = v.storage_.WriteBag(contract)
-	v.storage_.WriteCitation(resource, citation)
+	var source = `[
+    $capacity: ` + stc.Itoa(capacity) + `
+    $leasetime: ` + stc.Itoa(leasetime) + `
+](
+    $type: <bali:/types/documents/Bag:v3>
+    $tag: ` + fra.TagWithSize(20).AsString() + `
+    $version: v1
+    $permissions: ` + permissions.AsString() + `
+)`
+	var draft = not.DraftFromString(source)
+	var bag = v.notary_.NotarizeDraft(draft)
+	var citation = v.storage_.WriteBag(bag)
+	v.storage_.WriteCitation(name, citation)
 }
 
 func (v *documentRepository_) DeleteBag(
@@ -205,19 +218,26 @@ func (v *documentRepository_) DeleteBag(
 
 func (v *documentRepository_) MessageCount(
 	bag fra.ResourceLike,
-) uint {
+) int {
 	var citation = v.storage_.ReadCitation(bag)
 	return v.storage_.MessageCount(citation)
 }
 
 func (v *documentRepository_) SendMessage(
-	message not.DraftLike,
+	bag fra.ResourceLike,
+	content doc.DocumentLike,
 ) {
-	var source = message.AsString()
-	var document = doc.ParseSource(source)
-	var bag = documentRepositoryClass().ExtractBag(document)
+	var source = `[
+    $bag: ` + bag.AsString() + `
+    $content: ` + doc.FormatDocument(content) + `](
+    $type: <bali:/types/documents/Message:v3>
+    $tag: ` + fra.TagWithSize(20).AsString() + `
+    $version: v1
+	$permissions: <bali:/permissions/Public:v3>
+)`
+	var draft = not.DraftFromString(source)
 	var citation = v.storage_.ReadCitation(bag)
-	var contract = v.notary_.NotarizeDraft(message)
+	var contract = v.notary_.NotarizeDraft(draft)
 	v.storage_.WriteMessage(citation, contract)
 }
 
@@ -253,9 +273,20 @@ func (v *documentRepository_) RejectMessage(
 }
 
 func (v *documentRepository_) PublishEvent(
-	event not.DraftLike,
+	kind fra.ResourceLike,
+	content doc.DocumentLike,
+	permissions fra.ResourceLike,
 ) {
-	var contract = v.notary_.NotarizeDraft(event)
+	var source = `[
+    $kind: ` + kind.AsString() + `
+    $content: ` + doc.FormatDocument(content) + `](
+    $type: <bali:/types/documents/Event:v3>
+    $tag: ` + fra.TagWithSize(20).AsString() + `
+    $version: v1
+	$permissions: ` + permissions.AsString() + `
+)`
+	var draft = not.DraftFromString(source)
+	var contract = v.notary_.NotarizeDraft(draft)
 	v.storage_.WriteEvent(contract)
 }
 

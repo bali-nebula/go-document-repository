@@ -71,59 +71,33 @@ func TestLocalStorage(t *tes.T) {
 
 	// Create a new message bag.
 	var bag = fra.ResourceFromString("<bali:/test/Bag:v1>")
-	repository.CreateBag(
-		bag,
-		permissions,
-		8,
-		10,
-	)
-	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+	repository.CreateBag(bag, permissions, 8, 10)
+	ass.Equal(t, 0, repository.MessageCount(bag))
 
 	// Send a message to the bag.
-	component = doc.ParseSource(`"Hello World!"`).GetComponent()
-	type_ = fra.ResourceFromString("<bali:/examples/Message:v1>")
-	tag = fra.TagWithSize(20)
-	version = fra.VersionFromString("v1")
-	var message = not.Draft(
-		component,
-		type_,
-		tag,
-		version,
-		permissions,
-		previous,
-	)
-	repository.SendMessage(bag, message)
-	ass.Equal(t, 1, int(repository.MessageCount(bag)))
+	var content = doc.ParseSource(`"Hello World!"`)
+	repository.SendMessage(bag, content)
+	ass.Equal(t, 1, repository.MessageCount(bag))
 
 	// Retrieve a message from the bag.
 	contract = repository.RetrieveMessage(bag)
-	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+	ass.Equal(t, 0, repository.MessageCount(bag))
 
 	// Reject the message.
 	fmt.Println(contract.AsString())
 	repository.RejectMessage(contract)
-	ass.Equal(t, 1, int(repository.MessageCount(bag)))
+	ass.Equal(t, 1, repository.MessageCount(bag))
 
 	// Process the message.
 	contract = repository.RetrieveMessage(bag)
 	repository.AcceptMessage(contract)
-	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+	ass.Equal(t, 0, repository.MessageCount(bag))
 
 	// Delete the bag.
 	repository.DeleteBag(bag)
 
 	// Publish an event.
-	component = doc.ParseSource(`"Something Happened!"`).GetComponent()
-	type_ = fra.ResourceFromString("<bali:/examples/Event:v1>")
-	tag = fra.TagWithSize(20)
-	version = fra.VersionFromString("v1")
-	var event = not.Draft(
-		component,
-		type_,
-		tag,
-		version,
-		permissions,
-		previous,
-	)
-	repository.PublishEvent(event)
+	var kind = fra.ResourceFromString("<bali:/events/Example:v3>")
+	content = doc.ParseSource(`"Something Happened!"`)
+	repository.PublishEvent(kind, content, permissions)
 }

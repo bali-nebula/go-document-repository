@@ -177,8 +177,8 @@ func (v *remoteStorage_) RemoveBag(
 
 func (v *remoteStorage_) MessageCount(
 	bag not.CitationLike,
-) uint {
-	var result_ uint
+) int {
+	var result_ int
 	// TBD - Add the method implementation.
 	return result_
 }

@@ -246,10 +246,10 @@ func (v *localStorage_) RemoveBag(
 
 func (v *localStorage_) MessageCount(
 	bag not.CitationLike,
-) uint {
+) int {
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/available"
 	var messages = uti.ReadDirectory(path)
-	return uint(len(messages))
+	return len(messages)
 }
 
 func (v *localStorage_) ReadMessage(

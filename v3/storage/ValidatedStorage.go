@@ -178,8 +178,8 @@ func (v *validatedStorage_) RemoveBag(
 
 func (v *validatedStorage_) MessageCount(
 	bag not.CitationLike,
-) uint {
-	var result_ uint
+) int {
+	var result_ int
 	// TBD - Add the method implementation.
 	return result_
 }

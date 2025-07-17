@@ -172,8 +172,8 @@ func (v *s3Storage_) RemoveBag(
 
 func (v *s3Storage_) MessageCount(
 	bag not.CitationLike,
-) uint {
-	var result_ uint
+) int {
+	var result_ int
 	// TBD - Add the method implementation.
 	return result_
 }

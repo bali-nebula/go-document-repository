@@ -33,6 +33,7 @@ package repository
 
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	doc "github.com/bali-nebula/go-document-notation/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
 )
 
@@ -75,7 +76,7 @@ type DocumentRepositoryLike interface {
 		draft not.CitationLike,
 	)
 	NotarizeDraft(
-		resource fra.ResourceLike,
+		name fra.ResourceLike,
 		draft not.DraftLike,
 	) not.ContractLike
 	RetrieveContract(
@@ -83,20 +84,23 @@ type DocumentRepositoryLike interface {
 	) not.ContractLike
 	CheckoutDraft(
 		contract fra.ResourceLike,
-		level uint,
+		level int,
 	) not.DraftLike
 	CreateBag(
-		resource fra.ResourceLike,
-		bag not.DraftLike,
+		name fra.ResourceLike,
+		permissions fra.ResourceLike,
+		capacity int,
+		leasetime int,
 	)
 	DeleteBag(
 		bag fra.ResourceLike,
 	)
 	MessageCount(
 		bag fra.ResourceLike,
-	) uint
+	) int
 	SendMessage(
-		message not.DraftLike,
+		bag fra.ResourceLike,
+		content doc.DocumentLike,
 	)
 	RetrieveMessage(
 		bag fra.ResourceLike,
@@ -108,7 +112,9 @@ type DocumentRepositoryLike interface {
 		message not.ContractLike,
 	)
 	PublishEvent(
-		event not.DraftLike,
+		kind fra.ResourceLike,
+		content doc.DocumentLike,
+		permissions fra.ResourceLike,
 	)
 }
 
@@ -167,7 +173,7 @@ type Persistent interface {
 	)
 	MessageCount(
 		bag not.CitationLike,
-	) uint
+	) int
 	ReadMessage(
 		bag not.CitationLike,
 	) not.ContractLike
