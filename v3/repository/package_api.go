@@ -76,34 +76,34 @@ type DocumentRepositoryLike interface {
 		draft not.CitationLike,
 	)
 	NotarizeDraft(
-		name fra.ResourceLike,
+		name string,
 		draft not.DraftLike,
 	) not.ContractLike
 	RetrieveContract(
-		contract fra.ResourceLike,
+		contract string,
 	) not.ContractLike
 	CheckoutDraft(
-		contract fra.ResourceLike,
+		contract string,
 		level int,
 	) not.DraftLike
 	CreateBag(
-		name fra.ResourceLike,
-		permissions fra.ResourceLike,
+		name string,
+		permissions string,
 		capacity int,
 		leasetime int,
 	)
 	DeleteBag(
-		bag fra.ResourceLike,
+		bag string,
 	)
 	MessageCount(
-		bag fra.ResourceLike,
+		bag string,
 	) int
 	SendMessage(
-		bag fra.ResourceLike,
+		bag string,
 		content doc.DocumentLike,
 	)
 	RetrieveMessage(
-		bag fra.ResourceLike,
+		bag string,
 	) not.ContractLike
 	AcceptMessage(
 		message not.ContractLike,
@@ -112,9 +112,9 @@ type DocumentRepositoryLike interface {
 		message not.ContractLike,
 	)
 	PublishEvent(
-		kind fra.ResourceLike,
+		kind string,
 		content doc.DocumentLike,
-		permissions fra.ResourceLike,
+		permissions string,
 	)
 }
 

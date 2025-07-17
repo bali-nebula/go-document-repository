@@ -58,7 +58,7 @@ func TestLocalStorage(t *tes.T) {
 	repository.DiscardDraft(citation)
 
 	// Create a notarized contract document.
-	var resource = fra.ResourceFromString("<bali:/test/Contract:v1.2.3>")
+	var resource = "<bali:/test/Contract:v1.2.3>"
 	var contract = repository.NotarizeDraft(resource, draft)
 	var same2 = repository.RetrieveContract(resource)
 	ass.Equal(t, contract.AsString(), same2.AsString())
@@ -68,8 +68,8 @@ func TestLocalStorage(t *tes.T) {
 	ass.NotEqual(t, draft.AsString(), same.AsString())
 
 	// Create a new message bag.
-	var bag = fra.ResourceFromString("<bali:/test/Bag:v1>")
-	repository.CreateBag(bag, permissions, 8, 10)
+	var bag = "<bali:/test/Bag:v1>"
+	repository.CreateBag(bag, permissions.AsString(), 8, 10)
 	ass.Equal(t, 0, repository.MessageCount(bag))
 
 	// Send a message to the bag.
@@ -94,7 +94,7 @@ func TestLocalStorage(t *tes.T) {
 	repository.DeleteBag(bag)
 
 	// Publish an event.
-	var kind = fra.ResourceFromString("<bali:/events/Example:v3>")
+	var kind = "<bali:/events/Example:v3>"
 	content = doc.ParseSource(`"Something Happened!"`)
-	repository.PublishEvent(kind, content, permissions)
+	repository.PublishEvent(kind, content, permissions.AsString())
 }

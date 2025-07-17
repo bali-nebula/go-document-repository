@@ -125,10 +125,11 @@ func (v *documentRepository_) DiscardDraft(
 }
 
 func (v *documentRepository_) NotarizeDraft(
-	name fra.ResourceLike,
+	name string,
 	draft not.DraftLike,
 ) not.ContractLike {
-	if v.storage_.CitationExists(name) {
+	var resource = fra.ResourceFromString(name)
+	if v.storage_.CitationExists(resource) {
 		var message = fmt.Sprintf(
 			"Attempted to notarize a draft document using an existing name: %v",
 			name,
@@ -137,14 +138,15 @@ func (v *documentRepository_) NotarizeDraft(
 	}
 	var contract = v.notary_.NotarizeDraft(draft)
 	var citation = v.storage_.WriteContract(contract)
-	v.storage_.WriteCitation(name, citation)
+	v.storage_.WriteCitation(resource, citation)
 	return contract
 }
 
 func (v *documentRepository_) RetrieveContract(
-	contract fra.ResourceLike,
+	contract string,
 ) not.ContractLike {
-	var citation = v.storage_.ReadCitation(contract)
+	var resource = fra.ResourceFromString(contract)
+	var citation = v.storage_.ReadCitation(resource)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to retrieve a non-existent contract with name: %v",
@@ -156,10 +158,11 @@ func (v *documentRepository_) RetrieveContract(
 }
 
 func (v *documentRepository_) CheckoutDraft(
-	contract fra.ResourceLike,
+	contract string,
 	level int,
 ) not.DraftLike {
-	var citation = v.storage_.ReadCitation(contract)
+	var resource = fra.ResourceFromString(contract)
+	var citation = v.storage_.ReadCitation(resource)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to checkout a non-existent contract with name: %v",
@@ -190,8 +193,8 @@ func (v *documentRepository_) CheckoutDraft(
 }
 
 func (v *documentRepository_) CreateBag(
-	name fra.ResourceLike,
-	permissions fra.ResourceLike,
+	name string,
+	permissions string,
 	capacity int,
 	leasetime int,
 ) {
@@ -202,34 +205,37 @@ func (v *documentRepository_) CreateBag(
     $type: <bali:/types/documents/Bag:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
     $version: v1
-    $permissions: ` + permissions.AsString() + `
+    $permissions: ` + permissions + `
 )`
 	var draft = not.DraftFromString(source)
 	var bag = v.notary_.NotarizeDraft(draft)
+	var resource = fra.ResourceFromString(name)
 	var citation = v.storage_.WriteBag(bag)
-	v.storage_.WriteCitation(name, citation)
+	v.storage_.WriteCitation(resource, citation)
 }
 
 func (v *documentRepository_) DeleteBag(
-	bag fra.ResourceLike,
+	bag string,
 ) {
-	var citation = v.storage_.ReadCitation(bag)
+	var resource = fra.ResourceFromString(bag)
+	var citation = v.storage_.ReadCitation(resource)
 	v.storage_.RemoveBag(citation)
 }
 
 func (v *documentRepository_) MessageCount(
-	bag fra.ResourceLike,
+	bag string,
 ) int {
-	var citation = v.storage_.ReadCitation(bag)
+	var resource = fra.ResourceFromString(bag)
+	var citation = v.storage_.ReadCitation(resource)
 	return v.storage_.MessageCount(citation)
 }
 
 func (v *documentRepository_) SendMessage(
-	bag fra.ResourceLike,
+	bag string,
 	content doc.DocumentLike,
 ) {
 	var source = `[
-    $bag: ` + bag.AsString() + `
+    $bag: ` + bag + `
     $content: ` + doc.FormatDocument(content) + `](
     $type: <bali:/types/documents/Message:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
@@ -237,15 +243,17 @@ func (v *documentRepository_) SendMessage(
 	$permissions: <bali:/permissions/Public:v3>
 )`
 	var draft = not.DraftFromString(source)
-	var citation = v.storage_.ReadCitation(bag)
+	var resource = fra.ResourceFromString(bag)
+	var citation = v.storage_.ReadCitation(resource)
 	var contract = v.notary_.NotarizeDraft(draft)
 	v.storage_.WriteMessage(citation, contract)
 }
 
 func (v *documentRepository_) RetrieveMessage(
-	bag fra.ResourceLike,
+	bag string,
 ) not.ContractLike {
-	var citation = v.storage_.ReadCitation(bag)
+	var resource = fra.ResourceFromString(bag)
+	var citation = v.storage_.ReadCitation(resource)
 	return v.storage_.ReadMessage(citation)
 }
 
@@ -274,17 +282,17 @@ func (v *documentRepository_) RejectMessage(
 }
 
 func (v *documentRepository_) PublishEvent(
-	kind fra.ResourceLike,
+	kind string,
 	content doc.DocumentLike,
-	permissions fra.ResourceLike,
+	permissions string,
 ) {
 	var source = `[
-    $kind: ` + kind.AsString() + `
+    $kind: ` + kind + `
     $content: ` + doc.FormatDocument(content) + `](
     $type: <bali:/types/documents/Event:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
     $version: v1
-	$permissions: ` + permissions.AsString() + `
+	$permissions: ` + permissions + `
 )`
 	var draft = not.DraftFromString(source)
 	var contract = v.notary_.NotarizeDraft(draft)
