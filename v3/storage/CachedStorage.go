@@ -59,7 +59,7 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 // Persistent Methods
 
 func (v *cachedStorage_) CitationExists(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -67,7 +67,7 @@ func (v *cachedStorage_) CitationExists(
 }
 
 func (v *cachedStorage_) ReadCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) not.CitationLike {
 	var result_ not.CitationLike
 	// TBD - Add the method implementation.
@@ -75,8 +75,14 @@ func (v *cachedStorage_) ReadCitation(
 }
 
 func (v *cachedStorage_) WriteCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 	citation not.CitationLike,
+) {
+	// TBD - Add the method implementation.
+}
+
+func (v *cachedStorage_) RemoveCitation(
+	name fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
@@ -105,7 +111,7 @@ func (v *cachedStorage_) WriteDraft(
 	return result_
 }
 
-func (v *cachedStorage_) DeleteDraft(
+func (v *cachedStorage_) RemoveDraft(
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -135,6 +141,36 @@ func (v *cachedStorage_) WriteContract(
 	return result_
 }
 
+func (v *cachedStorage_) BagExists(
+	bag not.CitationLike,
+) bool {
+	var result_ bool
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *cachedStorage_) ReadBag(
+	bag not.CitationLike,
+) not.ContractLike {
+	var result_ not.ContractLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *cachedStorage_) WriteBag(
+	bag not.ContractLike,
+) not.CitationLike {
+	var result_ not.CitationLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *cachedStorage_) RemoveBag(
+	bag not.CitationLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 func (v *cachedStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
@@ -158,7 +194,7 @@ func (v *cachedStorage_) WriteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *cachedStorage_) DeleteMessage(
+func (v *cachedStorage_) RemoveMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

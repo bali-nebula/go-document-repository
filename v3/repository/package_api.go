@@ -69,46 +69,43 @@ type DocumentRepositoryLike interface {
 		draft not.DraftLike,
 	) not.CitationLike
 	RetrieveDraft(
-		citation not.CitationLike,
+		draft not.CitationLike,
 	) not.DraftLike
 	DiscardDraft(
-		citation not.CitationLike,
+		draft not.CitationLike,
 	)
 	NotarizeDraft(
 		resource fra.ResourceLike,
 		draft not.DraftLike,
 	) not.ContractLike
 	RetrieveContract(
-		resource fra.ResourceLike,
+		contract fra.ResourceLike,
 	) not.ContractLike
 	CheckoutDraft(
-		resource fra.ResourceLike,
+		contract fra.ResourceLike,
 		level uint,
 	) not.DraftLike
 	CreateBag(
 		resource fra.ResourceLike,
-		permissions fra.ResourceLike,
-		capacity uint,
-		leasetime uint,
+		bag not.DraftLike,
+	)
+	DeleteBag(
+		bag fra.ResourceLike,
 	)
 	MessageCount(
 		bag fra.ResourceLike,
 	) uint
-	PostMessage(
-		bag fra.ResourceLike,
+	SendMessage(
 		message not.DraftLike,
 	)
 	RetrieveMessage(
 		bag fra.ResourceLike,
-	) not.DraftLike
+	) not.ContractLike
 	AcceptMessage(
-		message not.DraftLike,
+		message not.ContractLike,
 	)
 	RejectMessage(
-		message not.DraftLike,
-	)
-	DeleteBag(
-		bag fra.ResourceLike,
+		message not.ContractLike,
 	)
 	PublishEvent(
 		event not.DraftLike,
@@ -123,36 +120,51 @@ persistent data storage mechanisms.
 */
 type Persistent interface {
 	CitationExists(
-		resource fra.ResourceLike,
+		name fra.ResourceLike,
 	) bool
 	ReadCitation(
-		resource fra.ResourceLike,
+		name fra.ResourceLike,
 	) not.CitationLike
 	WriteCitation(
-		resource fra.ResourceLike,
+		name fra.ResourceLike,
 		citation not.CitationLike,
 	)
+	RemoveCitation(
+		name fra.ResourceLike,
+	)
 	DraftExists(
-		citation not.CitationLike,
+		draft not.CitationLike,
 	) bool
 	ReadDraft(
-		citation not.CitationLike,
+		draft not.CitationLike,
 	) not.DraftLike
 	WriteDraft(
 		draft not.DraftLike,
 	) not.CitationLike
-	DeleteDraft(
-		citation not.CitationLike,
+	RemoveDraft(
+		draft not.CitationLike,
 	)
 	ContractExists(
-		citation not.CitationLike,
+		contract not.CitationLike,
 	) bool
 	ReadContract(
-		citation not.CitationLike,
+		contract not.CitationLike,
 	) not.ContractLike
 	WriteContract(
 		contract not.ContractLike,
 	) not.CitationLike
+	BagExists(
+		bag not.CitationLike,
+	) bool
+	ReadBag(
+		bag not.CitationLike,
+	) not.ContractLike
+	WriteBag(
+		bag not.ContractLike,
+	) not.CitationLike
+	RemoveBag(
+		bag not.CitationLike,
+	)
 	MessageCount(
 		bag not.CitationLike,
 	) uint
@@ -163,7 +175,7 @@ type Persistent interface {
 		bag not.CitationLike,
 		message not.ContractLike,
 	)
-	DeleteMessage(
+	RemoveMessage(
 		bag not.CitationLike,
 		message not.CitationLike,
 	)

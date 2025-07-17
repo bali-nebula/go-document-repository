@@ -63,7 +63,7 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 // Persistent Methods
 
 func (v *remoteStorage_) CitationExists(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -71,7 +71,7 @@ func (v *remoteStorage_) CitationExists(
 }
 
 func (v *remoteStorage_) ReadCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 ) not.CitationLike {
 	var result_ not.CitationLike
 	// TBD - Add the method implementation.
@@ -79,8 +79,14 @@ func (v *remoteStorage_) ReadCitation(
 }
 
 func (v *remoteStorage_) WriteCitation(
-	resource fra.ResourceLike,
+	name fra.ResourceLike,
 	citation not.CitationLike,
+) {
+	// TBD - Add the method implementation.
+}
+
+func (v *remoteStorage_) RemoveCitation(
+	name fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
@@ -109,7 +115,7 @@ func (v *remoteStorage_) WriteDraft(
 	return result_
 }
 
-func (v *remoteStorage_) DeleteDraft(
+func (v *remoteStorage_) RemoveDraft(
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -139,6 +145,36 @@ func (v *remoteStorage_) WriteContract(
 	return result_
 }
 
+func (v *remoteStorage_) BagExists(
+	bag not.CitationLike,
+) bool {
+	var result_ bool
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *remoteStorage_) ReadBag(
+	bag not.CitationLike,
+) not.ContractLike {
+	var result_ not.ContractLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *remoteStorage_) WriteBag(
+	bag not.ContractLike,
+) not.CitationLike {
+	var result_ not.CitationLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *remoteStorage_) RemoveBag(
+	bag not.CitationLike,
+) {
+	// TBD - Add the method implementation.
+}
+
 func (v *remoteStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
@@ -162,7 +198,7 @@ func (v *remoteStorage_) WriteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) DeleteMessage(
+func (v *remoteStorage_) RemoveMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

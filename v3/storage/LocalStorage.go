@@ -45,12 +45,6 @@ func (c *localStorageClass_) LocalStorage(
 	if !sts.HasSuffix(directory, "/") {
 		directory += "/"
 	}
-	uti.MakeDirectory(directory + "citations")
-	uti.MakeDirectory(directory + "drafts")
-	uti.MakeDirectory(directory + "contracts")
-	uti.MakeDirectory(directory + "available")
-	uti.MakeDirectory(directory + "processing")
-	uti.MakeDirectory(directory + "events")
 	var instance = &localStorage_{
 		// Initialize the instance attributes.
 		notary_:    notary,
@@ -107,6 +101,15 @@ func (v *localStorage_) WriteCitation(
 	uti.WriteFile(filename, source)
 }
 
+func (v *localStorage_) RemoveCitation(
+	name fra.ResourceLike,
+) {
+	var filename = v.directory_ + "citations"
+	filename += v.getNamePath(name)
+	filename += "/" + v.getNameFilename(name)
+	uti.RemovePath(filename)
+}
+
 func (v *localStorage_) DraftExists(
 	citation not.CitationLike,
 ) bool {
@@ -140,7 +143,7 @@ func (v *localStorage_) WriteDraft(
 	return citation
 }
 
-func (v *localStorage_) DeleteDraft(
+func (v *localStorage_) RemoveDraft(
 	citation not.CitationLike,
 ) {
 	var path = v.directory_ + "drafts/" + v.getCitationTag(citation)
@@ -187,10 +190,64 @@ func (v *localStorage_) WriteContract(
 	return citation
 }
 
+func (v *localStorage_) BagExists(
+	bag not.CitationLike,
+) bool {
+	var path = v.directory_ + "bags/"
+	path += v.getCitationTag(bag) + ".bali"
+	return uti.PathExists(path)
+}
+
+func (v *localStorage_) ReadBag(
+	bag not.CitationLike,
+) not.ContractLike {
+	var filename = v.directory_ + "bags/"
+	filename += v.getCitationTag(bag) + ".bali"
+	var source = uti.ReadFile(filename)
+	var contract = not.ContractFromString(source)
+	return contract
+}
+
+func (v *localStorage_) WriteBag(
+	bag not.ContractLike,
+) not.CitationLike {
+	// Create the bags directory.
+	var path = v.directory_ + "bags/"
+	uti.MakeDirectory(path)
+
+	// Save the bag configuration file.
+	var draft = bag.GetDraft()
+	var citation = v.notary_.CiteDraft(draft)
+	var tag = v.getCitationTag(citation)
+	var filename = path + tag + ".bali"
+	var source = bag.AsString()
+	uti.WriteFile(filename, source)
+
+	// Create the messages directories for the bag.
+	path = v.directory_ + "messages/" + tag
+	uti.MakeDirectory(path + "/available")
+	uti.MakeDirectory(path + "/processing")
+	return citation
+}
+
+func (v *localStorage_) RemoveBag(
+	bag not.CitationLike,
+) {
+	// Remove the messages directory for the bag.
+	var tag = v.getCitationTag(bag)
+	var path = v.directory_ + "messages/" + tag
+	uti.RemovePath(path)
+
+	// Remove the bag configuration file.
+	path = v.directory_ + "bags/"
+	var filename = path + "/" + tag + ".bali"
+	uti.RemovePath(filename)
+}
+
 func (v *localStorage_) MessageCount(
 	bag not.CitationLike,
 ) uint {
-	var path = v.directory_ + "available/" + v.getCitationTag(bag)
+	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/available"
 	var messages = uti.ReadDirectory(path)
 	return uint(len(messages))
 }
@@ -199,8 +256,9 @@ func (v *localStorage_) ReadMessage(
 	bag not.CitationLike,
 ) not.ContractLike {
 	var message not.ContractLike
-	var available = v.directory_ + "/available/" + v.getCitationTag(bag)
-	var processing = v.directory_ + "/processing/" + v.getCitationTag(bag)
+	var path = v.directory_ + "messages/" + v.getCitationTag(bag)
+	var available = path + "/available/"
+	var processing = path + "/processing/"
 	for tries := 5; tries > 0; tries-- {
 		var filenames = uti.ReadDirectory(available)
 		var count = len(filenames)
@@ -226,7 +284,7 @@ func (v *localStorage_) WriteMessage(
 	bag not.CitationLike,
 	message not.ContractLike,
 ) {
-	var path = v.directory_ + "available/" + v.getCitationTag(bag)
+	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/available"
 	uti.MakeDirectory(path)
 	var draft = message.GetDraft()
 	var citation = v.notary_.CiteDraft(draft)
@@ -235,11 +293,11 @@ func (v *localStorage_) WriteMessage(
 	uti.WriteFile(filename, source)
 }
 
-func (v *localStorage_) DeleteMessage(
+func (v *localStorage_) RemoveMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	var path = v.directory_ + "processing/" + v.getCitationTag(bag)
+	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/processing"
 	var filename = path + "/" + v.getCitationTag(message) + ".bali"
 	uti.RemovePath(filename)
 }
@@ -248,8 +306,9 @@ func (v *localStorage_) ReleaseMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
-	var available = v.directory_ + "/available/" + v.getCitationTag(bag) + "/"
-	var processing = v.directory_ + "/processing/" + v.getCitationTag(bag) + "/"
+	var path = v.directory_ + "messages/" + v.getCitationTag(bag)
+	var available = path + "/available/"
+	var processing = path + "/processing/"
 	var filename = v.getCitationTag(message) + ".bali"
 	// If Rename() fails the lease has already expired so nothing else to do.
 	var _ = osx.Rename(processing+filename, available+filename)

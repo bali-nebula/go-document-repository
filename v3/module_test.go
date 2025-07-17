@@ -24,6 +24,7 @@ import (
 const testDirectory = "./test/"
 
 func TestLocalStorage(t *tes.T) {
+	// Initialize the document repository.
 	uti.RemakeDirectory(testDirectory)
 	var ssm = not.Ssm(testDirectory)
 	var hsm = ssm
@@ -32,6 +33,8 @@ func TestLocalStorage(t *tes.T) {
 	notary.GenerateKey()
 	var storage = rep.LocalStorage(notary, testDirectory)
 	var repository = rep.DocumentRepository(notary, storage)
+
+	// Save a draft document.
 	var component = doc.ParseSource("~pi").GetComponent()
 	var type_ = fra.ResourceFromString("<bali:/examples/Angle:v1>")
 	var tag = fra.TagWithSize(20)
@@ -47,14 +50,80 @@ func TestLocalStorage(t *tes.T) {
 		previous,
 	)
 	var citation = repository.SaveDraft(draft)
+
+	// Retrieve the draft document.
 	var same = repository.RetrieveDraft(citation)
 	ass.Equal(t, draft.AsString(), same.AsString())
+
+	// Discard the draft document
 	repository.DiscardDraft(citation)
+
+	// Create a notarized contract document.
 	var resource = fra.ResourceFromString("<bali:/test/Contract:v1.2.3>")
 	var contract = repository.NotarizeDraft(resource, draft)
 	var same2 = repository.RetrieveContract(resource)
 	ass.Equal(t, contract.AsString(), same2.AsString())
+
+	// Checkout a new draft of the contract document.
 	draft = repository.CheckoutDraft(resource, 2)
 	fmt.Println(draft.AsString())
 	ass.NotEqual(t, draft.AsString(), same.AsString())
+
+	// Create a new message bag.
+	var bag = fra.ResourceFromString("<bali:/test/Bag:v1>")
+	repository.CreateBag(
+		bag,
+		permissions,
+		8,
+		10,
+	)
+	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+
+	// Send a message to the bag.
+	component = doc.ParseSource(`"Hello World!"`).GetComponent()
+	type_ = fra.ResourceFromString("<bali:/examples/Message:v1>")
+	tag = fra.TagWithSize(20)
+	version = fra.VersionFromString("v1")
+	var message = not.Draft(
+		component,
+		type_,
+		tag,
+		version,
+		permissions,
+		previous,
+	)
+	repository.SendMessage(bag, message)
+	ass.Equal(t, 1, int(repository.MessageCount(bag)))
+
+	// Retrieve a message from the bag.
+	contract = repository.RetrieveMessage(bag)
+	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+
+	// Reject the message.
+	fmt.Println(contract.AsString())
+	repository.RejectMessage(contract)
+	ass.Equal(t, 1, int(repository.MessageCount(bag)))
+
+	// Process the message.
+	contract = repository.RetrieveMessage(bag)
+	repository.AcceptMessage(contract)
+	ass.Equal(t, 0, int(repository.MessageCount(bag)))
+
+	// Delete the bag.
+	repository.DeleteBag(bag)
+
+	// Publish an event.
+	component = doc.ParseSource(`"Something Happened!"`).GetComponent()
+	type_ = fra.ResourceFromString("<bali:/examples/Event:v1>")
+	tag = fra.TagWithSize(20)
+	version = fra.VersionFromString("v1")
+	var event = not.Draft(
+		component,
+		type_,
+		tag,
+		version,
+		permissions,
+		previous,
+	)
+	repository.PublishEvent(event)
 }
