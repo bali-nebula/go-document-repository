@@ -53,50 +53,6 @@ func (c *documentRepositoryClass_) DocumentRepository(
 
 // Function Methods
 
-func (c *documentRepositoryClass_) ExtractBag(
-	document doc.DocumentLike,
-) fra.ResourceLike {
-	var bag fra.ResourceLike
-	var draft = not.DraftClass().ExtractDraft(document)
-	var component = draft.GetComponent()
-	var collection = component.GetAny().(doc.CollectionLike)
-	var attributes = collection.GetAny().(doc.AttributesLike)
-	var associations = attributes.GetAssociations()
-	var iterator = associations.GetIterator()
-	for iterator.HasNext() {
-		var association = iterator.GetNext()
-		var element = association.GetPrimitive().GetAny().(doc.ElementLike)
-		var symbol = element.GetAny().(string)
-		if symbol == "$bag" {
-			var source = doc.FormatDocument(association.GetDocument())
-			bag = fra.ResourceFromString(source)
-			break
-		}
-	}
-	return bag
-}
-
-func (c *documentRepositoryClass_) ExtractContent(
-	document doc.DocumentLike,
-) doc.ComponentLike {
-	var content doc.ComponentLike
-	var component = document.GetComponent()
-	var collection = component.GetAny().(doc.CollectionLike)
-	var attributes = collection.GetAny().(doc.AttributesLike)
-	var associations = attributes.GetAssociations()
-	var iterator = associations.GetIterator()
-	for iterator.HasNext() {
-		var association = iterator.GetNext()
-		var element = association.GetPrimitive().GetAny().(doc.ElementLike)
-		var symbol = element.GetAny().(string)
-		if symbol == "$content" {
-			content = association.GetDocument().GetComponent()
-			break
-		}
-	}
-	return content
-}
-
 // INSTANCE INTERFACE
 
 // Principal Methods
@@ -260,11 +216,11 @@ func (v *documentRepository_) RetrieveMessage(
 func (v *documentRepository_) AcceptMessage(
 	message not.ContractLike,
 ) {
-	var source = message.AsString()
-	var document = doc.ParseSource(source)
-	var bag = documentRepositoryClass().ExtractBag(document)
-	var bagCitation = v.storage_.ReadCitation(bag)
 	var draft = message.GetDraft()
+	var source = draft.AsString()
+	var document = doc.ParseSource(source)
+	var bag = v.extractBag(document)
+	var bagCitation = v.storage_.ReadCitation(bag)
 	var messageCitation = v.notary_.CiteDraft(draft)
 	v.storage_.RemoveMessage(bagCitation, messageCitation)
 }
@@ -272,11 +228,11 @@ func (v *documentRepository_) AcceptMessage(
 func (v *documentRepository_) RejectMessage(
 	message not.ContractLike,
 ) {
-	var source = message.AsString()
-	var document = doc.ParseSource(source)
-	var bag = documentRepositoryClass().ExtractBag(document)
-	var bagCitation = v.storage_.ReadCitation(bag)
 	var draft = message.GetDraft()
+	var source = draft.AsString()
+	var document = doc.ParseSource(source)
+	var bag = v.extractBag(document)
+	var bagCitation = v.storage_.ReadCitation(bag)
 	var messageCitation = v.notary_.CiteDraft(draft)
 	v.storage_.ReleaseMessage(bagCitation, messageCitation)
 }
@@ -304,6 +260,28 @@ func (v *documentRepository_) PublishEvent(
 // PROTECTED INTERFACE
 
 // Private Methods
+
+func (v *documentRepository_) extractBag(
+	document doc.DocumentLike,
+) fra.ResourceLike {
+	var bag fra.ResourceLike
+	var component = document.GetComponent()
+	var collection = component.GetAny().(doc.CollectionLike)
+	var attributes = collection.GetAny().(doc.AttributesLike)
+	var associations = attributes.GetAssociations()
+	var iterator = associations.GetIterator()
+	for iterator.HasNext() {
+		var association = iterator.GetNext()
+		var element = association.GetPrimitive().GetAny().(doc.ElementLike)
+		var symbol = element.GetAny().(string)
+		if symbol == "$bag" {
+			var source = doc.FormatDocument(association.GetDocument())
+			bag = fra.ResourceFromString(source)
+			break
+		}
+	}
+	return bag
+}
 
 // Instance Structure
 
