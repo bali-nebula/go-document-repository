@@ -140,7 +140,7 @@ func (v *localStorage_) DraftExists(
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a draft document  exists.",
+		"An error occurred while checking to see if a draft document exists.",
 	)
 
 	// Determine whether or not the draft document exists.
@@ -205,12 +205,64 @@ func (v *localStorage_) RemoveDraft(
 	}
 }
 
+func (v *localStorage_) CertificateExists(
+	citation not.CitationLike,
+) bool {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while checking to see if a certificate document exists.",
+	)
+
+	// Determine whether or not the certificate document exists.
+	var path = v.directory_ + "certificates/"
+	path += v.getCitationTag(citation) + "/"
+	path += v.getCitationVersion(citation) + ".bali"
+	return uti.PathExists(path)
+}
+
+func (v *localStorage_) ReadCertificate(
+	citation not.CitationLike,
+) not.ContractLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to read a certificate document.",
+	)
+
+	// Read the certificate document from local storage.
+	var filename = v.directory_ + "certificates/"
+	filename += v.getCitationTag(citation) + "/"
+	filename += v.getCitationVersion(citation) + ".bali"
+	var source = uti.ReadFile(filename)
+	var certificate = not.ContractFromString(source)
+	return certificate
+}
+
+func (v *localStorage_) WriteCertificate(
+	certificate not.ContractLike,
+) not.CitationLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to write a certificate document.",
+	)
+
+	// Write the certificate document to local storage.
+	var draft = certificate.GetDraft()
+	var citation = v.notary_.CiteDraft(draft)
+	var path = v.directory_ + "certificates/"
+	path += v.getCitationTag(citation) + "/"
+	uti.MakeDirectory(path)
+	var filename = path + v.getCitationVersion(citation) + ".bali"
+	var source = certificate.AsString()
+	uti.WriteFile(filename, source)
+	return citation
+}
+
 func (v *localStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a contract  document  exists.",
+		"An error occurred while checking to see if a contract document exists.",
 	)
 
 	// Determine whether or not the contract document exists.

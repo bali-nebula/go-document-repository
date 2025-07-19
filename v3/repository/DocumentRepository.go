@@ -61,6 +61,31 @@ func (v *documentRepository_) GetClass() DocumentRepositoryClassLike {
 	return documentRepositoryClass()
 }
 
+func (v *documentRepository_) SaveCertificate(
+	certificate not.ContractLike,
+) not.CitationLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to save a certificate document.",
+	)
+
+	// Write the certificate document out to document storage.
+	var citation = v.storage_.WriteCertificate(certificate)
+	return citation
+}
+
+func (v *documentRepository_) RetrieveCertificate(
+	certificate not.CitationLike,
+) not.ContractLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to retrieve a certificate document.",
+	)
+
+	// Read the certificate document from document storage.
+	return v.storage_.ReadCertificate(certificate)
+}
+
 func (v *documentRepository_) SaveDraft(
 	draft not.DraftLike,
 ) not.CitationLike {

@@ -29,9 +29,18 @@ func TestLocalStorage(t *tes.T) {
 	var hsm = ssm
 	var notary = not.DigitalNotary(testDirectory, ssm, hsm)
 	notary.ForgetKey()
-	notary.GenerateKey()
-	var storage = rep.LocalStorage(notary, testDirectory)
+	var certificate = notary.GenerateKey()
+	var storage rep.Persistent = rep.LocalStorage(notary, testDirectory)
+	storage = rep.ValidatedStorage(notary, storage)
+	storage = rep.CachedStorage(storage)
 	var repository = rep.DocumentRepository(notary, storage)
+
+	// Save the certificate.
+	var citation = repository.SaveCertificate(certificate)
+	ass.Equal(t, citation.AsString(), notary.GetCitation().AsString())
+	certificate = notary.RefreshKey()
+	citation = repository.SaveCertificate(certificate)
+	ass.Equal(t, citation.AsString(), notary.GetCitation().AsString())
 
 	// Save a draft document.
 	var component = doc.ParseSource("~pi").GetComponent()
@@ -48,7 +57,7 @@ func TestLocalStorage(t *tes.T) {
 		permissions,
 		previous,
 	)
-	var citation = repository.SaveDraft(draft)
+	citation = repository.SaveDraft(draft)
 
 	// Retrieve the draft document.
 	var same = repository.RetrieveDraft(citation)
@@ -62,6 +71,8 @@ func TestLocalStorage(t *tes.T) {
 	var contract = repository.NotarizeDraft(resource, draft)
 	var same2 = repository.RetrieveContract(resource)
 	ass.Equal(t, contract.AsString(), same2.AsString())
+	var same3 = repository.RetrieveContract(resource)
+	ass.Equal(t, same2.AsString(), same3.AsString())
 
 	// Checkout a new draft of the contract document.
 	draft = repository.CheckoutDraft(resource, 2)

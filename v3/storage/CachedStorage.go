@@ -114,7 +114,7 @@ func (v *cachedStorage_) DraftExists(
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a draft document  exists.",
+		"An error occurred while checking to see if a draft document exists.",
 	)
 
 	// Determine whether or not the draft document exists.
@@ -157,12 +157,63 @@ func (v *cachedStorage_) RemoveDraft(
 	v.storage_.RemoveDraft(citation)
 }
 
+func (v *cachedStorage_) CertificateExists(
+	citation not.CitationLike,
+) bool {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while checking to see if a certificate document exists.",
+	)
+
+	// Determine if the certificate document exists in cached storage.
+	var certificate = v.lookupContract(citation)
+	if uti.IsUndefined(certificate) {
+		// Determine if the certificate document exists in persistent storage.
+		return v.storage_.CertificateExists(citation)
+	}
+	return true
+}
+
+func (v *cachedStorage_) ReadCertificate(
+	citation not.CitationLike,
+) not.ContractLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to read a certificate document.",
+	)
+
+	// Attempt to read the certificate document from cached storage.
+	var certificate = v.lookupContract(citation)
+	if uti.IsUndefined(certificate) {
+		// Read the certificate document from persistent storage.
+		certificate = v.storage_.ReadCertificate(citation)
+		if uti.IsDefined(certificate) {
+			v.cacheContract(citation, certificate)
+		}
+	}
+	return certificate
+}
+
+func (v *cachedStorage_) WriteCertificate(
+	certificate not.ContractLike,
+) not.CitationLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to write a certificate document.",
+	)
+
+	// Write the certificate document to persistent storage.
+	var citation = v.storage_.WriteCertificate(certificate)
+	v.cacheContract(citation, certificate)
+	return citation
+}
+
 func (v *cachedStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a contract  document  exists.",
+		"An error occurred while checking to see if a contract document exists.",
 	)
 
 	// Determine if the contract document exists in cached storage.

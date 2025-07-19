@@ -118,7 +118,7 @@ func (v *validatedStorage_) DraftExists(
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a draft document  exists.",
+		"An error occurred while checking to see if a draft document exists.",
 	)
 
 	// Determine whether or not the draft document exists.
@@ -170,12 +170,74 @@ func (v *validatedStorage_) RemoveDraft(
 	v.storage_.RemoveDraft(citation)
 }
 
+func (v *validatedStorage_) CertificateExists(
+	citation not.CitationLike,
+) bool {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while checking to see if a certificate document exists.",
+	)
+
+	// Determine if the certificate document exists in validated storage.
+	return v.storage_.CertificateExists(citation)
+}
+
+func (v *validatedStorage_) ReadCertificate(
+	citation not.CitationLike,
+) not.ContractLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to read a certificate document.",
+	)
+
+	// Attempt to read the certificate document from validated storage.
+	var contract = v.storage_.ReadCertificate(citation)
+	var draft = contract.GetDraft()
+	var certificate = not.CertificateFromString(draft.AsString())
+	if !v.notary_.SignatureMatches(contract, certificate) {
+		var message = fmt.Sprintf(
+			"The certificate does not match the cited certificate document: %s%s",
+			certificate.AsString(),
+			contract.AsString(),
+		)
+		panic(message)
+	}
+	return contract
+}
+
+func (v *validatedStorage_) WriteCertificate(
+	contract not.ContractLike,
+) not.CitationLike {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to write a certificate document.",
+	)
+
+	// Write the certificate document to persistent storage.
+	var draft = contract.GetDraft()
+	var certificate = not.CertificateFromString(draft.AsString())
+	var previous = certificate.GetOptionalPrevious()
+	if uti.IsDefined(previous) {
+		draft = v.storage_.ReadCertificate(previous).GetDraft()
+		certificate = not.CertificateFromString(draft.AsString())
+	}
+	if !v.notary_.SignatureMatches(contract, certificate) {
+		var message = fmt.Sprintf(
+			"The certificate does not match the certificate document: %s%s",
+			certificate.AsString(),
+			contract.AsString(),
+		)
+		panic(message)
+	}
+	return v.storage_.WriteCertificate(contract)
+}
+
 func (v *validatedStorage_) ContractExists(
 	citation not.CitationLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a contract  document  exists.",
+		"An error occurred while checking to see if a contract document exists.",
 	)
 
 	// Determine if the contract document exists in validated storage.
@@ -192,7 +254,7 @@ func (v *validatedStorage_) ReadContract(
 
 	// Attempt to read the contract document from validated storage.
 	var contract = v.storage_.ReadContract(citation)
-	var draft = v.storage_.ReadContract(contract.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(contract, certificate) {
 		var message = fmt.Sprintf(
@@ -214,7 +276,7 @@ func (v *validatedStorage_) WriteContract(
 	)
 
 	// Write the contract document to persistent storage.
-	var draft = v.storage_.ReadContract(contract.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(contract, certificate) {
 		var message = fmt.Sprintf(
@@ -249,7 +311,7 @@ func (v *validatedStorage_) ReadBag(
 
 	// Read the message bag from persistent storage.
 	var contract = v.storage_.ReadContract(bag)
-	var draft = v.storage_.ReadContract(contract.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(contract, certificate) {
 		var message = fmt.Sprintf(
@@ -271,7 +333,7 @@ func (v *validatedStorage_) WriteBag(
 	)
 
 	// Create the new bag.
-	var draft = v.storage_.ReadContract(bag.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(bag.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(bag, certificate) {
 		var message = fmt.Sprintf(
@@ -318,7 +380,7 @@ func (v *validatedStorage_) ReadMessage(
 
 	// Read a random message from persistent storage.
 	var contract = v.storage_.ReadMessage(bag)
-	var draft = v.storage_.ReadContract(contract.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(contract, certificate) {
 		var message = fmt.Sprintf(
@@ -341,7 +403,7 @@ func (v *validatedStorage_) WriteMessage(
 	)
 
 	// Write the message to the message bag in persistent storage.
-	var draft = v.storage_.ReadContract(message.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(message.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(message, certificate) {
 		var message = fmt.Sprintf(
@@ -389,7 +451,7 @@ func (v *validatedStorage_) WriteEvent(
 	)
 
 	// Write the event to the notification queue in persistent storage.
-	var draft = v.storage_.ReadContract(event.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadCertificate(event.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
 	if !v.notary_.SignatureMatches(event, certificate) {
 		var message = fmt.Sprintf(

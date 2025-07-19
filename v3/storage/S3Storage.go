@@ -116,6 +116,30 @@ func (v *s3Storage_) RemoveDraft(
 	// TBD - Add the method implementation.
 }
 
+func (v *s3Storage_) CertificateExists(
+	citation not.CitationLike,
+) bool {
+	var result_ bool
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *s3Storage_) ReadCertificate(
+	citation not.CitationLike,
+) not.ContractLike {
+	var result_ not.ContractLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
+func (v *s3Storage_) WriteCertificate(
+	certificate not.ContractLike,
+) not.CitationLike {
+	var result_ not.CitationLike
+	// TBD - Add the method implementation.
+	return result_
+}
+
 func (v *s3Storage_) ContractExists(
 	citation not.CitationLike,
 ) bool {

@@ -66,6 +66,12 @@ of a concrete document-repository-like class.
 type DocumentRepositoryLike interface {
 	// Principal Methods
 	GetClass() DocumentRepositoryClassLike
+	SaveCertificate(
+		certificate not.ContractLike,
+	) not.CitationLike
+	RetrieveCertificate(
+		citation not.CitationLike,
+	) not.ContractLike
 	SaveDraft(
 		draft not.DraftLike,
 	) not.CitationLike
@@ -150,6 +156,15 @@ type Persistent interface {
 	RemoveDraft(
 		draft not.CitationLike,
 	)
+	CertificateExists(
+		certificate not.CitationLike,
+	) bool
+	ReadCertificate(
+		certificate not.CitationLike,
+	) not.ContractLike
+	WriteCertificate(
+		certificate not.ContractLike,
+	) not.CitationLike
 	ContractExists(
 		contract not.CitationLike,
 	) bool
