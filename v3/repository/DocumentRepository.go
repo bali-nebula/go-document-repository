@@ -119,8 +119,8 @@ func (v *documentRepository_) DiscardDraft(
 		"An error occurred while attempting to discard a draft document.",
 	)
 
-	// Remove the draft document from document storage.
-	v.storage_.RemoveDraft(draft)
+	// Delete the draft document from document storage.
+	v.storage_.DeleteDraft(draft)
 }
 
 func (v *documentRepository_) NotarizeDraft(
@@ -255,7 +255,7 @@ func (v *documentRepository_) CreateBag(
 	v.storage_.WriteCitation(resource, citation)
 }
 
-func (v *documentRepository_) DeleteBag(
+func (v *documentRepository_) RemoveBag(
 	bag string,
 ) {
 	// Check for any errors at the end.
@@ -274,11 +274,11 @@ func (v *documentRepository_) DeleteBag(
 		panic(message)
 	}
 
-	// Remove the message bag (and any remaining messages) from document storage.
-	v.storage_.RemoveBag(citation)
+	// Delete the message bag (and any remaining messages) from document storage.
+	v.storage_.DeleteBag(citation)
 
-	// Remove the citation to the message bag from document storage.
-	v.storage_.RemoveCitation(resource)
+	// Delete the citation to the message bag from document storage.
+	v.storage_.DeleteCitation(resource)
 }
 
 func (v *documentRepository_) MessageCount(
@@ -383,8 +383,8 @@ func (v *documentRepository_) AcceptMessage(
 	// Generate a message citation for the message.
 	var messageCitation = v.notary_.CiteDraft(draft)
 
-	// Remove the message from the message bag in document storage.
-	v.storage_.RemoveMessage(bagCitation, messageCitation)
+	// Delete the message from the message bag in document storage.
+	v.storage_.DeleteMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) RejectMessage(

@@ -101,8 +101,8 @@ func TestLocalStorage(t *tes.T) {
 	repository.AcceptMessage(contract)
 	ass.Equal(t, 0, repository.MessageCount(bag))
 
-	// Delete the bag.
-	repository.DeleteBag(bag)
+	// Remove the bag.
+	repository.RemoveBag(bag)
 
 	// Publish an event.
 	var kind = "<bali:/events/Example:v3>"

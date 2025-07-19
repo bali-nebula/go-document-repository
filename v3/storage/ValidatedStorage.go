@@ -101,16 +101,16 @@ func (v *validatedStorage_) WriteCitation(
 	v.storage_.WriteCitation(name, citation)
 }
 
-func (v *validatedStorage_) RemoveCitation(
+func (v *validatedStorage_) DeleteCitation(
 	name fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a document citation.",
+		"An error occurred while attempting to delete a document citation.",
 	)
 
-	// Remove the document citation from persistent storage.
-	v.storage_.RemoveCitation(name)
+	// Delete the document citation from persistent storage.
+	v.storage_.DeleteCitation(name)
 }
 
 func (v *validatedStorage_) DraftExists(
@@ -158,16 +158,16 @@ func (v *validatedStorage_) WriteDraft(
 	return v.storage_.WriteDraft(draft)
 }
 
-func (v *validatedStorage_) RemoveDraft(
+func (v *validatedStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a draft document.",
+		"An error occurred while attempting to delete a draft document.",
 	)
 
-	// Remove the draft document from persistent storage.
-	v.storage_.RemoveDraft(citation)
+	// Delete the draft document from persistent storage.
+	v.storage_.DeleteDraft(citation)
 }
 
 func (v *validatedStorage_) CertificateExists(
@@ -346,16 +346,16 @@ func (v *validatedStorage_) WriteBag(
 	return v.storage_.WriteBag(bag)
 }
 
-func (v *validatedStorage_) RemoveBag(
+func (v *validatedStorage_) DeleteBag(
 	bag not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a message bag.",
+		"An error occurred while attempting to delete a message bag.",
 	)
 
-	// Remove the bag and any remaining messages.
-	v.storage_.RemoveBag(bag)
+	// Delete the bag and any remaining messages.
+	v.storage_.DeleteBag(bag)
 }
 
 func (v *validatedStorage_) MessageCount(
@@ -416,17 +416,17 @@ func (v *validatedStorage_) WriteMessage(
 	v.storage_.WriteMessage(bag, message)
 }
 
-func (v *validatedStorage_) RemoveMessage(
+func (v *validatedStorage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a message from a message bag.",
+		"An error occurred while attempting to delete a message from a message bag.",
 	)
 
-	// Remove the message from the message bag in persistent storage.
-	v.storage_.RemoveMessage(bag, message)
+	// Delete the message from the message bag in persistent storage.
+	v.storage_.DeleteMessage(bag, message)
 }
 
 func (v *validatedStorage_) ReleaseMessage(

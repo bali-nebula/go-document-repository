@@ -120,15 +120,15 @@ func (v *localStorage_) WriteCitation(
 	uti.WriteFile(filename, source)
 }
 
-func (v *localStorage_) RemoveCitation(
+func (v *localStorage_) DeleteCitation(
 	name fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a document citation.",
+		"An error occurred while attempting to delete a document citation.",
 	)
 
-	// Remove the document citation from local storage.
+	// Delete the document citation from local storage.
 	var root = v.directory_ + "citations/"
 	var path = v.getNamePath(name)
 	var filename = root + path + "/" + v.getNameFilename(name)
@@ -196,21 +196,21 @@ func (v *localStorage_) WriteDraft(
 	return citation
 }
 
-func (v *localStorage_) RemoveDraft(
+func (v *localStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a draft document.",
+		"An error occurred while attempting to delete a draft document.",
 	)
 
-	// Remove the draft document from local storage.
+	// Delete the draft document from local storage.
 	var path = v.directory_ + "drafts/" + v.getCitationTag(citation)
 	var filename = path + "/" + v.getCitationVersion(citation) + ".bali"
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {
-		// This was the last version of the draft so remove the directory too.
+		// This was the last version of the draft so delete the directory too.
 		uti.RemovePath(path)
 	}
 }
@@ -376,20 +376,20 @@ func (v *localStorage_) WriteBag(
 	return citation
 }
 
-func (v *localStorage_) RemoveBag(
+func (v *localStorage_) DeleteBag(
 	bag not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a message bag.",
+		"An error occurred while attempting to delete a message bag.",
 	)
 
-	// Remove the messages directory for the bag.
+	// Delete the messages directory for the bag.
 	var tag = v.getCitationTag(bag)
 	var path = v.directory_ + "messages/" + tag
 	uti.RemovePath(path)
 
-	// Remove the bag configuration file.
+	// Delete the bag configuration file.
 	path = v.directory_ + "bags/"
 	var filename = path + "/" + tag + ".bali"
 	uti.RemovePath(filename)
@@ -462,16 +462,16 @@ func (v *localStorage_) WriteMessage(
 	uti.WriteFile(filename, source)
 }
 
-func (v *localStorage_) RemoveMessage(
+func (v *localStorage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to remove a message from a message bag.",
+		"An error occurred while attempting to delete a message from a message bag.",
 	)
 
-	// Remove the message from the message bag in local storage.
+	// Delete the message from the message bag in local storage.
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/processing"
 	var filename = path + "/" + v.getCitationTag(message) + ".bali"
 	uti.RemovePath(filename)

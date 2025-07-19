@@ -98,7 +98,7 @@ type DocumentRepositoryLike interface {
 		capacity int,
 		leasetime int,
 	)
-	DeleteBag(
+	RemoveBag(
 		bag string,
 	)
 	MessageCount(
@@ -141,7 +141,7 @@ type Persistent interface {
 		name fra.ResourceLike,
 		citation not.CitationLike,
 	)
-	RemoveCitation(
+	DeleteCitation(
 		name fra.ResourceLike,
 	)
 	DraftExists(
@@ -153,7 +153,7 @@ type Persistent interface {
 	WriteDraft(
 		draft not.DraftLike,
 	) not.CitationLike
-	RemoveDraft(
+	DeleteDraft(
 		draft not.CitationLike,
 	)
 	CertificateExists(
@@ -183,7 +183,7 @@ type Persistent interface {
 	WriteBag(
 		bag not.ContractLike,
 	) not.CitationLike
-	RemoveBag(
+	DeleteBag(
 		bag not.CitationLike,
 	)
 	MessageCount(
@@ -196,7 +196,7 @@ type Persistent interface {
 		bag not.CitationLike,
 		message not.ContractLike,
 	)
-	RemoveMessage(
+	DeleteMessage(
 		bag not.CitationLike,
 		message not.CitationLike,
 	)

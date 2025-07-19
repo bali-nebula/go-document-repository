@@ -85,7 +85,7 @@ func (v *remoteStorage_) WriteCitation(
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) RemoveCitation(
+func (v *remoteStorage_) DeleteCitation(
 	name fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
@@ -115,7 +115,7 @@ func (v *remoteStorage_) WriteDraft(
 	return result_
 }
 
-func (v *remoteStorage_) RemoveDraft(
+func (v *remoteStorage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -193,7 +193,7 @@ func (v *remoteStorage_) WriteBag(
 	return result_
 }
 
-func (v *remoteStorage_) RemoveBag(
+func (v *remoteStorage_) DeleteBag(
 	bag not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -222,7 +222,7 @@ func (v *remoteStorage_) WriteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) RemoveMessage(
+func (v *remoteStorage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {

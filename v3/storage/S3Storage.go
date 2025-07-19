@@ -80,7 +80,7 @@ func (v *s3Storage_) WriteCitation(
 	// TBD - Add the method implementation.
 }
 
-func (v *s3Storage_) RemoveCitation(
+func (v *s3Storage_) DeleteCitation(
 	name fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
@@ -110,7 +110,7 @@ func (v *s3Storage_) WriteDraft(
 	return result_
 }
 
-func (v *s3Storage_) RemoveDraft(
+func (v *s3Storage_) DeleteDraft(
 	citation not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -188,7 +188,7 @@ func (v *s3Storage_) WriteBag(
 	return result_
 }
 
-func (v *s3Storage_) RemoveBag(
+func (v *s3Storage_) DeleteBag(
 	bag not.CitationLike,
 ) {
 	// TBD - Add the method implementation.
@@ -217,7 +217,7 @@ func (v *s3Storage_) WriteMessage(
 	// TBD - Add the method implementation.
 }
 
-func (v *s3Storage_) RemoveMessage(
+func (v *s3Storage_) DeleteMessage(
 	bag not.CitationLike,
 	message not.CitationLike,
 ) {
