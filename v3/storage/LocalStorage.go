@@ -129,10 +129,20 @@ func (v *localStorage_) RemoveCitation(
 	)
 
 	// Remove the document citation from local storage.
-	var filename = v.directory_ + "citations"
-	filename += v.getNamePath(name)
-	filename += "/" + v.getNameFilename(name)
+	var root = v.directory_ + "citations/"
+	var path = v.getNamePath(name)
+	var filename = root + path + "/" + v.getNameFilename(name)
 	uti.RemovePath(filename)
+	for len(path) > 0 {
+		if len(uti.ReadDirectory(root+path)) > 0 {
+			// The directory is not empty so we are done.
+			return
+		}
+		uti.RemovePath(root + path)
+		var directories = sts.Split(path, "/")
+		directories = directories[:len(directories)-1] // Strip off last one.
+		path = sts.Join(directories, "/")
+	}
 }
 
 func (v *localStorage_) DraftExists(

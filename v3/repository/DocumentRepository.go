@@ -276,6 +276,9 @@ func (v *documentRepository_) DeleteBag(
 
 	// Remove the message bag (and any remaining messages) from document storage.
 	v.storage_.RemoveBag(citation)
+
+	// Remove the citation to the message bag from document storage.
+	v.storage_.RemoveCitation(resource)
 }
 
 func (v *documentRepository_) MessageCount(
