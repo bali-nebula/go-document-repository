@@ -460,20 +460,11 @@ func (v *documentRepository_) extractBag(
 	document doc.DocumentLike,
 ) fra.ResourceLike {
 	var bag fra.ResourceLike
-	var component = document.GetComponent()
-	var collection = component.GetAny().(doc.CollectionLike)
-	var attributes = collection.GetAny().(doc.AttributesLike)
-	var associations = attributes.GetAssociations()
-	var iterator = associations.GetIterator()
-	for iterator.HasNext() {
-		var association = iterator.GetNext()
-		var element = association.GetPrimitive().GetAny().(doc.ElementLike)
-		var symbol = element.GetAny().(string)
-		if symbol == "$bag" {
-			var source = doc.FormatDocument(association.GetDocument())
-			bag = fra.ResourceFromString(source)
-			break
-		}
+	document = doc.GetItem(document, "$bag")
+	if uti.IsDefined(document) {
+		var source = doc.FormatDocument(document)
+		source = source[:len(source)-1] // Remove the trailing newline.
+		bag = fra.ResourceFromString(source)
 	}
 	return bag
 }
