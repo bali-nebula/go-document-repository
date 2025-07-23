@@ -460,7 +460,7 @@ func (v *documentRepository_) extractBag(
 	document doc.DocumentLike,
 ) fra.ResourceLike {
 	var bag fra.ResourceLike
-	document = doc.GetItem(document, "$bag")
+	document = doc.GetAttribute(document, "$bag")
 	if uti.IsDefined(document) {
 		var source = doc.FormatDocument(document)
 		source = source[:len(source)-1] // Remove the trailing newline.
