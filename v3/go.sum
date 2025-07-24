@@ -1,7 +1,7 @@
-github.com/bali-nebula/go-digital-notary/v3 v3.10.0 h1:A9gM5L5IF0ul0yeQVZkPqBSNdUSHu3eNrefAz1/sz5A=
-github.com/bali-nebula/go-digital-notary/v3 v3.10.0/go.mod h1:lw7C/uH3SY3YB8cmfXvrTC13v4JBM1IHesFYR7KEXf8=
-github.com/bali-nebula/go-document-notation/v3 v3.6.0 h1:2pJRBXpxSeTlm0CIanGxdJNnTfyp0gWK6wL/8yLvgD8=
-github.com/bali-nebula/go-document-notation/v3 v3.6.0/go.mod h1:y41SctwWPSH1R3uspHqrK6Zwfd5cnnFUw/dO3bsRuYs=
+github.com/bali-nebula/go-digital-notary/v3 v3.11.0 h1:iv/9xWeoJ84L9C3hdOqm+toLQ8WrQBdGuW7srBMy/n0=
+github.com/bali-nebula/go-digital-notary/v3 v3.11.0/go.mod h1:yhlLiqBRhPO+ibO+rwZ5y6aofm1x4JK3L6UNNHSC8j4=
+github.com/bali-nebula/go-document-notation/v3 v3.7.0 h1:Ez7Ah0hDXTNDBnAkxjyCFC2LEsdkWxOP2pd+Y+RkIQs=
+github.com/bali-nebula/go-document-notation/v3 v3.7.0/go.mod h1:y41SctwWPSH1R3uspHqrK6Zwfd5cnnFUw/dO3bsRuYs=
 github.com/craterdog/go-component-framework/v7 v7.12.0 h1:qwLj3BoEeD0i+y58Gqos5M9nCcnp3cE7ZttiOQnLS0M=
 github.com/craterdog/go-component-framework/v7 v7.12.0/go.mod h1:tVnnJzkWI1+kkUu0LREYPjI8QWTVZutxcaTYzzv4Il8=
 github.com/craterdog/go-missing-utilities/v7 v7.13.0 h1:03R+Dm5zdBL/7ilGpXqBMop5QX1D6dQB3EYdpYLCk8Q=
