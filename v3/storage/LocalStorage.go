@@ -87,7 +87,7 @@ func (v *localStorage_) CitationExists(
 
 func (v *localStorage_) ReadCitation(
 	name fra.ResourceLike,
-) not.CitationLike {
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a document citation.",
@@ -98,13 +98,13 @@ func (v *localStorage_) ReadCitation(
 	filename += v.getNamePath(name)
 	filename += "/" + v.getNameFilename(name)
 	var source = uti.ReadFile(filename)
-	var citation = not.CitationFromString(source)
+	var citation = fra.ResourceFromString(source)
 	return citation
 }
 
 func (v *localStorage_) WriteCitation(
 	name fra.ResourceLike,
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -116,7 +116,7 @@ func (v *localStorage_) WriteCitation(
 	path += v.getNamePath(name)
 	uti.MakeDirectory(path)
 	var filename = path + "/" + v.getNameFilename(name)
-	var source = citation.AsString()
+	var source = not.CitationFromResource(citation).AsString()
 	uti.WriteFile(filename, source)
 }
 
@@ -146,7 +146,7 @@ func (v *localStorage_) DeleteCitation(
 }
 
 func (v *localStorage_) DraftExists(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -161,8 +161,8 @@ func (v *localStorage_) DraftExists(
 }
 
 func (v *localStorage_) ReadDraft(
-	citation not.CitationLike,
-) not.DraftLike {
+	citation fra.ResourceLike,
+) not.Parameterized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a draft document.",
@@ -178,8 +178,8 @@ func (v *localStorage_) ReadDraft(
 }
 
 func (v *localStorage_) WriteDraft(
-	draft not.DraftLike,
-) not.CitationLike {
+	draft not.Parameterized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a draft document.",
@@ -197,7 +197,7 @@ func (v *localStorage_) WriteDraft(
 }
 
 func (v *localStorage_) DeleteDraft(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -215,112 +215,60 @@ func (v *localStorage_) DeleteDraft(
 	}
 }
 
-func (v *localStorage_) CertificateExists(
-	citation not.CitationLike,
+func (v *localStorage_) DocumentExists(
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a certificate document exists.",
+		"An error occurred while checking to see if a notarized document exists.",
 	)
 
-	// Determine whether or not the certificate document exists.
-	var path = v.directory_ + "certificates/"
-	path += v.getCitationTag(citation) + "/"
-	path += v.getCitationVersion(citation) + ".bali"
-	return uti.PathExists(path)
-}
-
-func (v *localStorage_) ReadCertificate(
-	citation not.CitationLike,
-) not.ContractLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a certificate document.",
-	)
-
-	// Read the certificate document from local storage.
-	var filename = v.directory_ + "certificates/"
-	filename += v.getCitationTag(citation) + "/"
-	filename += v.getCitationVersion(citation) + ".bali"
-	var source = uti.ReadFile(filename)
-	var certificate = not.ContractFromString(source)
-	return certificate
-}
-
-func (v *localStorage_) WriteCertificate(
-	certificate not.ContractLike,
-) not.CitationLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a certificate document.",
-	)
-
-	// Write the certificate document to local storage.
-	var draft = certificate.GetDraft()
-	var citation = v.notary_.CiteDraft(draft)
-	var path = v.directory_ + "certificates/"
-	path += v.getCitationTag(citation) + "/"
-	uti.MakeDirectory(path)
-	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = certificate.AsString()
-	uti.WriteFile(filename, source)
-	return citation
-}
-
-func (v *localStorage_) ContractExists(
-	citation not.CitationLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a contract document exists.",
-	)
-
-	// Determine whether or not the contract document exists.
+	// Determine whether or not the notarized document exists.
 	var path = v.directory_ + "contracts/"
 	path += v.getCitationTag(citation) + "/"
 	path += v.getCitationVersion(citation) + ".bali"
 	return uti.PathExists(path)
 }
 
-func (v *localStorage_) ReadContract(
-	citation not.CitationLike,
-) not.ContractLike {
+func (v *localStorage_) ReadDocument(
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to read a contract document.",
+		"An error occurred while attempting to read a notarized document.",
 	)
 
-	// Read the contract document from local storage.
+	// Read the notarized document from local storage.
 	var filename = v.directory_ + "contracts/"
 	filename += v.getCitationTag(citation) + "/"
 	filename += v.getCitationVersion(citation) + ".bali"
 	var source = uti.ReadFile(filename)
-	var contract = not.ContractFromString(source)
-	return contract
+	var document = not.ContractFromString(source)
+	return document
 }
 
-func (v *localStorage_) WriteContract(
-	contract not.ContractLike,
-) not.CitationLike {
+func (v *localStorage_) WriteDocument(
+	document not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to write a contract document.",
+		"An error occurred while attempting to write a notarized document.",
 	)
 
-	// Write the contract document to local storage.
-	var draft = contract.GetDraft()
-	var citation = v.notary_.CiteDraft(draft)
+	// Write the notarized document to local storage.
+	var content = document.GetContent()
+	var citation = v.notary_.CiteDraft(content)
 	var path = v.directory_ + "contracts/"
 	path += v.getCitationTag(citation) + "/"
 	uti.MakeDirectory(path)
 	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = contract.AsString()
+	var source = document.AsString()
 	uti.WriteFile(filename, source)
 	return citation
 }
 
 func (v *localStorage_) BagExists(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -329,13 +277,13 @@ func (v *localStorage_) BagExists(
 
 	// Determine whether or not the message bag exists.
 	var path = v.directory_ + "bags/"
-	path += v.getCitationTag(bag) + ".bali"
+	path += v.getCitationTag(citation) + ".bali"
 	return uti.PathExists(path)
 }
 
 func (v *localStorage_) ReadBag(
-	bag not.CitationLike,
-) not.ContractLike {
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message bag.",
@@ -343,15 +291,15 @@ func (v *localStorage_) ReadBag(
 
 	// Read the message bag from local storage.
 	var filename = v.directory_ + "bags/"
-	filename += v.getCitationTag(bag) + ".bali"
+	filename += v.getCitationTag(citation) + ".bali"
 	var source = uti.ReadFile(filename)
-	var contract = not.ContractFromString(source)
-	return contract
+	var bag = not.ContractFromString(source)
+	return bag
 }
 
 func (v *localStorage_) WriteBag(
-	bag not.ContractLike,
-) not.CitationLike {
+	bag not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a message bag.",
@@ -362,8 +310,8 @@ func (v *localStorage_) WriteBag(
 	uti.MakeDirectory(path)
 
 	// Save the bag configuration file.
-	var draft = bag.GetDraft()
-	var citation = v.notary_.CiteDraft(draft)
+	var content = bag.GetContent()
+	var citation = v.notary_.CiteDraft(content)
 	var tag = v.getCitationTag(citation)
 	var filename = path + tag + ".bali"
 	var source = bag.AsString()
@@ -377,7 +325,7 @@ func (v *localStorage_) WriteBag(
 }
 
 func (v *localStorage_) DeleteBag(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -385,7 +333,7 @@ func (v *localStorage_) DeleteBag(
 	)
 
 	// Delete the messages directory for the bag.
-	var tag = v.getCitationTag(bag)
+	var tag = v.getCitationTag(citation)
 	var path = v.directory_ + "messages/" + tag
 	uti.RemovePath(path)
 
@@ -396,8 +344,8 @@ func (v *localStorage_) DeleteBag(
 }
 
 func (v *localStorage_) MessageCount(
-	bag not.CitationLike,
-) int {
+	bag fra.ResourceLike,
+) uti.Cardinal {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while counting the messages in a message bag.",
@@ -406,19 +354,19 @@ func (v *localStorage_) MessageCount(
 	// Determine the number of messages currently available in the bag.
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/available"
 	var messages = uti.ReadDirectory(path)
-	return len(messages)
+	return uti.Cardinal(len(messages))
 }
 
 func (v *localStorage_) ReadMessage(
-	bag not.CitationLike,
-) not.ContractLike {
+	bag fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message from a message bag.",
 	)
 
 	// Read a random message from local storage.
-	var message not.ContractLike
+	var message not.Notarized
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag)
 	var available = path + "/available/"
 	var processing = path + "/processing/"
@@ -444,8 +392,8 @@ func (v *localStorage_) ReadMessage(
 }
 
 func (v *localStorage_) WriteMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
+	bag fra.ResourceLike,
+	message not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -455,16 +403,16 @@ func (v *localStorage_) WriteMessage(
 	// Write the message to the message bag in local storage.
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/available"
 	uti.MakeDirectory(path)
-	var draft = message.GetDraft()
-	var citation = v.notary_.CiteDraft(draft)
+	var content = message.GetContent()
+	var citation = v.notary_.CiteDraft(content)
 	var filename = path + "/" + v.getCitationTag(citation) + ".bali"
 	var source = message.AsString()
 	uti.WriteFile(filename, source)
 }
 
 func (v *localStorage_) DeleteMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -473,13 +421,13 @@ func (v *localStorage_) DeleteMessage(
 
 	// Delete the message from the message bag in local storage.
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag) + "/processing"
-	var filename = path + "/" + v.getCitationTag(message) + ".bali"
+	var filename = path + "/" + v.getCitationTag(citation) + ".bali"
 	uti.RemovePath(filename)
 }
 
 func (v *localStorage_) ReleaseMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -490,13 +438,13 @@ func (v *localStorage_) ReleaseMessage(
 	var path = v.directory_ + "messages/" + v.getCitationTag(bag)
 	var available = path + "/available/"
 	var processing = path + "/processing/"
-	var filename = v.getCitationTag(message) + ".bali"
+	var filename = v.getCitationTag(citation) + ".bali"
 	// If Rename() fails the lease has already expired so nothing else to do.
 	var _ = osx.Rename(processing+filename, available+filename)
 }
 
 func (v *localStorage_) WriteEvent(
-	event not.ContractLike,
+	event not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -506,8 +454,8 @@ func (v *localStorage_) WriteEvent(
 	// Write the event to the notification queue in local storage.
 	var path = v.directory_ + "events/"
 	uti.MakeDirectory(path)
-	var draft = event.GetDraft()
-	var citation = v.notary_.CiteDraft(draft)
+	var content = event.GetContent()
+	var citation = v.notary_.CiteDraft(content)
 	var filename = path + v.getCitationTag(citation) + ".bali"
 	var source = event.AsString()
 	uti.WriteFile(filename, source)
@@ -531,29 +479,31 @@ func (v *localStorage_) errorCheck(
 }
 
 func (v *localStorage_) getCitationTag(
-	citation not.CitationLike,
+	resource fra.ResourceLike,
 ) string {
+	var citation = not.CitationFromResource(resource)
 	var tag = citation.GetTag()
 	return tag.AsString()[1:] // Remove the leading "#" character.
 }
 
 func (v *localStorage_) getCitationVersion(
-	citation not.CitationLike,
+	resource fra.ResourceLike,
 ) string {
+	var citation = not.CitationFromResource(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
 }
 
 func (v *localStorage_) getNamePath(
-	name fra.ResourceLike,
+	resource fra.ResourceLike,
 ) string {
-	return sts.Split(name.GetPath(), ":")[0]
+	return sts.Split(resource.GetPath(), ":")[0]
 }
 
 func (v *localStorage_) getNameFilename(
-	name fra.ResourceLike,
+	resource fra.ResourceLike,
 ) string {
-	return sts.Split(name.GetPath(), ":")[1] + ".bali"
+	return sts.Split(resource.GetPath(), ":")[1] + ".bali"
 }
 
 // Instance Structure

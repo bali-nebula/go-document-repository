@@ -38,7 +38,7 @@ func (c *cachedStorageClass_) CachedStorage(
 	}
 	var instance = &cachedStorage_{
 		// Initialize the instance attributes.
-		cache_:   fra.Catalog[string, not.ContractLike](),
+		cache_:   fra.Catalog[string, not.Notarized](),
 		storage_: storage,
 	}
 	return instance
@@ -74,7 +74,7 @@ func (v *cachedStorage_) CitationExists(
 
 func (v *cachedStorage_) ReadCitation(
 	name fra.ResourceLike,
-) not.CitationLike {
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a document citation.",
@@ -86,7 +86,7 @@ func (v *cachedStorage_) ReadCitation(
 
 func (v *cachedStorage_) WriteCitation(
 	name fra.ResourceLike,
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -110,7 +110,7 @@ func (v *cachedStorage_) DeleteCitation(
 }
 
 func (v *cachedStorage_) DraftExists(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -122,8 +122,8 @@ func (v *cachedStorage_) DraftExists(
 }
 
 func (v *cachedStorage_) ReadDraft(
-	citation not.CitationLike,
-) not.DraftLike {
+	citation fra.ResourceLike,
+) not.Parameterized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a draft document.",
@@ -134,8 +134,8 @@ func (v *cachedStorage_) ReadDraft(
 }
 
 func (v *cachedStorage_) WriteDraft(
-	draft not.DraftLike,
-) not.CitationLike {
+	draft not.Parameterized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a draft document.",
@@ -146,7 +146,7 @@ func (v *cachedStorage_) WriteDraft(
 }
 
 func (v *cachedStorage_) DeleteDraft(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -157,110 +157,59 @@ func (v *cachedStorage_) DeleteDraft(
 	v.storage_.DeleteDraft(citation)
 }
 
-func (v *cachedStorage_) CertificateExists(
-	citation not.CitationLike,
+func (v *cachedStorage_) DocumentExists(
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a certificate document exists.",
+		"An error occurred while checking to see if a notarized document exists.",
 	)
 
-	// Determine if the certificate document exists in cached storage.
-	var certificate = v.lookupContract(citation)
-	if uti.IsUndefined(certificate) {
-		// Determine if the certificate document exists in persistent storage.
-		return v.storage_.CertificateExists(citation)
+	// Determine if the notarized document exists in cached storage.
+	var document = v.lookupDocument(citation)
+	if uti.IsUndefined(document) {
+		// Determine if the notarized document exists in persistent storage.
+		return v.storage_.DocumentExists(citation)
 	}
 	return true
 }
 
-func (v *cachedStorage_) ReadCertificate(
-	citation not.CitationLike,
-) not.ContractLike {
+func (v *cachedStorage_) ReadDocument(
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to read a certificate document.",
+		"An error occurred while attempting to read a notarized document.",
 	)
 
-	// Attempt to read the certificate document from cached storage.
-	var certificate = v.lookupContract(citation)
-	if uti.IsUndefined(certificate) {
-		// Read the certificate document from persistent storage.
-		certificate = v.storage_.ReadCertificate(citation)
-		if uti.IsDefined(certificate) {
-			v.cacheContract(citation, certificate)
+	// Attempt to read the notarized document from cached storage.
+	var document = v.lookupDocument(citation)
+	if uti.IsUndefined(document) {
+		// Read the notarized document from persistent storage.
+		document = v.storage_.ReadDocument(citation)
+		if uti.IsDefined(document) {
+			v.cacheDocument(citation, document)
 		}
 	}
-	return certificate
+	return document
 }
 
-func (v *cachedStorage_) WriteCertificate(
-	certificate not.ContractLike,
-) not.CitationLike {
+func (v *cachedStorage_) WriteDocument(
+	document not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to write a certificate document.",
+		"An error occurred while attempting to write a notarized document.",
 	)
 
-	// Write the certificate document to persistent storage.
-	var citation = v.storage_.WriteCertificate(certificate)
-	v.cacheContract(citation, certificate)
-	return citation
-}
-
-func (v *cachedStorage_) ContractExists(
-	citation not.CitationLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a contract document exists.",
-	)
-
-	// Determine if the contract document exists in cached storage.
-	var contract = v.lookupContract(citation)
-	if uti.IsUndefined(contract) {
-		// Determine if the contract document exists in persistent storage.
-		return v.storage_.ContractExists(citation)
-	}
-	return true
-}
-
-func (v *cachedStorage_) ReadContract(
-	citation not.CitationLike,
-) not.ContractLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a contract document.",
-	)
-
-	// Attempt to read the contract document from cached storage.
-	var contract = v.lookupContract(citation)
-	if uti.IsUndefined(contract) {
-		// Read the contract document from persistent storage.
-		contract = v.storage_.ReadContract(citation)
-		if uti.IsDefined(contract) {
-			v.cacheContract(citation, contract)
-		}
-	}
-	return contract
-}
-
-func (v *cachedStorage_) WriteContract(
-	contract not.ContractLike,
-) not.CitationLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a contract document.",
-	)
-
-	// Write the contract document to persistent storage.
-	var citation = v.storage_.WriteContract(contract)
-	v.cacheContract(citation, contract)
+	// Write the notarized document to persistent storage.
+	var citation = v.storage_.WriteDocument(document)
+	v.cacheDocument(citation, document)
 	return citation
 }
 
 func (v *cachedStorage_) BagExists(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -268,24 +217,24 @@ func (v *cachedStorage_) BagExists(
 	)
 
 	// Determine whether or not the message bag exists.
-	return v.storage_.BagExists(bag)
+	return v.storage_.BagExists(citation)
 }
 
 func (v *cachedStorage_) ReadBag(
-	bag not.CitationLike,
-) not.ContractLike {
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message bag.",
 	)
 
 	// Read the message bag from persistent storage.
-	return v.storage_.ReadBag(bag)
+	return v.storage_.ReadBag(citation)
 }
 
 func (v *cachedStorage_) WriteBag(
-	bag not.ContractLike,
-) not.CitationLike {
+	bag not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a message bag.",
@@ -296,7 +245,7 @@ func (v *cachedStorage_) WriteBag(
 }
 
 func (v *cachedStorage_) DeleteBag(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -304,12 +253,12 @@ func (v *cachedStorage_) DeleteBag(
 	)
 
 	// Delete the bag and any remaining messages.
-	v.storage_.DeleteBag(bag)
+	v.storage_.DeleteBag(citation)
 }
 
 func (v *cachedStorage_) MessageCount(
-	bag not.CitationLike,
-) int {
+	bag fra.ResourceLike,
+) uti.Cardinal {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while counting the messages in a message bag.",
@@ -320,8 +269,8 @@ func (v *cachedStorage_) MessageCount(
 }
 
 func (v *cachedStorage_) ReadMessage(
-	bag not.CitationLike,
-) not.ContractLike {
+	bag fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message from a message bag.",
@@ -332,8 +281,8 @@ func (v *cachedStorage_) ReadMessage(
 }
 
 func (v *cachedStorage_) WriteMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
+	bag fra.ResourceLike,
+	message not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -345,8 +294,8 @@ func (v *cachedStorage_) WriteMessage(
 }
 
 func (v *cachedStorage_) DeleteMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -354,12 +303,12 @@ func (v *cachedStorage_) DeleteMessage(
 	)
 
 	// Delete the message from the message bag in persistent storage.
-	v.storage_.DeleteMessage(bag, message)
+	v.storage_.DeleteMessage(bag, citation)
 }
 
 func (v *cachedStorage_) ReleaseMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -367,11 +316,11 @@ func (v *cachedStorage_) ReleaseMessage(
 	)
 
 	// Reset the message lease for the message in persistent storage.
-	v.storage_.ReleaseMessage(bag, message)
+	v.storage_.ReleaseMessage(bag, citation)
 }
 
 func (v *cachedStorage_) WriteEvent(
-	event not.ContractLike,
+	event not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -386,12 +335,12 @@ func (v *cachedStorage_) WriteEvent(
 
 // Private Methods
 
-func (v *cachedStorage_) cacheContract(
-	citation not.CitationLike,
-	contract not.ContractLike,
+func (v *cachedStorage_) cacheDocument(
+	citation fra.ResourceLike,
+	document not.Notarized,
 ) {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	v.cache_.SetValue(key, contract)
+	v.cache_.SetValue(key, document)
 }
 
 func (v *cachedStorage_) errorCheck(
@@ -408,22 +357,24 @@ func (v *cachedStorage_) errorCheck(
 }
 
 func (v *cachedStorage_) getCitationTag(
-	citation not.CitationLike,
+	resource fra.ResourceLike,
 ) string {
+	var citation = not.CitationFromResource(resource)
 	var tag = citation.GetTag()
 	return tag.AsString()[1:] // Remove the leading "#" character.
 }
 
 func (v *cachedStorage_) getCitationVersion(
-	citation not.CitationLike,
+	resource fra.ResourceLike,
 ) string {
+	var citation = not.CitationFromResource(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
 }
 
-func (v *cachedStorage_) lookupContract(
-	citation not.CitationLike,
-) not.ContractLike {
+func (v *cachedStorage_) lookupDocument(
+	citation fra.ResourceLike,
+) not.Notarized {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
 	return v.cache_.GetValue(key)
 }
@@ -432,7 +383,7 @@ func (v *cachedStorage_) lookupContract(
 
 type cachedStorage_ struct {
 	// Declare the instance attributes.
-	cache_   fra.CatalogLike[string, not.ContractLike]
+	cache_   fra.CatalogLike[string, not.Notarized]
 	storage_ rep.Persistent
 }
 

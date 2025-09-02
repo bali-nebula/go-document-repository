@@ -14,8 +14,8 @@ package repository
 
 import (
 	fmt "fmt"
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	doc "github.com/bali-nebula/go-document-notation/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 	stc "strconv"
@@ -62,33 +62,21 @@ func (v *documentRepository_) GetClass() DocumentRepositoryClassLike {
 }
 
 func (v *documentRepository_) SaveCertificate(
-	certificate not.ContractLike,
-) not.CitationLike {
+	certificate not.CertificateLike,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to save a certificate document.",
 	)
 
 	// Write the certificate document out to document storage.
-	var citation = v.storage_.WriteCertificate(certificate)
+	var citation = v.storage_.WriteDocument(certificate)
 	return citation
 }
 
-func (v *documentRepository_) RetrieveCertificate(
-	certificate not.CitationLike,
-) not.ContractLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to retrieve a certificate document.",
-	)
-
-	// Read the certificate document from document storage.
-	return v.storage_.ReadCertificate(certificate)
-}
-
 func (v *documentRepository_) SaveDraft(
-	draft not.DraftLike,
-) not.CitationLike {
+	draft not.Parameterized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to save a draft document.",
@@ -100,19 +88,19 @@ func (v *documentRepository_) SaveDraft(
 }
 
 func (v *documentRepository_) RetrieveDraft(
-	draft not.CitationLike,
-) not.DraftLike {
+	citation fra.ResourceLike,
+) not.Parameterized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a draft document.",
 	)
 
 	// Read the draft document from document storage.
-	return v.storage_.ReadDraft(draft)
+	return v.storage_.ReadDraft(citation)
 }
 
 func (v *documentRepository_) DiscardDraft(
-	draft not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -120,21 +108,20 @@ func (v *documentRepository_) DiscardDraft(
 	)
 
 	// Delete the draft document from document storage.
-	v.storage_.DeleteDraft(draft)
+	v.storage_.DeleteDraft(citation)
 }
 
-func (v *documentRepository_) NotarizeDraft(
-	name string,
-	draft not.DraftLike,
-) not.ContractLike {
+func (v *documentRepository_) NotarizeDocument(
+	name fra.ResourceLike,
+	draft not.Parameterized,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a draft document.",
 	)
 
 	// Make sure the name of the document is unique.
-	var resource = fra.ResourceFromString(name)
-	if v.storage_.CitationExists(resource) {
+	if v.storage_.CitationExists(name) {
 		var message = fmt.Sprintf(
 			"Attempted to notarize a draft document using an existing name: %v",
 			name,
@@ -146,72 +133,70 @@ func (v *documentRepository_) NotarizeDraft(
 	var contract = v.notary_.NotarizeDraft(draft)
 
 	// Write the notarized contract out to document storage.
-	var citation = v.storage_.WriteContract(contract)
+	var citation = v.storage_.WriteDocument(contract)
 
 	// Write the citation to the contract out to document storage.
-	v.storage_.WriteCitation(resource, citation)
+	v.storage_.WriteCitation(name, citation)
 	return contract
 }
 
-func (v *documentRepository_) RetrieveContract(
-	contract string,
-) not.ContractLike {
+func (v *documentRepository_) RetrieveDocument(
+	name fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a contract document.",
 	)
 
 	// Make sure the name of the contract document exists.
-	var resource = fra.ResourceFromString(contract)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(name)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to retrieve a non-existent contract with name: %v",
-			contract,
+			name,
 		)
 		panic(message)
 	}
 
 	// Read the contract document from document storage.
-	return v.storage_.ReadContract(citation)
+	return v.storage_.ReadDocument(citation)
 }
 
-func (v *documentRepository_) CheckoutDraft(
-	contract string,
-	level int,
-) not.DraftLike {
+func (v *documentRepository_) CheckoutDocument(
+	name fra.ResourceLike,
+	level uti.Cardinal,
+) not.Parameterized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to checkout a draft document.",
 	)
 
 	// Make sure the name of the contract document exists.
-	var resource = fra.ResourceFromString(contract)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(name)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to checkout a non-existent contract with name: %v",
-			contract,
+			name,
 		)
 		panic(message)
 	}
 
 	// Read the contract document from document storage.
-	var draft = v.storage_.ReadContract(citation).GetDraft()
+	var draft = v.storage_.ReadDocument(citation).GetContent()
 
 	// Create a draft copy of the contract document with an updated version.
-	var component = draft.GetComponent()
+	var entity = draft.GetEntity()
 	var type_ = draft.GetType()
 	var tag = draft.GetTag()
 	var version = draft.GetVersion()
-	var permissions = draft.GetPermissions()
-	var previous = citation
 	var nextVersion = fra.VersionClass().GetNextVersion(
 		version,
 		uti.Ordinal(level),
 	)
+	var permissions = draft.GetPermissions()
+	var previous = citation
 	draft = not.Draft(
-		component,
+		entity,
 		type_,
 		tag,
 		nextVersion,
@@ -222,10 +207,10 @@ func (v *documentRepository_) CheckoutDraft(
 }
 
 func (v *documentRepository_) CreateBag(
-	name string,
-	permissions string,
-	capacity int,
-	leasetime int,
+	name fra.ResourceLike,
+	permissions fra.ResourceLike,
+	capacity uti.Cardinal,
+	leasetime uti.Cardinal,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -234,13 +219,13 @@ func (v *documentRepository_) CreateBag(
 
 	// Create a new message bag.
 	var source = `[
-    $capacity: ` + stc.Itoa(capacity) + `
-    $leasetime: ` + stc.Itoa(leasetime) + `
+    $capacity: ` + stc.Itoa(int(capacity)) + `
+    $leasetime: ` + stc.Itoa(int(leasetime)) + `
 ](
     $type: <bali:/types/documents/Bag:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
     $version: v1
-    $permissions: ` + permissions + `
+    $permissions: ` + permissions.AsString() + `
 )`
 	var draft = not.DraftFromString(source)
 
@@ -251,12 +236,11 @@ func (v *documentRepository_) CreateBag(
 	var citation = v.storage_.WriteBag(bag)
 
 	// Write the citation to the message bag out to document storage.
-	var resource = fra.ResourceFromString(name)
-	v.storage_.WriteCitation(resource, citation)
+	v.storage_.WriteCitation(name, citation)
 }
 
 func (v *documentRepository_) RemoveBag(
-	bag string,
+	name fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -264,12 +248,11 @@ func (v *documentRepository_) RemoveBag(
 	)
 
 	// Make sure the name of the message bag exists.
-	var resource = fra.ResourceFromString(bag)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(name)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to delete a non-existent message bag with name: %v",
-			bag,
+			name,
 		)
 		panic(message)
 	}
@@ -278,20 +261,19 @@ func (v *documentRepository_) RemoveBag(
 	v.storage_.DeleteBag(citation)
 
 	// Delete the citation to the message bag from document storage.
-	v.storage_.DeleteCitation(resource)
+	v.storage_.DeleteCitation(name)
 }
 
 func (v *documentRepository_) MessageCount(
-	bag string,
-) int {
+	bag fra.ResourceLike,
+) uti.Cardinal {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to calculate the message count.",
 	)
 
 	// Make sure the name of the message bag exists.
-	var resource = fra.ResourceFromString(bag)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(bag)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to access a non-existent message bag with name: %v",
@@ -305,8 +287,8 @@ func (v *documentRepository_) MessageCount(
 }
 
 func (v *documentRepository_) SendMessage(
-	bag string,
-	content doc.DocumentLike,
+	bag fra.ResourceLike,
+	message doc.ItemsLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -314,19 +296,17 @@ func (v *documentRepository_) SendMessage(
 	)
 
 	// Create the new message.
-	var source = `[
-    $bag: ` + bag + `
-    $content: ` + doc.FormatDocument(content) + `](
+	var source = doc.FormatComponent(message) + `(
     $type: <bali:/types/documents/Message:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
     $version: v1
-	$permissions: <bali:/permissions/Public:v3>
+	$permissions: <bali:/permissions/public:v3>
 )`
 	var draft = not.DraftFromString(source)
+	draft.SetObject(bag, fra.Symbol("bag"))
 
 	// Make sure the name of the message bag exists.
-	var resource = fra.ResourceFromString(bag)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(bag)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to send a message to a non-existent bag with name: %v",
@@ -343,16 +323,15 @@ func (v *documentRepository_) SendMessage(
 }
 
 func (v *documentRepository_) RetrieveMessage(
-	bag string,
-) not.ContractLike {
+	bag fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
 
 	// Make sure the name of the message bag exists.
-	var resource = fra.ResourceFromString(bag)
-	var citation = v.storage_.ReadCitation(resource)
+	var citation = v.storage_.ReadCitation(bag)
 	if uti.IsUndefined(citation) {
 		var message = fmt.Sprintf(
 			"Attempted to retrieve a message from a non-existent bag with name: %v",
@@ -366,7 +345,7 @@ func (v *documentRepository_) RetrieveMessage(
 }
 
 func (v *documentRepository_) AcceptMessage(
-	message not.ContractLike,
+	message not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -374,21 +353,21 @@ func (v *documentRepository_) AcceptMessage(
 	)
 
 	// Extract the bag citation from the message.
-	var draft = message.GetDraft()
-	var source = draft.AsString()
-	var document = doc.ParseSource(source)
-	var bag = v.extractBag(document)
-	var bagCitation = v.storage_.ReadCitation(bag)
+	var content = message.GetContent()
+	var bag = content.GetObject(fra.Symbol("bag"))
+	var component = bag.GetComponent()
+	var name = component.GetEntity().(fra.ResourceLike)
+	var bagCitation = v.storage_.ReadCitation(name)
 
 	// Generate a message citation for the message.
-	var messageCitation = v.notary_.CiteDraft(draft)
+	var messageCitation = v.notary_.CiteDraft(content)
 
 	// Delete the message from the message bag in document storage.
 	v.storage_.DeleteMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) RejectMessage(
-	message not.ContractLike,
+	message not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -396,23 +375,21 @@ func (v *documentRepository_) RejectMessage(
 	)
 
 	// Extract the bag citation from the message.
-	var draft = message.GetDraft()
-	var source = draft.AsString()
-	var document = doc.ParseSource(source)
-	var bag = v.extractBag(document)
-	var bagCitation = v.storage_.ReadCitation(bag)
+	var content = message.GetContent()
+	var bag = content.GetObject(fra.Symbol("bag"))
+	var component = bag.GetComponent()
+	var name = component.GetEntity().(fra.ResourceLike)
+	var bagCitation = v.storage_.ReadCitation(name)
 
 	// Generate a message citation for the message.
-	var messageCitation = v.notary_.CiteDraft(draft)
+	var messageCitation = v.notary_.CiteDraft(content)
 
 	// Reset the message lease in the message bag in document storage.
 	v.storage_.ReleaseMessage(bagCitation, messageCitation)
 }
 
 func (v *documentRepository_) PublishEvent(
-	kind string,
-	content doc.DocumentLike,
-	permissions string,
+	event doc.ItemsLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -420,13 +397,11 @@ func (v *documentRepository_) PublishEvent(
 	)
 
 	// Create the new event.
-	var source = `[
-    $kind: ` + kind + `
-    $content: ` + doc.FormatDocument(content) + `](
+	var source = doc.FormatComponent(event) + `(
     $type: <bali:/types/documents/Event:v3>
     $tag: ` + fra.TagWithSize(20).AsString() + `
     $version: v1
-	$permissions: ` + permissions + `
+	$permissions: <bali:/permissions/public:v3>
 )`
 	var draft = not.DraftFromString(source)
 
@@ -454,20 +429,6 @@ func (v *documentRepository_) errorCheck(
 		)
 		panic(message)
 	}
-}
-
-func (v *documentRepository_) extractBag(
-	document doc.DocumentLike,
-) fra.ResourceLike {
-	var bag fra.ResourceLike
-	var key = doc.Primitive(doc.Element("$bag"))
-	document = doc.GetAttribute(document, key)
-	if uti.IsDefined(document) {
-		var source = doc.FormatDocument(document)
-		source = source[:len(source)-1] // Remove the trailing newline.
-		bag = fra.ResourceFromString(source)
-	}
-	return bag
 }
 
 // Instance Structure

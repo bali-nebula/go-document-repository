@@ -78,7 +78,7 @@ func (v *validatedStorage_) CitationExists(
 
 func (v *validatedStorage_) ReadCitation(
 	name fra.ResourceLike,
-) not.CitationLike {
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a document citation.",
@@ -90,7 +90,7 @@ func (v *validatedStorage_) ReadCitation(
 
 func (v *validatedStorage_) WriteCitation(
 	name fra.ResourceLike,
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -114,7 +114,7 @@ func (v *validatedStorage_) DeleteCitation(
 }
 
 func (v *validatedStorage_) DraftExists(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -126,8 +126,8 @@ func (v *validatedStorage_) DraftExists(
 }
 
 func (v *validatedStorage_) ReadDraft(
-	citation not.CitationLike,
-) not.DraftLike {
+	citation fra.ResourceLike,
+) not.Parameterized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a draft document.",
@@ -147,8 +147,8 @@ func (v *validatedStorage_) ReadDraft(
 }
 
 func (v *validatedStorage_) WriteDraft(
-	draft not.DraftLike,
-) not.CitationLike {
+	draft not.Parameterized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a draft document.",
@@ -159,7 +159,7 @@ func (v *validatedStorage_) WriteDraft(
 }
 
 func (v *validatedStorage_) DeleteDraft(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -170,127 +170,65 @@ func (v *validatedStorage_) DeleteDraft(
 	v.storage_.DeleteDraft(citation)
 }
 
-func (v *validatedStorage_) CertificateExists(
-	citation not.CitationLike,
+func (v *validatedStorage_) DocumentExists(
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while checking to see if a certificate document exists.",
+		"An error occurred while checking to see if a notarized document exists.",
 	)
 
-	// Determine if the certificate document exists in validated storage.
-	return v.storage_.CertificateExists(citation)
+	// Determine if the notarized document exists in validated storage.
+	return v.storage_.DocumentExists(citation)
 }
 
-func (v *validatedStorage_) ReadCertificate(
-	citation not.CitationLike,
-) not.ContractLike {
+func (v *validatedStorage_) ReadDocument(
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to read a certificate document.",
+		"An error occurred while attempting to read a notarized document.",
 	)
 
-	// Attempt to read the certificate document from validated storage.
-	var contract = v.storage_.ReadCertificate(citation)
-	var draft = contract.GetDraft()
+	// Attempt to read the notarized document from validated storage.
+	var document = v.storage_.ReadDocument(citation)
+	var draft = v.storage_.ReadCertificate(document.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, certificate) {
+	if !v.notary_.SignatureMatches(document, certificate) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the cited certificate document: %s%s",
+			"The certificate does not match the cited notarized document: %s%s",
 			certificate.AsString(),
-			contract.AsString(),
+			document.AsString(),
 		)
 		panic(message)
 	}
-	return contract
+	return document
 }
 
-func (v *validatedStorage_) WriteCertificate(
-	contract not.ContractLike,
-) not.CitationLike {
+func (v *validatedStorage_) WriteDocument(
+	document not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
-		"An error occurred while attempting to write a certificate document.",
+		"An error occurred while attempting to write a notarized document.",
 	)
 
-	// Write the certificate document to persistent storage.
-	var draft = contract.GetDraft()
+	// Write the notarized document to persistent storage.
+	var draft = v.storage_.ReadCertificate(document.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
-	var previous = certificate.GetOptionalPrevious()
-	if uti.IsDefined(previous) {
-		draft = v.storage_.ReadCertificate(previous).GetDraft()
-		certificate = not.CertificateFromString(draft.AsString())
-	}
-	if !v.notary_.SignatureMatches(contract, certificate) {
+	if !v.notary_.SignatureMatches(document, certificate) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the certificate document: %s%s",
+			"The certificate does not match the notarized document: %s%s",
 			certificate.AsString(),
-			contract.AsString(),
+			document.AsString(),
 		)
 		panic(message)
 	}
-	return v.storage_.WriteCertificate(contract)
-}
-
-func (v *validatedStorage_) ContractExists(
-	citation not.CitationLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a contract document exists.",
-	)
-
-	// Determine if the contract document exists in validated storage.
-	return v.storage_.ContractExists(citation)
-}
-
-func (v *validatedStorage_) ReadContract(
-	citation not.CitationLike,
-) not.ContractLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a contract document.",
-	)
-
-	// Attempt to read the contract document from validated storage.
-	var contract = v.storage_.ReadContract(citation)
-	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
-	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, certificate) {
-		var message = fmt.Sprintf(
-			"The certificate does not match the cited contract document: %s%s",
-			certificate.AsString(),
-			contract.AsString(),
-		)
-		panic(message)
-	}
-	return contract
-}
-
-func (v *validatedStorage_) WriteContract(
-	contract not.ContractLike,
-) not.CitationLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a contract document.",
-	)
-
-	// Write the contract document to persistent storage.
-	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
-	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, certificate) {
-		var message = fmt.Sprintf(
-			"The certificate does not match the contract document: %s%s",
-			certificate.AsString(),
-			contract.AsString(),
-		)
-		panic(message)
-	}
-	return v.storage_.WriteContract(contract)
+	return v.storage_.WriteDocument(document)
 }
 
 func (v *validatedStorage_) BagExists(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -298,35 +236,35 @@ func (v *validatedStorage_) BagExists(
 	)
 
 	// Determine whether or not the message bag exists.
-	return v.storage_.BagExists(bag)
+	return v.storage_.BagExists(citation)
 }
 
 func (v *validatedStorage_) ReadBag(
-	bag not.CitationLike,
-) not.ContractLike {
+	citation fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message bag.",
 	)
 
 	// Read the message bag from persistent storage.
-	var contract = v.storage_.ReadContract(bag)
-	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
+	var bag = v.storage_.ReadDocument(citation)
+	var draft = v.storage_.ReadCertificate(bag.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, certificate) {
+	if !v.notary_.SignatureMatches(bag, certificate) {
 		var message = fmt.Sprintf(
 			"The certificate does not match the cited bag: %s%s",
 			certificate.AsString(),
-			contract.AsString(),
+			bag.AsString(),
 		)
 		panic(message)
 	}
-	return contract
+	return bag
 }
 
 func (v *validatedStorage_) WriteBag(
-	bag not.ContractLike,
-) not.CitationLike {
+	bag not.Notarized,
+) fra.ResourceLike {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to write a message bag.",
@@ -347,7 +285,7 @@ func (v *validatedStorage_) WriteBag(
 }
 
 func (v *validatedStorage_) DeleteBag(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -355,12 +293,12 @@ func (v *validatedStorage_) DeleteBag(
 	)
 
 	// Delete the bag and any remaining messages.
-	v.storage_.DeleteBag(bag)
+	v.storage_.DeleteBag(citation)
 }
 
 func (v *validatedStorage_) MessageCount(
-	bag not.CitationLike,
-) int {
+	bag fra.ResourceLike,
+) uti.Cardinal {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while counting the messages in a message bag.",
@@ -371,31 +309,31 @@ func (v *validatedStorage_) MessageCount(
 }
 
 func (v *validatedStorage_) ReadMessage(
-	bag not.CitationLike,
-) not.ContractLike {
+	bag fra.ResourceLike,
+) not.Notarized {
 	// Check for any errors at the end.
 	defer v.errorCheck(
 		"An error occurred while attempting to read a message from a message bag.",
 	)
 
 	// Read a random message from persistent storage.
-	var contract = v.storage_.ReadMessage(bag)
-	var draft = v.storage_.ReadCertificate(contract.GetCertificate()).GetDraft()
+	var message = v.storage_.ReadMessage(bag)
+	var draft = v.storage_.ReadCertificate(message.GetCertificate()).GetDraft()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, certificate) {
+	if !v.notary_.SignatureMatches(message, certificate) {
 		var message = fmt.Sprintf(
 			"The certificate does not match the returned message: %s%s",
 			certificate.AsString(),
-			contract.AsString(),
+			message.AsString(),
 		)
 		panic(message)
 	}
-	return contract
+	return message
 }
 
 func (v *validatedStorage_) WriteMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
+	bag fra.ResourceLike,
+	message not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -417,8 +355,8 @@ func (v *validatedStorage_) WriteMessage(
 }
 
 func (v *validatedStorage_) DeleteMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -426,12 +364,12 @@ func (v *validatedStorage_) DeleteMessage(
 	)
 
 	// Delete the message from the message bag in persistent storage.
-	v.storage_.DeleteMessage(bag, message)
+	v.storage_.DeleteMessage(bag, citation)
 }
 
 func (v *validatedStorage_) ReleaseMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(
@@ -439,11 +377,11 @@ func (v *validatedStorage_) ReleaseMessage(
 	)
 
 	// Reset the message lease for the message in persistent storage.
-	v.storage_.ReleaseMessage(bag, message)
+	v.storage_.ReleaseMessage(bag, citation)
 }
 
 func (v *validatedStorage_) WriteEvent(
-	event not.ContractLike,
+	event not.Notarized,
 ) {
 	// Check for any errors at the end.
 	defer v.errorCheck(

@@ -72,15 +72,15 @@ func (v *remoteStorage_) CitationExists(
 
 func (v *remoteStorage_) ReadCitation(
 	name fra.ResourceLike,
-) not.CitationLike {
-	var result_ not.CitationLike
+) fra.ResourceLike {
+	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteCitation(
 	name fra.ResourceLike,
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
@@ -92,7 +92,7 @@ func (v *remoteStorage_) DeleteCitation(
 }
 
 func (v *remoteStorage_) DraftExists(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -100,77 +100,53 @@ func (v *remoteStorage_) DraftExists(
 }
 
 func (v *remoteStorage_) ReadDraft(
-	citation not.CitationLike,
-) not.DraftLike {
-	var result_ not.DraftLike
+	citation fra.ResourceLike,
+) not.Parameterized {
+	var result_ not.Parameterized
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteDraft(
-	draft not.DraftLike,
-) not.CitationLike {
-	var result_ not.CitationLike
+	draft not.Parameterized,
+) fra.ResourceLike {
+	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) DeleteDraft(
-	citation not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) CertificateExists(
-	citation not.CitationLike,
+func (v *remoteStorage_) DocumentExists(
+	citation fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) ReadCertificate(
-	citation not.CitationLike,
-) not.ContractLike {
-	var result_ not.ContractLike
+func (v *remoteStorage_) ReadDocument(
+	citation fra.ResourceLike,
+) not.Notarized {
+	var result_ not.Notarized
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) WriteCertificate(
-	certificate not.ContractLike,
-) not.CitationLike {
-	var result_ not.CitationLike
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) ContractExists(
-	citation not.CitationLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) ReadContract(
-	citation not.CitationLike,
-) not.ContractLike {
-	var result_ not.ContractLike
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) WriteContract(
-	contract not.ContractLike,
-) not.CitationLike {
-	var result_ not.CitationLike
+func (v *remoteStorage_) WriteDocument(
+	document not.Notarized,
+) fra.ResourceLike {
+	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) BagExists(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) bool {
 	var result_ bool
 	// TBD - Add the method implementation.
@@ -178,66 +154,66 @@ func (v *remoteStorage_) BagExists(
 }
 
 func (v *remoteStorage_) ReadBag(
-	bag not.CitationLike,
-) not.ContractLike {
-	var result_ not.ContractLike
+	citation fra.ResourceLike,
+) not.Notarized {
+	var result_ not.Notarized
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteBag(
-	bag not.ContractLike,
-) not.CitationLike {
-	var result_ not.CitationLike
+	bag not.Notarized,
+) fra.ResourceLike {
+	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) DeleteBag(
-	bag not.CitationLike,
+	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) MessageCount(
-	bag not.CitationLike,
-) int {
-	var result_ int
+	bag fra.ResourceLike,
+) uti.Cardinal {
+	var result_ uti.Cardinal
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) ReadMessage(
-	bag not.CitationLike,
-) not.ContractLike {
-	var result_ not.ContractLike
+	bag fra.ResourceLike,
+) not.Notarized {
+	var result_ not.Notarized
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteMessage(
-	bag not.CitationLike,
-	message not.ContractLike,
+	bag fra.ResourceLike,
+	message not.Notarized,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) DeleteMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) ReleaseMessage(
-	bag not.CitationLike,
-	message not.CitationLike,
+	bag fra.ResourceLike,
+	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) WriteEvent(
-	event not.ContractLike,
+	event not.Notarized,
 ) {
 	// TBD - Add the method implementation.
 }

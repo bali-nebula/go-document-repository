@@ -32,9 +32,10 @@ on interfaces, not on each other.
 package repository
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	doc "github.com/bali-nebula/go-document-notation/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
+	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // TYPE DECLARATIONS
@@ -67,60 +68,55 @@ type DocumentRepositoryLike interface {
 	// Principal Methods
 	GetClass() DocumentRepositoryClassLike
 	SaveCertificate(
-		certificate not.ContractLike,
-	) not.CitationLike
-	RetrieveCertificate(
-		citation not.CitationLike,
-	) not.ContractLike
+		certificate not.CertificateLike,
+	) fra.ResourceLike
 	SaveDraft(
-		draft not.DraftLike,
-	) not.CitationLike
+		draft not.Parameterized,
+	) fra.ResourceLike
 	RetrieveDraft(
-		draft not.CitationLike,
-	) not.DraftLike
+		citation fra.ResourceLike,
+	) not.Parameterized
 	DiscardDraft(
-		draft not.CitationLike,
+		citation fra.ResourceLike,
 	)
-	NotarizeDraft(
-		name string,
-		draft not.DraftLike,
-	) not.ContractLike
-	RetrieveContract(
-		contract string,
-	) not.ContractLike
-	CheckoutDraft(
-		contract string,
-		level int,
-	) not.DraftLike
+	NotarizeDocument(
+		name fra.ResourceLike,
+		draft not.Parameterized,
+	) not.Notarized
+	RetrieveDocument(
+		name fra.ResourceLike,
+	) not.Notarized
+	CheckoutDocument(
+		name fra.ResourceLike,
+		level uti.Cardinal,
+	) not.Parameterized
 	CreateBag(
-		name string,
-		permissions string,
-		capacity int,
-		leasetime int,
+		name fra.ResourceLike,
+		permissions fra.ResourceLike,
+		capacity uti.Cardinal,
+		leasetime uti.Cardinal,
 	)
 	RemoveBag(
-		bag string,
+		name fra.ResourceLike,
 	)
 	MessageCount(
-		bag string,
-	) int
+		bag fra.ResourceLike,
+	) uti.Cardinal
 	SendMessage(
-		bag string,
-		content doc.DocumentLike,
+		bag fra.ResourceLike,
+		message doc.ItemsLike,
 	)
 	RetrieveMessage(
-		bag string,
-	) not.ContractLike
+		bag fra.ResourceLike,
+	) not.Notarized
 	AcceptMessage(
-		message not.ContractLike,
+		message not.Notarized,
 	)
 	RejectMessage(
-		message not.ContractLike,
+		message not.Notarized,
 	)
 	PublishEvent(
-		kind string,
-		content doc.DocumentLike,
-		permissions string,
+		event doc.ItemsLike,
 	)
 }
 
@@ -136,75 +132,66 @@ type Persistent interface {
 	) bool
 	ReadCitation(
 		name fra.ResourceLike,
-	) not.CitationLike
+	) fra.ResourceLike
 	WriteCitation(
 		name fra.ResourceLike,
-		citation not.CitationLike,
+		citation fra.ResourceLike,
 	)
 	DeleteCitation(
 		name fra.ResourceLike,
 	)
 	DraftExists(
-		draft not.CitationLike,
+		citation fra.ResourceLike,
 	) bool
 	ReadDraft(
-		draft not.CitationLike,
-	) not.DraftLike
+		citation fra.ResourceLike,
+	) not.Parameterized
 	WriteDraft(
-		draft not.DraftLike,
-	) not.CitationLike
+		draft not.Parameterized,
+	) fra.ResourceLike
 	DeleteDraft(
-		draft not.CitationLike,
+		citation fra.ResourceLike,
 	)
-	CertificateExists(
-		certificate not.CitationLike,
+	DocumentExists(
+		citation fra.ResourceLike,
 	) bool
-	ReadCertificate(
-		certificate not.CitationLike,
-	) not.ContractLike
-	WriteCertificate(
-		certificate not.ContractLike,
-	) not.CitationLike
-	ContractExists(
-		contract not.CitationLike,
-	) bool
-	ReadContract(
-		contract not.CitationLike,
-	) not.ContractLike
-	WriteContract(
-		contract not.ContractLike,
-	) not.CitationLike
+	ReadDocument(
+		citation fra.ResourceLike,
+	) not.Notarized
+	WriteDocument(
+		document not.Notarized,
+	) fra.ResourceLike
 	BagExists(
-		bag not.CitationLike,
+		citation fra.ResourceLike,
 	) bool
 	ReadBag(
-		bag not.CitationLike,
-	) not.ContractLike
+		citation fra.ResourceLike,
+	) not.Notarized
 	WriteBag(
-		bag not.ContractLike,
-	) not.CitationLike
+		bag not.Notarized,
+	) fra.ResourceLike
 	DeleteBag(
-		bag not.CitationLike,
+		citation fra.ResourceLike,
 	)
 	MessageCount(
-		bag not.CitationLike,
-	) int
+		bag fra.ResourceLike,
+	) uti.Cardinal
 	ReadMessage(
-		bag not.CitationLike,
-	) not.ContractLike
+		bag fra.ResourceLike,
+	) not.Notarized
 	WriteMessage(
-		bag not.CitationLike,
-		message not.ContractLike,
+		bag fra.ResourceLike,
+		message not.Notarized,
 	)
 	DeleteMessage(
-		bag not.CitationLike,
-		message not.CitationLike,
+		bag fra.ResourceLike,
+		citation fra.ResourceLike,
 	)
 	ReleaseMessage(
-		bag not.CitationLike,
-		message not.CitationLike,
+		bag fra.ResourceLike,
+		citation fra.ResourceLike,
 	)
 	WriteEvent(
-		event not.ContractLike,
+		event not.Notarized,
 	)
 }
