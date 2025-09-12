@@ -192,11 +192,12 @@ func (v *validatedStorage_) ReadDocument(
 
 	// Attempt to read the notarized document from validated storage.
 	var document = v.storage_.ReadDocument(citation)
-	var draft = v.storage_.ReadCertificate(document.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(document.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(document, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(document, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the cited notarized document: %s%s",
+			"The signature does not match the cited notarized document: %s%s",
 			certificate.AsString(),
 			document.AsString(),
 		)
@@ -214,11 +215,12 @@ func (v *validatedStorage_) WriteDocument(
 	)
 
 	// Write the notarized document to persistent storage.
-	var draft = v.storage_.ReadCertificate(document.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(document.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(document, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(document, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the notarized document: %s%s",
+			"The signature does not match the cited notarized document: %s%s",
 			certificate.AsString(),
 			document.AsString(),
 		)
@@ -249,11 +251,12 @@ func (v *validatedStorage_) ReadBag(
 
 	// Read the message bag from persistent storage.
 	var bag = v.storage_.ReadDocument(citation)
-	var draft = v.storage_.ReadCertificate(bag.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(bag.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(bag, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(bag, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the cited bag: %s%s",
+			"The signature does not match the message bag: %s%s",
 			certificate.AsString(),
 			bag.AsString(),
 		)
@@ -271,11 +274,12 @@ func (v *validatedStorage_) WriteBag(
 	)
 
 	// Create the new bag.
-	var draft = v.storage_.ReadCertificate(bag.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(bag.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(bag, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(bag, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the message bag: %s%s",
+			"The signature does not match the message bag: %s%s",
 			certificate.AsString(),
 			bag.AsString(),
 		)
@@ -318,11 +322,12 @@ func (v *validatedStorage_) ReadMessage(
 
 	// Read a random message from persistent storage.
 	var message = v.storage_.ReadMessage(bag)
-	var draft = v.storage_.ReadCertificate(message.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(message.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(message, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(message, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the returned message: %s%s",
+			"The signature does not match the returned message: %s%s",
 			certificate.AsString(),
 			message.AsString(),
 		)
@@ -341,11 +346,12 @@ func (v *validatedStorage_) WriteMessage(
 	)
 
 	// Write the message to the message bag in persistent storage.
-	var draft = v.storage_.ReadCertificate(message.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(message.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(message, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(message, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the message bag: %s%s",
+			"The signature does not match the specified message: %s%s",
 			certificate.AsString(),
 			message.AsString(),
 		)
@@ -389,11 +395,12 @@ func (v *validatedStorage_) WriteEvent(
 	)
 
 	// Write the event to the notification queue in persistent storage.
-	var draft = v.storage_.ReadCertificate(event.GetCertificate()).GetDraft()
+	var draft = v.storage_.ReadDocument(event.GetSignatory()).GetContent()
 	var certificate = not.CertificateFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(event, certificate) {
+	var key = certificate.GetKey()
+	if !v.notary_.SignatureMatches(event, key) {
 		var message = fmt.Sprintf(
-			"The certificate does not match the event: %s%s",
+			"The signature does not match the specified event: %s%s",
 			certificate.AsString(),
 			event.AsString(),
 		)
