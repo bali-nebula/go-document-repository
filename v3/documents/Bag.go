@@ -22,48 +22,43 @@ import (
 
 // Access Function
 
-func EventClass() EventClassLike {
-	return eventClass()
+func BagClass() BagClassLike {
+	return bagClass()
 }
 
 // Constructor Methods
 
-func (c *eventClass_) Event(
-	entity any,
-	type_ fra.ResourceLike,
+func (c *bagClass_) Bag(
+	name fra.NameLike,
+	capacity fra.NumberLike,
+	leasetime fra.NumberLike,
 	permissions fra.ResourceLike,
-) EventLike {
-	if uti.IsUndefined(entity) {
-		panic("The \"entity\" attribute is required by this class.")
+) BagLike {
+	if uti.IsUndefined(name) {
+		panic("The \"name\" attribute is required by this class.")
 	}
-	if uti.IsUndefined(type_) {
-		panic("The \"type\" attribute is required by this class.")
+	if uti.IsUndefined(capacity) {
+		panic("The \"capacity\" attribute is required by this class.")
+	}
+	if uti.IsUndefined(leasetime) {
+		panic("The \"leasetime\" attribute is required by this class.")
 	}
 	if uti.IsUndefined(permissions) {
 		panic("The \"permissions\" attribute is required by this class.")
 	}
 	var tag = fra.TagWithSize(20)
-	var event = doc.ParseSource(
-		doc.FormatComponent(entity) + `(
-    $type: ` + type_.AsString() + `
+	var source = `[
+    $name: ` + name.AsString() + `
+    $capacity: ` + capacity.AsString() + `
+    $leasetime: ` + leasetime.AsString() + `
+](
+    $type: <bali:/types/documents/Bag:v3>
     $tag: ` + tag.AsString() + `
     $version: v1
     $permissions: ` + permissions.AsString() + `
-    $previous: none
-)`,
-	)
-	var object = event.GetObject(fra.Symbol("kind"))
-	if uti.IsUndefined(object) {
-		panic("A \"kind\" attribute is required by this class.")
-	}
-	var component = object.GetComponent()
-	switch component.GetEntity().(type) {
-	case fra.ResourceLike:
-	default:
-		panic("The \"kind\" attribute must be a named resource.")
-	}
-
-	var instance = &event_{
+)`
+	var component = doc.ParseSource(source)
+	var instance = &bag_{
 		// Initialize the instance attributes.
 
 		// Initialize the inherited aspects.
@@ -72,11 +67,11 @@ func (c *eventClass_) Event(
 	return instance
 }
 
-func (c *eventClass_) EventFromString(
+func (c *bagClass_) BagFromString(
 	source string,
-) EventLike {
+) BagLike {
 	var component = doc.ParseSource(source)
-	var instance = &event_{
+	var instance = &bag_{
 		// Initialize the instance attributes.
 
 		// Initialize the inherited aspects.
@@ -93,53 +88,65 @@ func (c *eventClass_) EventFromString(
 
 // Principal Methods
 
-func (v *event_) GetClass() EventClassLike {
-	return eventClass()
+func (v *bag_) GetClass() BagClassLike {
+	return bagClass()
 }
 
-func (v *event_) AsString() string {
+func (v *bag_) AsString() string {
 	return doc.FormatDocument(v.Declarative.(doc.ComponentLike))
 }
 
-func (v *event_) AsIntrinsic() doc.ComponentLike {
+func (v *bag_) AsIntrinsic() doc.ComponentLike {
 	return v.Declarative.(doc.ComponentLike)
 }
 
-func (v *event_) GetKind() fra.ResourceLike {
-	var component = v.GetObject(fra.Symbol("kind")).GetComponent()
-	var kind = component.GetEntity().(fra.ResourceLike)
-	return kind
+func (v *bag_) GetName() fra.NameLike {
+	var component = v.GetObject(fra.Symbol("name")).GetComponent()
+	var name = component.GetEntity().(fra.NameLike)
+	return name
+}
+
+func (v *bag_) GetCapacity() fra.NumberLike {
+	var component = v.GetObject(fra.Symbol("capacity")).GetComponent()
+	var capacity = component.GetEntity().(fra.NumberLike)
+	return capacity
+}
+
+func (v *bag_) GetLeasetime() fra.NumberLike {
+	var component = v.GetObject(fra.Symbol("leasetime")).GetComponent()
+	var leasetime = component.GetEntity().(fra.NumberLike)
+	return leasetime
 }
 
 // Attribute Methods
 
 // Parameterized Methods
 
-func (v *event_) GetEntity() any {
+func (v *bag_) GetEntity() any {
 	return v.Declarative.(doc.ComponentLike).GetEntity()
 }
 
-func (v *event_) GetType() fra.ResourceLike {
+func (v *bag_) GetType() fra.ResourceLike {
 	var component = v.GetParameter(fra.Symbol("type"))
 	return fra.ResourceFromString(doc.FormatComponent(component))
 }
 
-func (v *event_) GetTag() fra.TagLike {
+func (v *bag_) GetTag() fra.TagLike {
 	var component = v.GetParameter(fra.Symbol("tag"))
 	return fra.TagFromString(doc.FormatComponent(component))
 }
 
-func (v *event_) GetVersion() fra.VersionLike {
+func (v *bag_) GetVersion() fra.VersionLike {
 	var component = v.GetParameter(fra.Symbol("version"))
 	return fra.VersionFromString(doc.FormatComponent(component))
 }
 
-func (v *event_) GetPermissions() fra.ResourceLike {
+func (v *bag_) GetPermissions() fra.ResourceLike {
 	var component = v.GetParameter(fra.Symbol("permissions"))
 	return fra.ResourceFromString(doc.FormatComponent(component))
 }
 
-func (v *event_) GetOptionalPrevious() fra.ResourceLike {
+func (v *bag_) GetOptionalPrevious() fra.ResourceLike {
 	var previous fra.ResourceLike
 	var component = v.GetParameter(fra.Symbol("previous"))
 	var source = doc.FormatComponent(component)
@@ -155,7 +162,7 @@ func (v *event_) GetOptionalPrevious() fra.ResourceLike {
 
 // Instance Structure
 
-type event_ struct {
+type bag_ struct {
 	// Declare the instance attributes.
 
 	// Declare the inherited aspects.
@@ -164,16 +171,16 @@ type event_ struct {
 
 // Class Structure
 
-type eventClass_ struct {
+type bagClass_ struct {
 	// Declare the class constants.
 }
 
 // Class Reference
 
-func eventClass() *eventClass_ {
-	return eventClassReference_
+func bagClass() *bagClass_ {
+	return bagClassReference_
 }
 
-var eventClassReference_ = &eventClass_{
+var bagClassReference_ = &bagClass_{
 	// Initialize the class constants.
 }

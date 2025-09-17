@@ -41,20 +41,21 @@ import (
 // CLASS DECLARATIONS
 
 /*
-EventClassLike is a class interface that declares the complete set of
+BagClassLike is a class interface that declares the complete set of
 class constructors, constants and functions that must be supported by each
-concrete event-like class.
+concrete bag-like class.
 */
-type EventClassLike interface {
+type BagClassLike interface {
 	// Constructor Methods
-	Event(
-		entity any,
-		type_ fra.ResourceLike,
+	Bag(
+		name fra.NameLike,
+		capacity fra.NumberLike,
+		leasetime fra.NumberLike,
 		permissions fra.ResourceLike,
-	) EventLike
-	EventFromString(
+	) BagLike
+	BagFromString(
 		source string,
-	) EventLike
+	) BagLike
 }
 
 /*
@@ -77,16 +78,20 @@ type MessageClassLike interface {
 // INSTANCE DECLARATIONS
 
 /*
-EventLike is an instance interface that declares the complete set of
+BagLike is an instance interface that declares the complete set of
 principal, attribute and aspect methods that must be supported by each instance
-of a concrete event-like class.
+of a concrete bag-like class.
 */
-type EventLike interface {
+type BagLike interface {
 	// Principal Methods
-	GetClass() EventClassLike
+	GetClass() BagClassLike
 	AsString() string
 	AsIntrinsic() doc.ComponentLike
-	GetKind() fra.ResourceLike
+
+	// Attribute Methods
+	GetName() fra.NameLike
+	GetCapacity() fra.NumberLike
+	GetLeasetime() fra.NumberLike
 
 	// Aspect Interfaces
 	doc.Declarative
@@ -103,9 +108,16 @@ type MessageLike interface {
 	GetClass() MessageClassLike
 	AsString() string
 	AsIntrinsic() doc.ComponentLike
-	GetBag() fra.ResourceLike
+
+	// Attribute Methods
+	GetBag() fra.NameLike
+	SetBag(
+		bag fra.NameLike,
+	)
 
 	// Aspect Interfaces
 	doc.Declarative
 	not.Parameterized
 }
+
+// ASPECT DECLARATIONS

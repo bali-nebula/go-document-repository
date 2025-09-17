@@ -57,16 +57,9 @@ func (v *s3Storage_) GetClass() S3StorageClassLike {
 
 // Persistent Methods
 
-func (v *s3Storage_) CitationExists(
-	name fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
 func (v *s3Storage_) ReadCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) fra.ResourceLike {
 	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
@@ -74,22 +67,24 @@ func (v *s3Storage_) ReadCitation(
 }
 
 func (v *s3Storage_) WriteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *s3Storage_) DeleteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
-func (v *s3Storage_) DraftExists(
-	citation fra.ResourceLike,
-) bool {
-	var result_ bool
+func (v *s3Storage_) ListCitations(
+	path fra.NameLike,
+) fra.Sequential[fra.ResourceLike] {
+	var result_ fra.Sequential[fra.ResourceLike]
 	// TBD - Add the method implementation.
 	return result_
 }
@@ -116,15 +111,7 @@ func (v *s3Storage_) DeleteDraft(
 	// TBD - Add the method implementation.
 }
 
-func (v *s3Storage_) DocumentExists(
-	citation fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) ReadDocument(
+func (v *s3Storage_) ReadContract(
 	citation fra.ResourceLike,
 ) not.Notarized {
 	var result_ not.Notarized
@@ -132,83 +119,16 @@ func (v *s3Storage_) ReadDocument(
 	return result_
 }
 
-func (v *s3Storage_) WriteDocument(
-	document not.Notarized,
+func (v *s3Storage_) WriteContract(
+	contract not.Notarized,
 ) fra.ResourceLike {
 	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *s3Storage_) BagExists(
+func (v *s3Storage_) DeleteContract(
 	citation fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) ReadBag(
-	citation fra.ResourceLike,
-) not.Notarized {
-	var result_ not.Notarized
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) WriteBag(
-	bag not.Notarized,
-) fra.ResourceLike {
-	var result_ fra.ResourceLike
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) DeleteBag(
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *s3Storage_) MessageCount(
-	bag fra.ResourceLike,
-) uti.Cardinal {
-	var result_ uti.Cardinal
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) ReadMessage(
-	bag fra.ResourceLike,
-) not.Notarized {
-	var result_ not.Notarized
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *s3Storage_) WriteMessage(
-	bag fra.ResourceLike,
-	message not.Notarized,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *s3Storage_) DeleteMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *s3Storage_) ReleaseMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *s3Storage_) WriteEvent(
-	event not.Notarized,
 ) {
 	// TBD - Add the method implementation.
 }

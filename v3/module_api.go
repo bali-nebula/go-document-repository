@@ -32,12 +32,23 @@ package module
 
 import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	doc "github.com/bali-nebula/go-document-repository/v3/documents"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	sto "github.com/bali-nebula/go-document-repository/v3/storage"
 	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE ALIASES
+
+// Documents
+
+type (
+	MessageClassLike = doc.MessageClassLike
+)
+
+type (
+	MessageLike = doc.MessageLike
+)
 
 // Repository
 
@@ -56,22 +67,48 @@ type (
 // Storage
 
 type (
-	CachedStorageClassLike    = sto.CachedStorageClassLike
-	LocalStorageClassLike     = sto.LocalStorageClassLike
-	RemoteStorageClassLike    = sto.RemoteStorageClassLike
-	S3StorageClassLike        = sto.S3StorageClassLike
-	ValidatedStorageClassLike = sto.ValidatedStorageClassLike
+	CachedStorageClassLike = sto.CachedStorageClassLike
+	LocalStorageClassLike  = sto.LocalStorageClassLike
+	RemoteStorageClassLike = sto.RemoteStorageClassLike
+	S3StorageClassLike     = sto.S3StorageClassLike
+	SecureStorageClassLike = sto.SecureStorageClassLike
 )
 
 type (
-	CachedStorageLike    = sto.CachedStorageLike
-	LocalStorageLike     = sto.LocalStorageLike
-	RemoteStorageLike    = sto.RemoteStorageLike
-	S3StorageLike        = sto.S3StorageLike
-	ValidatedStorageLike = sto.ValidatedStorageLike
+	CachedStorageLike = sto.CachedStorageLike
+	LocalStorageLike  = sto.LocalStorageLike
+	RemoteStorageLike = sto.RemoteStorageLike
+	S3StorageLike     = sto.S3StorageLike
+	SecureStorageLike = sto.SecureStorageLike
 )
 
 // CLASS ACCESSORS
+
+// Documents
+
+func MessageClass() MessageClassLike {
+	return doc.MessageClass()
+}
+
+func Message(
+	entity any,
+	type_ fra.ResourceLike,
+	permissions fra.ResourceLike,
+) MessageLike {
+	return MessageClass().Message(
+		entity,
+		type_,
+		permissions,
+	)
+}
+
+func MessageFromString(
+	source string,
+) MessageLike {
+	return MessageClass().MessageFromString(
+		source,
+	)
+}
 
 // Repository
 
@@ -143,15 +180,15 @@ func S3Storage(
 	)
 }
 
-func ValidatedStorageClass() ValidatedStorageClassLike {
-	return sto.ValidatedStorageClass()
+func SecureStorageClass() SecureStorageClassLike {
+	return sto.SecureStorageClass()
 }
 
-func ValidatedStorage(
+func SecureStorage(
 	notary not.DigitalNotaryLike,
 	storage rep.Persistent,
-) ValidatedStorageLike {
-	return ValidatedStorageClass().ValidatedStorage(
+) SecureStorageLike {
+	return SecureStorageClass().SecureStorage(
 		notary,
 		storage,
 	)

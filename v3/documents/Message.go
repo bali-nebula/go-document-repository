@@ -43,7 +43,7 @@ func (c *messageClass_) Message(
 		panic("The \"permissions\" attribute is required by this class.")
 	}
 	var tag = fra.TagWithSize(20)
-	var message = doc.ParseSource(
+	var component = doc.ParseSource(
 		doc.FormatComponent(entity) + `(
     $type: ` + type_.AsString() + `
     $tag: ` + tag.AsString() + `
@@ -52,17 +52,6 @@ func (c *messageClass_) Message(
     $previous: none
 )`,
 	)
-	var object = message.GetObject(fra.Symbol("bag"))
-	if uti.IsUndefined(object) {
-		panic("A \"bag\" attribute is required by this class.")
-	}
-	var component = object.GetComponent()
-	switch component.GetEntity().(type) {
-	case fra.ResourceLike:
-	default:
-		panic("The \"bag\" attribute must be a named resource.")
-	}
-
 	var instance = &message_{
 		// Initialize the instance attributes.
 
@@ -105,13 +94,19 @@ func (v *message_) AsIntrinsic() doc.ComponentLike {
 	return v.Declarative.(doc.ComponentLike)
 }
 
-func (v *message_) GetBag() fra.ResourceLike {
+// Attribute Methods
+
+func (v *message_) GetBag() fra.NameLike {
 	var component = v.GetObject(fra.Symbol("bag")).GetComponent()
-	var bag = component.GetEntity().(fra.ResourceLike)
+	var bag = component.GetEntity().(fra.NameLike)
 	return bag
 }
 
-// Attribute Methods
+func (v *message_) SetBag(
+	bag fra.NameLike,
+) {
+	v.SetObject(bag, fra.Symbol("bag"))
+}
 
 // Parameterized Methods
 

@@ -13,7 +13,6 @@
 package storage
 
 import (
-	fmt "fmt"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	fra "github.com/craterdog/go-component-framework/v7"
@@ -60,300 +59,109 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 
 // Persistent Methods
 
-func (v *cachedStorage_) CitationExists(
-	name fra.ResourceLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a document citation exists.",
-	)
-
-	// Determine whether or not the document citation exists.
-	return v.storage_.CitationExists(name)
-}
-
 func (v *cachedStorage_) ReadCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) fra.ResourceLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a document citation.",
-	)
-
-	// Read the document citation from persistent storage.
-	return v.storage_.ReadCitation(name)
+	return v.storage_.ReadCitation(name, version)
 }
 
 func (v *cachedStorage_) WriteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 	citation fra.ResourceLike,
 ) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a document citation.",
-	)
-
-	// Write the document citation to persistent storage.
-	v.storage_.WriteCitation(name, citation)
+	v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *cachedStorage_) DeleteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to delete a document citation.",
-	)
-
-	// Delete the document citation from persistent storage.
-	v.storage_.DeleteCitation(name)
+	v.storage_.DeleteCitation(name, version)
 }
 
-func (v *cachedStorage_) DraftExists(
-	citation fra.ResourceLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a draft document exists.",
-	)
-
-	// Determine whether or not the draft document exists.
-	return v.storage_.DraftExists(citation)
+func (v *cachedStorage_) ListCitations(
+	path fra.NameLike,
+) fra.Sequential[fra.ResourceLike] {
+	return v.storage_.ListCitations(path)
 }
 
 func (v *cachedStorage_) ReadDraft(
 	citation fra.ResourceLike,
 ) not.Parameterized {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a draft document.",
-	)
-
-	// Read the draft document from persistent storage.
 	return v.storage_.ReadDraft(citation)
 }
 
 func (v *cachedStorage_) WriteDraft(
 	draft not.Parameterized,
 ) fra.ResourceLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a draft document.",
-	)
-
-	// Write the draft document to persistent storage.
 	return v.storage_.WriteDraft(draft)
 }
 
 func (v *cachedStorage_) DeleteDraft(
 	citation fra.ResourceLike,
 ) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to delete a draft document.",
-	)
-
-	// Delete the draft document from persistent storage.
 	v.storage_.DeleteDraft(citation)
 }
 
-func (v *cachedStorage_) DocumentExists(
-	citation fra.ResourceLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a notarized document exists.",
-	)
-
-	// Determine if the notarized document exists in cached storage.
-	var document = v.lookupDocument(citation)
-	if uti.IsUndefined(document) {
-		// Determine if the notarized document exists in persistent storage.
-		return v.storage_.DocumentExists(citation)
-	}
-	return true
-}
-
-func (v *cachedStorage_) ReadDocument(
+func (v *cachedStorage_) ReadContract(
 	citation fra.ResourceLike,
 ) not.Notarized {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a notarized document.",
-	)
-
 	// Attempt to read the notarized document from cached storage.
-	var document = v.lookupDocument(citation)
+	var document = v.lookupContract(citation)
 	if uti.IsUndefined(document) {
 		// Read the notarized document from persistent storage.
-		document = v.storage_.ReadDocument(citation)
+		document = v.storage_.ReadContract(citation)
 		if uti.IsDefined(document) {
-			v.cacheDocument(citation, document)
+			v.cacheContract(citation, document)
 		}
 	}
 	return document
 }
 
-func (v *cachedStorage_) WriteDocument(
-	document not.Notarized,
+func (v *cachedStorage_) WriteContract(
+	contract not.Notarized,
 ) fra.ResourceLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a notarized document.",
-	)
-
-	// Write the notarized document to persistent storage.
-	var citation = v.storage_.WriteDocument(document)
-	v.cacheDocument(citation, document)
+	var citation = v.storage_.WriteContract(contract)
+	v.cacheContract(citation, contract)
 	return citation
 }
 
-func (v *cachedStorage_) BagExists(
-	citation fra.ResourceLike,
-) bool {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while checking to see if a message bag exists.",
-	)
-
-	// Determine whether or not the message bag exists.
-	return v.storage_.BagExists(citation)
-}
-
-func (v *cachedStorage_) ReadBag(
-	citation fra.ResourceLike,
-) not.Notarized {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a message bag.",
-	)
-
-	// Read the message bag from persistent storage.
-	return v.storage_.ReadBag(citation)
-}
-
-func (v *cachedStorage_) WriteBag(
-	bag not.Notarized,
-) fra.ResourceLike {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a message bag.",
-	)
-
-	// Create the new bag.
-	return v.storage_.WriteBag(bag)
-}
-
-func (v *cachedStorage_) DeleteBag(
+func (v *cachedStorage_) DeleteContract(
 	citation fra.ResourceLike,
 ) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to delete a message bag.",
-	)
+	// Delete the notarized document from persistent storage.
+	v.storage_.DeleteContract(citation)
 
-	// Delete the bag and any remaining messages.
-	v.storage_.DeleteBag(citation)
-}
-
-func (v *cachedStorage_) MessageCount(
-	bag fra.ResourceLike,
-) uti.Cardinal {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while counting the messages in a message bag.",
-	)
-
-	// Determine the number of messages currently available in the bag.
-	return v.storage_.MessageCount(bag)
-}
-
-func (v *cachedStorage_) ReadMessage(
-	bag fra.ResourceLike,
-) not.Notarized {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to read a message from a message bag.",
-	)
-
-	// Read a random message from persistent storage.
-	return v.storage_.ReadMessage(bag)
-}
-
-func (v *cachedStorage_) WriteMessage(
-	bag fra.ResourceLike,
-	message not.Notarized,
-) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write a message to a message bag.",
-	)
-
-	// Write the message to the message bag in persistent storage.
-	v.storage_.WriteMessage(bag, message)
-}
-
-func (v *cachedStorage_) DeleteMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to delete a message from a message bag.",
-	)
-
-	// Delete the message from the message bag in persistent storage.
-	v.storage_.DeleteMessage(bag, citation)
-}
-
-func (v *cachedStorage_) ReleaseMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to reset the lease on a message.",
-	)
-
-	// Reset the message lease for the message in persistent storage.
-	v.storage_.ReleaseMessage(bag, citation)
-}
-
-func (v *cachedStorage_) WriteEvent(
-	event not.Notarized,
-) {
-	// Check for any errors at the end.
-	defer v.errorCheck(
-		"An error occurred while attempting to write an event.",
-	)
-
-	// Write the event to the notification queue in persistent storage.
-	v.storage_.WriteEvent(event)
+	// Remove the notarized document from cached storage.
+	v.uncacheContract(citation)
 }
 
 // PROTECTED INTERFACE
 
 // Private Methods
 
-func (v *cachedStorage_) cacheDocument(
+func (v *cachedStorage_) cacheContract(
 	citation fra.ResourceLike,
-	document not.Notarized,
+	contract not.Notarized,
 ) {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	v.cache_.SetValue(key, document)
+	v.cache_.SetValue(key, contract)
 }
 
-func (v *cachedStorage_) errorCheck(
-	message string,
+func (v *cachedStorage_) lookupContract(
+	citation fra.ResourceLike,
+) not.Notarized {
+	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
+	return v.cache_.GetValue(key)
+}
+
+func (v *cachedStorage_) uncacheContract(
+	citation fra.ResourceLike,
 ) {
-	if e := recover(); e != nil {
-		message = fmt.Sprintf(
-			"CachedStorage: %s:\n    %v",
-			message,
-			e,
-		)
-		panic(message)
-	}
+	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
+	v.cache_.RemoveValue(key)
 }
 
 func (v *cachedStorage_) getCitationTag(
@@ -370,13 +178,6 @@ func (v *cachedStorage_) getCitationVersion(
 	var citation = not.CitationFromResource(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
-}
-
-func (v *cachedStorage_) lookupDocument(
-	citation fra.ResourceLike,
-) not.Notarized {
-	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	return v.cache_.GetValue(key)
 }
 
 // Instance Structure

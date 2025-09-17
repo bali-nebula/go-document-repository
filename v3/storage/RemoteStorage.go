@@ -62,16 +62,9 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 
 // Persistent Methods
 
-func (v *remoteStorage_) CitationExists(
-	name fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
 func (v *remoteStorage_) ReadCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) fra.ResourceLike {
 	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
@@ -79,22 +72,24 @@ func (v *remoteStorage_) ReadCitation(
 }
 
 func (v *remoteStorage_) WriteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 	citation fra.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) DeleteCitation(
-	name fra.ResourceLike,
+	name fra.NameLike,
+	version fra.VersionLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) DraftExists(
-	citation fra.ResourceLike,
-) bool {
-	var result_ bool
+func (v *remoteStorage_) ListCitations(
+	path fra.NameLike,
+) fra.Sequential[fra.ResourceLike] {
+	var result_ fra.Sequential[fra.ResourceLike]
 	// TBD - Add the method implementation.
 	return result_
 }
@@ -121,15 +116,7 @@ func (v *remoteStorage_) DeleteDraft(
 	// TBD - Add the method implementation.
 }
 
-func (v *remoteStorage_) DocumentExists(
-	citation fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) ReadDocument(
+func (v *remoteStorage_) ReadContract(
 	citation fra.ResourceLike,
 ) not.Notarized {
 	var result_ not.Notarized
@@ -137,83 +124,16 @@ func (v *remoteStorage_) ReadDocument(
 	return result_
 }
 
-func (v *remoteStorage_) WriteDocument(
-	document not.Notarized,
+func (v *remoteStorage_) WriteContract(
+	contract not.Notarized,
 ) fra.ResourceLike {
 	var result_ fra.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
-func (v *remoteStorage_) BagExists(
+func (v *remoteStorage_) DeleteContract(
 	citation fra.ResourceLike,
-) bool {
-	var result_ bool
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) ReadBag(
-	citation fra.ResourceLike,
-) not.Notarized {
-	var result_ not.Notarized
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) WriteBag(
-	bag not.Notarized,
-) fra.ResourceLike {
-	var result_ fra.ResourceLike
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) DeleteBag(
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *remoteStorage_) MessageCount(
-	bag fra.ResourceLike,
-) uti.Cardinal {
-	var result_ uti.Cardinal
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) ReadMessage(
-	bag fra.ResourceLike,
-) not.Notarized {
-	var result_ not.Notarized
-	// TBD - Add the method implementation.
-	return result_
-}
-
-func (v *remoteStorage_) WriteMessage(
-	bag fra.ResourceLike,
-	message not.Notarized,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *remoteStorage_) DeleteMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *remoteStorage_) ReleaseMessage(
-	bag fra.ResourceLike,
-	citation fra.ResourceLike,
-) {
-	// TBD - Add the method implementation.
-}
-
-func (v *remoteStorage_) WriteEvent(
-	event not.Notarized,
 ) {
 	// TBD - Add the method implementation.
 }

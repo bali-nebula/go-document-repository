@@ -32,8 +32,8 @@ on interfaces, not on each other.
 package repository
 
 import (
-	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	doc "github.com/bali-nebula/go-document-repository/v3/documents"
 	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
@@ -80,43 +80,40 @@ type DocumentRepositoryLike interface {
 		citation fra.ResourceLike,
 	)
 	NotarizeDocument(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 		draft not.Parameterized,
 	) not.Notarized
 	RetrieveDocument(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 	) not.Notarized
 	CheckoutDocument(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 		level uti.Cardinal,
 	) not.Parameterized
 	CreateBag(
-		name fra.ResourceLike,
-		permissions fra.ResourceLike,
+		name fra.NameLike,
 		capacity uti.Cardinal,
 		leasetime uti.Cardinal,
+		permissions fra.ResourceLike,
 	)
 	RemoveBag(
-		name fra.ResourceLike,
+		name fra.NameLike,
 	)
-	MessageCount(
-		bag fra.ResourceLike,
-	) uti.Cardinal
-	SendMessage(
-		bag fra.ResourceLike,
-		message doc.ItemsLike,
+	PostMessage(
+		bag fra.NameLike,
+		message doc.MessageLike,
 	)
 	RetrieveMessage(
-		bag fra.ResourceLike,
+		bag fra.NameLike,
 	) not.Notarized
 	AcceptMessage(
 		message not.Notarized,
 	)
 	RejectMessage(
 		message not.Notarized,
-	)
-	PublishEvent(
-		event doc.ItemsLike,
 	)
 }
 
@@ -127,22 +124,22 @@ Persistent declares the set of method signatures that must be supported by all
 persistent data storage mechanisms.
 */
 type Persistent interface {
-	CitationExists(
-		name fra.ResourceLike,
-	) bool
 	ReadCitation(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 	) fra.ResourceLike
 	WriteCitation(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 		citation fra.ResourceLike,
 	)
 	DeleteCitation(
-		name fra.ResourceLike,
+		name fra.NameLike,
+		version fra.VersionLike,
 	)
-	DraftExists(
-		citation fra.ResourceLike,
-	) bool
+	ListCitations(
+		path fra.NameLike,
+	) fra.Sequential[fra.ResourceLike]
 	ReadDraft(
 		citation fra.ResourceLike,
 	) not.Parameterized
@@ -152,46 +149,13 @@ type Persistent interface {
 	DeleteDraft(
 		citation fra.ResourceLike,
 	)
-	DocumentExists(
-		citation fra.ResourceLike,
-	) bool
-	ReadDocument(
+	ReadContract(
 		citation fra.ResourceLike,
 	) not.Notarized
-	WriteDocument(
-		document not.Notarized,
+	WriteContract(
+		contract not.Notarized,
 	) fra.ResourceLike
-	BagExists(
+	DeleteContract(
 		citation fra.ResourceLike,
-	) bool
-	ReadBag(
-		citation fra.ResourceLike,
-	) not.Notarized
-	WriteBag(
-		bag not.Notarized,
-	) fra.ResourceLike
-	DeleteBag(
-		citation fra.ResourceLike,
-	)
-	MessageCount(
-		bag fra.ResourceLike,
-	) uti.Cardinal
-	ReadMessage(
-		bag fra.ResourceLike,
-	) not.Notarized
-	WriteMessage(
-		bag fra.ResourceLike,
-		message not.Notarized,
-	)
-	DeleteMessage(
-		bag fra.ResourceLike,
-		citation fra.ResourceLike,
-	)
-	ReleaseMessage(
-		bag fra.ResourceLike,
-		citation fra.ResourceLike,
-	)
-	WriteEvent(
-		event not.Notarized,
 	)
 }
