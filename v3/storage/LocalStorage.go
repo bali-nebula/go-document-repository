@@ -118,7 +118,7 @@ func (v *localStorage_) ListCitations(
 	var directory = v.getNamePath(path)
 	var filenames = uti.ReadDirectory(directory)
 	for _, filename := range filenames {
-		var source = uti.ReadFile(filename)
+		var source = uti.ReadFile(directory + filename + "/v1.bali")
 		var citation = not.CitationFromString(source)
 		citations.AppendValue(citation.AsResource())
 	}

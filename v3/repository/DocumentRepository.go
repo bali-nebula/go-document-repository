@@ -165,7 +165,7 @@ func (v *documentRepository_) CreateBag(
 	)
 	var contract = v.notary_.NotarizeDraft(bag)
 	var citation = v.storage_.WriteContract(contract)
-	var version fra.VersionLike // Bags don't have a version number.
+	var version = fra.VersionFromString("v1")
 	v.storage_.WriteCitation(name, version, citation)
 }
 
@@ -175,7 +175,7 @@ func (v *documentRepository_) RemoveBag(
 	defer v.errorCheck(
 		"An error occurred while attempting to delete a message bag.",
 	)
-	var version fra.VersionLike // Bags don't have a version number.
+	var version = fra.VersionFromString("v1")
 	var citation = v.storage_.ReadCitation(name, version)
 	v.storage_.DeleteContract(citation)
 	v.storage_.DeleteCitation(name, version)
@@ -194,7 +194,7 @@ func (v *documentRepository_) PostMessage(
 		bag,
 		fra.NameFromString("/accessible/"+message.GetTag().AsString()[1:]),
 	)
-	var version fra.VersionLike // Bags don't have a version number.
+	var version = fra.VersionFromString("v1")
 	var contract = v.notary_.NotarizeDraft(message)
 	var citation = v.storage_.WriteContract(contract)
 	v.storage_.WriteCitation(name, version, citation)
