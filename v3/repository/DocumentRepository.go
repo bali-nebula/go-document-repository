@@ -192,7 +192,7 @@ func (v *documentRepository_) PostMessage(
 	message.SetObject(bag, fra.Symbol("bag"))
 	var name = fra.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/available/"+message.GetTag().AsString()),
+		fra.NameFromString("/accessible/"+message.GetTag().AsString()[1:]),
 	)
 	var version fra.VersionLike // Bags don't have a version number.
 	var contract = v.notary_.NotarizeDraft(message)

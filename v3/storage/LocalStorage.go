@@ -71,7 +71,7 @@ func (v *localStorage_) ReadCitation(
 	name fra.NameLike,
 	version fra.VersionLike,
 ) fra.ResourceLike {
-	var filename = v.directory_ + "bali/" + name.AsString()
+	var filename = v.getNamePath(name) + v.getVersionFilename(version)
 	var source = uti.ReadFile(filename)
 	var citation = not.CitationFromString(source)
 	return citation.AsResource()
@@ -82,9 +82,9 @@ func (v *localStorage_) WriteCitation(
 	version fra.VersionLike,
 	citation fra.ResourceLike,
 ) {
-	var path = v.directory_ + "bali"
+	var path = v.getNamePath(name)
 	uti.MakeDirectory(path)
-	var filename = path + "/" + name.AsString()
+	var filename = path + v.getVersionFilename(version)
 	var source = not.CitationFromResource(citation).AsString()
 	uti.WriteFile(filename, source)
 }
@@ -94,17 +94,17 @@ func (v *localStorage_) DeleteCitation(
 	version fra.VersionLike,
 ) {
 	// Remove the citation file.
-	var root = v.directory_ + "bali"
-	var path = name.AsString()
-	uti.RemovePath(root + path)
+	var filename = v.getNamePath(name) + v.getVersionFilename(version)
+	uti.RemovePath(filename)
 
 	// Remove any empty directories in the citation path.
+	var path = v.getNamePath(name)
 	for len(path) > 0 {
-		if len(uti.ReadDirectory(root+path)) > 0 {
+		if len(uti.ReadDirectory(path)) > 0 {
 			// The directory is not empty so we are done.
 			return
 		}
-		uti.RemovePath(root + path)
+		uti.RemovePath(path)
 		var directories = sts.Split(path, "/")
 		directories = directories[:len(directories)-1] // Strip off the last one.
 		path = sts.Join(directories, "/")
@@ -115,11 +115,12 @@ func (v *localStorage_) ListCitations(
 	path fra.NameLike,
 ) fra.Sequential[fra.ResourceLike] {
 	var citations = fra.List[fra.ResourceLike]()
-	var directory = v.directory_ + "bali" + path.AsString()
+	var directory = v.getNamePath(path)
 	var filenames = uti.ReadDirectory(directory)
 	for _, filename := range filenames {
-		var source = "<bali:" + path.AsString() + filename + ">"
-		citations.AppendValue(fra.ResourceFromString(source))
+		var source = uti.ReadFile(filename)
+		var citation = not.CitationFromString(source)
+		citations.AppendValue(citation.AsResource())
 	}
 	return citations
 }
@@ -213,6 +214,18 @@ func (v *localStorage_) getCitationVersion(
 	var citation = not.CitationFromResource(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
+}
+
+func (v *localStorage_) getNamePath(
+	name fra.NameLike,
+) string {
+	return v.directory_ + "bali" + name.AsString() + "/"
+}
+
+func (v *localStorage_) getVersionFilename(
+	version fra.VersionLike,
+) string {
+	return version.AsString() + ".bali"
 }
 
 // Instance Structure
