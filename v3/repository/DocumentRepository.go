@@ -135,7 +135,7 @@ func (v *documentRepository_) CheckoutDocument(
 	var content = v.storage_.ReadContract(citation).GetContent()
 	var nextVersion = fra.VersionClass().GetNextVersion(
 		version,
-		uti.Ordinal(level), // TBD - This should be Cardinal since 0 is allowed.
+		level,
 	)
 	var draft = not.Draft(
 		content.GetEntity(),
@@ -240,9 +240,9 @@ func (v *documentRepository_) RetrieveMessage(
 		)
 		accessible = fra.NameClass().Concatenate(accessible, tag)
 		processing = fra.NameClass().Concatenate(processing, tag)
-		var none fra.VersionLike
-		v.storage_.DeleteCitation(accessible, none)
-		v.storage_.WriteCitation(processing, none, citation)
+		var version = fra.VersionFromString("v1")
+		v.storage_.DeleteCitation(accessible, version)
+		v.storage_.WriteCitation(processing, version, citation)
 		break
 	}
 	return message
@@ -256,15 +256,15 @@ func (v *documentRepository_) AcceptMessage(
 	)
 
 	// Delete the message citation from the document storage.
-	var content = message.GetContent().(doc.MessageLike)
-	var bag = content.GetBag()
-	var tag = content.GetTag()
+	var content = message.GetContent()
+	var bag = content.GetObject(fra.Symbol("bag")).GetComponent().GetEntity().(fra.NameLike)
+	var tag = content.GetTag().AsString()[1:]
 	var processing = fra.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/processing/"+tag.AsString()),
+		fra.NameFromString("/processing/"+tag),
 	)
-	var none fra.VersionLike
-	v.storage_.DeleteCitation(processing, none)
+	var version = fra.VersionFromString("v1")
+	v.storage_.DeleteCitation(processing, version)
 
 	// Delete the message from the document storage.
 	var citation = v.notary_.CiteDraft(content)
@@ -277,21 +277,21 @@ func (v *documentRepository_) RejectMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to reject a retrieved  message.",
 	)
-	var content = message.GetContent().(doc.MessageLike)
-	var bag = content.GetBag()
-	var tag = content.GetTag()
+	var content = message.GetContent()
+	var bag = content.GetObject(fra.Symbol("bag")).GetComponent().GetEntity().(fra.NameLike)
+	var tag = content.GetTag().AsString()[1:]
 	var accessible = fra.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/accessible/"+tag.AsString()),
+		fra.NameFromString("/accessible/"+tag),
 	)
 	var processing = fra.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/processing/"+tag.AsString()),
+		fra.NameFromString("/processing/"+tag),
 	)
-	var none fra.VersionLike
-	v.storage_.DeleteCitation(processing, none)
+	var version = fra.VersionFromString("v1")
+	v.storage_.DeleteCitation(processing, version)
 	var citation = v.notary_.CiteDraft(content)
-	v.storage_.WriteCitation(accessible, none, citation)
+	v.storage_.WriteCitation(accessible, version, citation)
 }
 
 // Attribute Methods

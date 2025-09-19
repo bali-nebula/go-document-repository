@@ -106,7 +106,7 @@ func (v *localStorage_) DeleteCitation(
 		}
 		uti.RemovePath(path)
 		var directories = sts.Split(path, "/")
-		directories = directories[:len(directories)-1] // Strip off the last one.
+		directories = directories[:len(directories)-2] // Strip off the last one.
 		path = sts.Join(directories, "/")
 	}
 }

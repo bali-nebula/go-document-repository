@@ -13,6 +13,7 @@
 package module_test
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3"
 	fra "github.com/craterdog/go-component-framework/v7"
@@ -84,8 +85,11 @@ func TestLocalStorage(t *tes.T) {
 	repository.CreateBag(bag, 8, 10, permissions)
 
 	// Send a message to the bag.
+	var entity = doc.ParseSource(`[
+    $quote: "Hello World!"
+]`).GetEntity()
 	var message = rep.Message(
-		fra.QuoteFromString(`"Hello World!"`),
+		entity,
 		fra.ResourceFromString("<bali:/examples/Message:v1>"),
 		permissions,
 	)
