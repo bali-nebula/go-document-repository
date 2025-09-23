@@ -31,7 +31,6 @@ package documents
 import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE DECLARATIONS
@@ -48,10 +47,10 @@ concrete bag-like class.
 type BagClassLike interface {
 	// Constructor Methods
 	Bag(
-		name fra.NameLike,
-		capacity fra.NumberLike,
-		leasetime fra.NumberLike,
-		permissions fra.ResourceLike,
+		name doc.NameLike,
+		capacity doc.NumberLike,
+		leasetime doc.NumberLike,
+		permissions doc.ResourceLike,
 	) BagLike
 	BagFromString(
 		source string,
@@ -67,8 +66,8 @@ type MessageClassLike interface {
 	// Constructor Methods
 	Message(
 		entity any,
-		type_ fra.ResourceLike,
-		permissions fra.ResourceLike,
+		type_ doc.ResourceLike,
+		permissions doc.ResourceLike,
 	) MessageLike
 	MessageFromString(
 		source string,
@@ -89,9 +88,9 @@ type BagLike interface {
 	AsIntrinsic() doc.ComponentLike
 
 	// Attribute Methods
-	GetName() fra.NameLike
-	GetCapacity() fra.NumberLike
-	GetLeasetime() fra.NumberLike
+	GetName() doc.NameLike
+	GetCapacity() doc.NumberLike
+	GetLeasetime() doc.NumberLike
 
 	// Aspect Interfaces
 	doc.Declarative
@@ -110,9 +109,9 @@ type MessageLike interface {
 	AsIntrinsic() doc.ComponentLike
 
 	// Attribute Methods
-	GetBag() fra.NameLike
+	GetBag() doc.NameLike
 	SetBag(
-		bag fra.NameLike,
+		bag doc.NameLike,
 	)
 
 	// Aspect Interfaces

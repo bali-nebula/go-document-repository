@@ -29,9 +29,9 @@ on interfaces, not on each other.
 package storage
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
-	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE DECLARATIONS
@@ -74,7 +74,7 @@ type RemoteStorageClassLike interface {
 	// Constructor Methods
 	RemoteStorage(
 		notary not.DigitalNotaryLike,
-		service fra.ResourceLike,
+		service doc.ResourceLike,
 	) RemoteStorageLike
 }
 

@@ -13,8 +13,8 @@
 package storage
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -30,7 +30,7 @@ func RemoteStorageClass() RemoteStorageClassLike {
 
 func (c *remoteStorageClass_) RemoteStorage(
 	notary not.DigitalNotaryLike,
-	service fra.ResourceLike,
+	service doc.ResourceLike,
 ) RemoteStorageLike {
 	if uti.IsUndefined(notary) {
 		panic("The \"notary\" attribute is required by this class.")
@@ -63,39 +63,39 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 // Persistent Methods
 
 func (v *remoteStorage_) ReadCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-) fra.ResourceLike {
-	var result_ fra.ResourceLike
+	name doc.NameLike,
+	version doc.VersionLike,
+) doc.ResourceLike {
+	var result_ doc.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-	citation fra.ResourceLike,
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation doc.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) DeleteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
+	name doc.NameLike,
+	version doc.VersionLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) ListCitations(
-	path fra.NameLike,
-) fra.Sequential[fra.ResourceLike] {
-	var result_ fra.Sequential[fra.ResourceLike]
+	path doc.NameLike,
+) doc.Sequential[doc.ResourceLike] {
+	var result_ doc.Sequential[doc.ResourceLike]
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) ReadDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) not.Parameterized {
 	var result_ not.Parameterized
 	// TBD - Add the method implementation.
@@ -104,36 +104,36 @@ func (v *remoteStorage_) ReadDraft(
 
 func (v *remoteStorage_) WriteDraft(
 	draft not.Parameterized,
-) fra.ResourceLike {
-	var result_ fra.ResourceLike
+) doc.ResourceLike {
+	var result_ doc.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) DeleteDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
 
 func (v *remoteStorage_) ReadContract(
-	citation fra.ResourceLike,
-) not.Notarized {
-	var result_ not.Notarized
+	citation doc.ResourceLike,
+) not.ContractLike {
+	var result_ not.ContractLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) WriteContract(
-	contract not.Notarized,
-) fra.ResourceLike {
-	var result_ fra.ResourceLike
+	contract not.ContractLike,
+) doc.ResourceLike {
+	var result_ doc.ResourceLike
 	// TBD - Add the method implementation.
 	return result_
 }
 
 func (v *remoteStorage_) DeleteContract(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	// TBD - Add the method implementation.
 }
@@ -147,7 +147,7 @@ func (v *remoteStorage_) DeleteContract(
 type remoteStorage_ struct {
 	// Declare the instance attributes.
 	notary_  not.DigitalNotaryLike
-	service_ fra.ResourceLike
+	service_ doc.ResourceLike
 }
 
 // Class Structure

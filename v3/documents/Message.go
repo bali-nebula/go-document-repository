@@ -14,7 +14,6 @@ package documents
 
 import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -30,8 +29,8 @@ func MessageClass() MessageClassLike {
 
 func (c *messageClass_) Message(
 	entity any,
-	type_ fra.ResourceLike,
-	permissions fra.ResourceLike,
+	type_ doc.ResourceLike,
+	permissions doc.ResourceLike,
 ) MessageLike {
 	if uti.IsUndefined(entity) {
 		panic("The \"entity\" attribute is required by this class.")
@@ -42,12 +41,13 @@ func (c *messageClass_) Message(
 	if uti.IsUndefined(permissions) {
 		panic("The \"permissions\" attribute is required by this class.")
 	}
-	var tag = fra.TagWithSize(20)
+	var tag = doc.Tag()
+	var version = doc.Version()
 	var component = doc.ParseSource(
 		doc.FormatComponent(entity) + `(
     $type: ` + type_.AsString() + `
     $tag: ` + tag.AsString() + `
-    $version: v1
+    $version: ` + version.AsString() + `
     $permissions: ` + permissions.AsString() + `
     $previous: none
 )`,
@@ -96,16 +96,16 @@ func (v *message_) AsIntrinsic() doc.ComponentLike {
 
 // Attribute Methods
 
-func (v *message_) GetBag() fra.NameLike {
-	var component = v.GetObject(fra.Symbol("bag")).GetComponent()
-	var bag = component.GetEntity().(fra.NameLike)
+func (v *message_) GetBag() doc.NameLike {
+	var component = v.GetObject(doc.Symbol("bag")).GetComponent()
+	var bag = component.GetEntity().(doc.NameLike)
 	return bag
 }
 
 func (v *message_) SetBag(
-	bag fra.NameLike,
+	bag doc.NameLike,
 ) {
-	v.SetObject(bag, fra.Symbol("bag"))
+	v.SetObject(bag, doc.Symbol("bag"))
 }
 
 // Parameterized Methods
@@ -114,32 +114,32 @@ func (v *message_) GetEntity() any {
 	return v.Declarative.(doc.ComponentLike).GetEntity()
 }
 
-func (v *message_) GetType() fra.ResourceLike {
-	var component = v.GetParameter(fra.Symbol("type"))
-	return fra.ResourceFromString(doc.FormatComponent(component))
+func (v *message_) GetType() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("type"))
+	return doc.Resource(doc.FormatComponent(component))
 }
 
-func (v *message_) GetTag() fra.TagLike {
-	var component = v.GetParameter(fra.Symbol("tag"))
-	return fra.TagFromString(doc.FormatComponent(component))
+func (v *message_) GetTag() doc.TagLike {
+	var component = v.GetParameter(doc.Symbol("tag"))
+	return doc.Tag(doc.FormatComponent(component))
 }
 
-func (v *message_) GetVersion() fra.VersionLike {
-	var component = v.GetParameter(fra.Symbol("version"))
-	return fra.VersionFromString(doc.FormatComponent(component))
+func (v *message_) GetVersion() doc.VersionLike {
+	var component = v.GetParameter(doc.Symbol("version"))
+	return doc.Version(doc.FormatComponent(component))
 }
 
-func (v *message_) GetPermissions() fra.ResourceLike {
-	var component = v.GetParameter(fra.Symbol("permissions"))
-	return fra.ResourceFromString(doc.FormatComponent(component))
+func (v *message_) GetPermissions() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("permissions"))
+	return doc.Resource(doc.FormatComponent(component))
 }
 
-func (v *message_) GetOptionalPrevious() fra.ResourceLike {
-	var previous fra.ResourceLike
-	var component = v.GetParameter(fra.Symbol("previous"))
+func (v *message_) GetOptionalPrevious() doc.ResourceLike {
+	var previous doc.ResourceLike
+	var component = v.GetParameter(doc.Symbol("previous"))
 	var source = doc.FormatComponent(component)
 	if source != "none" {
-		previous = fra.ResourceFromString(source)
+		previous = doc.Resource(source)
 	}
 	return previous
 }

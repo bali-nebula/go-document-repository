@@ -14,7 +14,6 @@ package documents
 
 import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -29,10 +28,10 @@ func BagClass() BagClassLike {
 // Constructor Methods
 
 func (c *bagClass_) Bag(
-	name fra.NameLike,
-	capacity fra.NumberLike,
-	leasetime fra.NumberLike,
-	permissions fra.ResourceLike,
+	name doc.NameLike,
+	capacity doc.NumberLike,
+	leasetime doc.NumberLike,
+	permissions doc.ResourceLike,
 ) BagLike {
 	if uti.IsUndefined(name) {
 		panic("The \"name\" attribute is required by this class.")
@@ -46,7 +45,8 @@ func (c *bagClass_) Bag(
 	if uti.IsUndefined(permissions) {
 		panic("The \"permissions\" attribute is required by this class.")
 	}
-	var tag = fra.TagWithSize(20)
+	var tag = doc.Tag()
+	var version = doc.Version()
 	var source = `[
     $name: ` + name.AsString() + `
     $capacity: ` + capacity.AsString() + `
@@ -54,7 +54,7 @@ func (c *bagClass_) Bag(
 ](
     $type: <bali:/types/documents/Bag:v3>
     $tag: ` + tag.AsString() + `
-    $version: v1
+    $version: ` + version.AsString() + `
     $permissions: ` + permissions.AsString() + `
 )`
 	var component = doc.ParseSource(source)
@@ -100,21 +100,21 @@ func (v *bag_) AsIntrinsic() doc.ComponentLike {
 	return v.Declarative.(doc.ComponentLike)
 }
 
-func (v *bag_) GetName() fra.NameLike {
-	var component = v.GetObject(fra.Symbol("name")).GetComponent()
-	var name = component.GetEntity().(fra.NameLike)
+func (v *bag_) GetName() doc.NameLike {
+	var component = v.GetObject(doc.Symbol("name")).GetComponent()
+	var name = component.GetEntity().(doc.NameLike)
 	return name
 }
 
-func (v *bag_) GetCapacity() fra.NumberLike {
-	var component = v.GetObject(fra.Symbol("capacity")).GetComponent()
-	var capacity = component.GetEntity().(fra.NumberLike)
+func (v *bag_) GetCapacity() doc.NumberLike {
+	var component = v.GetObject(doc.Symbol("capacity")).GetComponent()
+	var capacity = component.GetEntity().(doc.NumberLike)
 	return capacity
 }
 
-func (v *bag_) GetLeasetime() fra.NumberLike {
-	var component = v.GetObject(fra.Symbol("leasetime")).GetComponent()
-	var leasetime = component.GetEntity().(fra.NumberLike)
+func (v *bag_) GetLeasetime() doc.NumberLike {
+	var component = v.GetObject(doc.Symbol("leasetime")).GetComponent()
+	var leasetime = component.GetEntity().(doc.NumberLike)
 	return leasetime
 }
 
@@ -126,32 +126,32 @@ func (v *bag_) GetEntity() any {
 	return v.Declarative.(doc.ComponentLike).GetEntity()
 }
 
-func (v *bag_) GetType() fra.ResourceLike {
-	var component = v.GetParameter(fra.Symbol("type"))
-	return fra.ResourceFromString(doc.FormatComponent(component))
+func (v *bag_) GetType() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("type"))
+	return doc.Resource(doc.FormatComponent(component))
 }
 
-func (v *bag_) GetTag() fra.TagLike {
-	var component = v.GetParameter(fra.Symbol("tag"))
-	return fra.TagFromString(doc.FormatComponent(component))
+func (v *bag_) GetTag() doc.TagLike {
+	var component = v.GetParameter(doc.Symbol("tag"))
+	return doc.Tag(doc.FormatComponent(component))
 }
 
-func (v *bag_) GetVersion() fra.VersionLike {
-	var component = v.GetParameter(fra.Symbol("version"))
-	return fra.VersionFromString(doc.FormatComponent(component))
+func (v *bag_) GetVersion() doc.VersionLike {
+	var component = v.GetParameter(doc.Symbol("version"))
+	return doc.Version(doc.FormatComponent(component))
 }
 
-func (v *bag_) GetPermissions() fra.ResourceLike {
-	var component = v.GetParameter(fra.Symbol("permissions"))
-	return fra.ResourceFromString(doc.FormatComponent(component))
+func (v *bag_) GetPermissions() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("permissions"))
+	return doc.Resource(doc.FormatComponent(component))
 }
 
-func (v *bag_) GetOptionalPrevious() fra.ResourceLike {
-	var previous fra.ResourceLike
-	var component = v.GetParameter(fra.Symbol("previous"))
+func (v *bag_) GetOptionalPrevious() doc.ResourceLike {
+	var previous doc.ResourceLike
+	var component = v.GetParameter(doc.Symbol("previous"))
 	var source = doc.FormatComponent(component)
 	if source != "none" {
-		previous = fra.ResourceFromString(source)
+		previous = doc.Resource(source)
 	}
 	return previous
 }

@@ -13,9 +13,9 @@
 package storage
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -37,7 +37,7 @@ func (c *cachedStorageClass_) CachedStorage(
 	}
 	var instance = &cachedStorage_{
 		// Initialize the instance attributes.
-		cache_:   fra.Catalog[string, not.Notarized](),
+		cache_:   doc.Catalog[string, not.ContractLike](),
 		storage_: storage,
 	}
 	return instance
@@ -60,54 +60,54 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 // Persistent Methods
 
 func (v *cachedStorage_) ReadCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-) fra.ResourceLike {
+	name doc.NameLike,
+	version doc.VersionLike,
+) doc.ResourceLike {
 	return v.storage_.ReadCitation(name, version)
 }
 
 func (v *cachedStorage_) WriteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-	citation fra.ResourceLike,
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation doc.ResourceLike,
 ) {
 	v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *cachedStorage_) DeleteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
+	name doc.NameLike,
+	version doc.VersionLike,
 ) {
 	v.storage_.DeleteCitation(name, version)
 }
 
 func (v *cachedStorage_) ListCitations(
-	path fra.NameLike,
-) fra.Sequential[fra.ResourceLike] {
+	path doc.NameLike,
+) doc.Sequential[doc.ResourceLike] {
 	return v.storage_.ListCitations(path)
 }
 
 func (v *cachedStorage_) ReadDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) not.Parameterized {
 	return v.storage_.ReadDraft(citation)
 }
 
 func (v *cachedStorage_) WriteDraft(
 	draft not.Parameterized,
-) fra.ResourceLike {
+) doc.ResourceLike {
 	return v.storage_.WriteDraft(draft)
 }
 
 func (v *cachedStorage_) DeleteDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	v.storage_.DeleteDraft(citation)
 }
 
 func (v *cachedStorage_) ReadContract(
-	citation fra.ResourceLike,
-) not.Notarized {
+	citation doc.ResourceLike,
+) not.ContractLike {
 	// Attempt to read the notarized document from cached storage.
 	var document = v.lookupContract(citation)
 	if uti.IsUndefined(document) {
@@ -121,15 +121,15 @@ func (v *cachedStorage_) ReadContract(
 }
 
 func (v *cachedStorage_) WriteContract(
-	contract not.Notarized,
-) fra.ResourceLike {
+	contract not.ContractLike,
+) doc.ResourceLike {
 	var citation = v.storage_.WriteContract(contract)
 	v.cacheContract(citation, contract)
 	return citation
 }
 
 func (v *cachedStorage_) DeleteContract(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	// Delete the notarized document from persistent storage.
 	v.storage_.DeleteContract(citation)
@@ -143,39 +143,39 @@ func (v *cachedStorage_) DeleteContract(
 // Private Methods
 
 func (v *cachedStorage_) cacheContract(
-	citation fra.ResourceLike,
-	contract not.Notarized,
+	citation doc.ResourceLike,
+	contract not.ContractLike,
 ) {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
 	v.cache_.SetValue(key, contract)
 }
 
 func (v *cachedStorage_) lookupContract(
-	citation fra.ResourceLike,
-) not.Notarized {
+	citation doc.ResourceLike,
+) not.ContractLike {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
 	return v.cache_.GetValue(key)
 }
 
 func (v *cachedStorage_) uncacheContract(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
 	v.cache_.RemoveValue(key)
 }
 
 func (v *cachedStorage_) getCitationTag(
-	resource fra.ResourceLike,
+	resource doc.ResourceLike,
 ) string {
-	var citation = not.CitationFromResource(resource)
+	var citation = not.Citation(resource)
 	var tag = citation.GetTag()
 	return tag.AsString()[1:] // Remove the leading "#" character.
 }
 
 func (v *cachedStorage_) getCitationVersion(
-	resource fra.ResourceLike,
+	resource doc.ResourceLike,
 ) string {
-	var citation = not.CitationFromResource(resource)
+	var citation = not.Citation(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
 }
@@ -184,7 +184,7 @@ func (v *cachedStorage_) getCitationVersion(
 
 type cachedStorage_ struct {
 	// Declare the instance attributes.
-	cache_   fra.CatalogLike[string, not.Notarized]
+	cache_   doc.CatalogLike[string, not.ContractLike]
 	storage_ rep.Persistent
 }
 

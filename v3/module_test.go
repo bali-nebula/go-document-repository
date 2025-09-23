@@ -16,7 +16,6 @@ import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 	ass "github.com/stretchr/testify/assert"
 	tes "testing"
@@ -38,19 +37,25 @@ func TestLocalStorage(t *tes.T) {
 	var repository = rep.DocumentRepository(notary, storage)
 
 	// Save the certificate.
-	var citation = repository.SaveCertificate(certificate)
-	ass.Equal(t, citation.AsString(), notary.GetCitation().AsString())
-	certificate = notary.RefreshKey()
+	var content = certificate.GetContent()
+	var citation = notary.CiteDocument(content)
+	ass.True(t, notary.CitationMatches(citation, content))
 	citation = repository.SaveCertificate(certificate)
-	ass.Equal(t, citation.AsString(), notary.GetCitation().AsString())
+	ass.True(t, notary.CitationMatches(citation, content))
+	certificate = notary.RefreshKey()
+	content = certificate.GetContent()
+	citation = notary.CiteDocument(content)
+	ass.True(t, notary.CitationMatches(citation, content))
+	citation = repository.SaveCertificate(certificate)
+	ass.True(t, notary.CitationMatches(citation, content))
 
 	// Save a draft document.
-	var component = fra.AngleFromString("~pi")
-	var type_ = fra.ResourceFromString("<bali:/examples/Angle:v1>")
-	var tag = fra.TagWithSize(20)
-	var version = fra.VersionFromString("v1.2.3")
-	var permissions = fra.ResourceFromString("<bali:/permissions/Public:v1>")
-	var previous fra.ResourceLike
+	var component = doc.Angle("~pi")
+	var type_ = doc.Resource("<bali:/examples/Angle:v1>")
+	var tag = doc.Tag()
+	var version = doc.Version("v1.2.3")
+	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	var previous doc.ResourceLike
 	var draft not.Parameterized = not.Draft(
 		component,
 		type_,
@@ -69,7 +74,7 @@ func TestLocalStorage(t *tes.T) {
 	repository.DiscardDraft(citation)
 
 	// Create a notarized contract document.
-	var name = fra.NameFromString("/examples/Contract")
+	var name = doc.Name("/examples/Contract")
 	var contract = repository.NotarizeDocument(name, version, draft)
 	var same2 = repository.RetrieveDocument(name, version)
 	ass.Equal(t, contract.AsString(), same2.AsString())
@@ -77,11 +82,11 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, same2.AsString(), same3.AsString())
 
 	// Checkout a new draft of the contract document.
-	draft = repository.CheckoutDocument(name, version, uti.Cardinal(2))
+	draft = repository.CheckoutDocument(name, version, uint(2))
 	ass.NotEqual(t, draft.AsString(), same.AsString())
 
 	// Create a new message bag.
-	var bag = fra.NameFromString("/examples/Bag")
+	var bag = doc.Name("/examples/Bag")
 	repository.CreateBag(bag, 8, 10, permissions)
 
 	// Send a message to the bag.
@@ -90,7 +95,7 @@ func TestLocalStorage(t *tes.T) {
 ]`).GetEntity()
 	var message = rep.Message(
 		entity,
-		fra.ResourceFromString("<bali:/examples/Message:v1>"),
+		doc.Resource("<bali:/examples/Message:v1>"),
 		permissions,
 	)
 	repository.PostMessage(bag, message)

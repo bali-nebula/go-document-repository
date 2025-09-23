@@ -14,9 +14,9 @@ package storage
 
 import (
 	fmt "fmt"
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -65,35 +65,35 @@ func (v *secureStorage_) GetClass() SecureStorageClassLike {
 // Persistent Methods
 
 func (v *secureStorage_) ReadCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-) fra.ResourceLike {
+	name doc.NameLike,
+	version doc.VersionLike,
+) doc.ResourceLike {
 	return v.storage_.ReadCitation(name, version)
 }
 
 func (v *secureStorage_) WriteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-	citation fra.ResourceLike,
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation doc.ResourceLike,
 ) {
 	v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *secureStorage_) DeleteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
+	name doc.NameLike,
+	version doc.VersionLike,
 ) {
 	v.storage_.DeleteCitation(name, version)
 }
 
 func (v *secureStorage_) ListCitations(
-	path fra.NameLike,
-) fra.Sequential[fra.ResourceLike] {
+	path doc.NameLike,
+) doc.Sequential[doc.ResourceLike] {
 	return v.storage_.ListCitations(path)
 }
 
 func (v *secureStorage_) ReadDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) not.Parameterized {
 	var draft = v.storage_.ReadDraft(citation)
 	if !v.notary_.CitationMatches(citation, draft) {
@@ -109,33 +109,33 @@ func (v *secureStorage_) ReadDraft(
 
 func (v *secureStorage_) WriteDraft(
 	draft not.Parameterized,
-) fra.ResourceLike {
+) doc.ResourceLike {
 	return v.storage_.WriteDraft(draft)
 }
 
 func (v *secureStorage_) DeleteDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	v.storage_.DeleteDraft(citation)
 }
 
 func (v *secureStorage_) ReadContract(
-	citation fra.ResourceLike,
-) not.Notarized {
+	citation doc.ResourceLike,
+) not.ContractLike {
 	var document = v.storage_.ReadContract(citation)
 	v.validateContract(document)
 	return document
 }
 
 func (v *secureStorage_) WriteContract(
-	contract not.Notarized,
-) fra.ResourceLike {
+	contract not.ContractLike,
+) doc.ResourceLike {
 	v.validateContract(contract)
 	return v.storage_.WriteContract(contract)
 }
 
 func (v *secureStorage_) DeleteContract(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	v.storage_.DeleteContract(citation)
 }
@@ -145,22 +145,21 @@ func (v *secureStorage_) DeleteContract(
 // Private Methods
 
 func (v *secureStorage_) validateContract(
-	contract not.Notarized,
+	contract not.ContractLike,
 ) {
 	// Retrieve the citation to the certificate that signed the document.
-	var signatory = contract.GetSignatory()
+	var notary = contract.GetNotary()
 	var draft = contract.GetContent()
-	var citation = v.notary_.CiteDraft(draft)
-	if signatory.AsString() != citation.AsString() {
+	if !v.notary_.CitationMatches(notary, draft) {
 		// Not self-signed, read the certificate that signed the document.
-		draft = v.storage_.ReadContract(signatory).GetContent()
+		draft = v.storage_.ReadContract(notary).GetContent()
 	}
-	var key = not.KeyFromString(draft.AsString())
-	if !v.notary_.SignatureMatches(contract, key) {
+	var certificate = not.Certificate(draft.AsString())
+	if !v.notary_.SealMatches(contract, certificate) {
 		var message = fmt.Sprintf(
 			"The cited certificate was not used to notarize the document: %s%s",
-			key.AsString(),
 			contract.AsString(),
+			certificate.AsString(),
 		)
 		panic(message)
 	}

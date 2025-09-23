@@ -31,11 +31,11 @@ For detailed documentation on this entire module refer to the wiki:
 package module
 
 import (
+	bal "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	doc "github.com/bali-nebula/go-document-repository/v3/documents"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	sto "github.com/bali-nebula/go-document-repository/v3/storage"
-	fra "github.com/craterdog/go-component-framework/v7"
 )
 
 // TYPE ALIASES
@@ -92,8 +92,8 @@ func MessageClass() MessageClassLike {
 
 func Message(
 	entity any,
-	type_ fra.ResourceLike,
-	permissions fra.ResourceLike,
+	type_ bal.ResourceLike,
+	permissions bal.ResourceLike,
 ) MessageLike {
 	return MessageClass().Message(
 		entity,
@@ -160,7 +160,7 @@ func RemoteStorageClass() RemoteStorageClassLike {
 
 func RemoteStorage(
 	notary not.DigitalNotaryLike,
-	service fra.ResourceLike,
+	service bal.ResourceLike,
 ) RemoteStorageLike {
 	return RemoteStorageClass().RemoteStorage(
 		notary,

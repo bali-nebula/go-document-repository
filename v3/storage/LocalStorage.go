@@ -13,8 +13,8 @@
 package storage
 
 import (
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 	sts "strings"
 )
@@ -68,30 +68,30 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 // Persistent Methods
 
 func (v *localStorage_) ReadCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-) fra.ResourceLike {
+	name doc.NameLike,
+	version doc.VersionLike,
+) doc.ResourceLike {
 	var filename = v.getNamePath(name) + v.getVersionFilename(version)
 	var source = uti.ReadFile(filename)
-	var citation = not.CitationFromString(source)
+	var citation = not.Citation(source)
 	return citation.AsResource()
 }
 
 func (v *localStorage_) WriteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
-	citation fra.ResourceLike,
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation doc.ResourceLike,
 ) {
 	var path = v.getNamePath(name)
 	uti.MakeDirectory(path)
 	var filename = path + v.getVersionFilename(version)
-	var source = not.CitationFromResource(citation).AsString()
+	var source = not.Citation(citation).AsString()
 	uti.WriteFile(filename, source)
 }
 
 func (v *localStorage_) DeleteCitation(
-	name fra.NameLike,
-	version fra.VersionLike,
+	name doc.NameLike,
+	version doc.VersionLike,
 ) {
 	// Remove the citation file.
 	var filename = v.getNamePath(name) + v.getVersionFilename(version)
@@ -112,33 +112,33 @@ func (v *localStorage_) DeleteCitation(
 }
 
 func (v *localStorage_) ListCitations(
-	path fra.NameLike,
-) fra.Sequential[fra.ResourceLike] {
-	var citations = fra.List[fra.ResourceLike]()
+	path doc.NameLike,
+) doc.Sequential[doc.ResourceLike] {
+	var citations = doc.List[doc.ResourceLike]()
 	var directory = v.getNamePath(path)
 	var filenames = uti.ReadDirectory(directory)
 	for _, filename := range filenames {
 		var source = uti.ReadFile(directory + filename + "/v1.bali")
-		var citation = not.CitationFromString(source)
+		var citation = not.Citation(source)
 		citations.AppendValue(citation.AsResource())
 	}
 	return citations
 }
 
 func (v *localStorage_) ReadDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) not.Parameterized {
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	var filename = path + v.getCitationVersion(citation) + ".bali"
 	var source = uti.ReadFile(filename)
-	var draft = not.DraftFromString(source)
+	var draft = not.Draft(source)
 	return draft
 }
 
 func (v *localStorage_) WriteDraft(
 	draft not.Parameterized,
-) fra.ResourceLike {
-	var citation = v.notary_.CiteDraft(draft)
+) doc.ResourceLike {
+	var citation = v.notary_.CiteDocument(draft)
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	uti.MakeDirectory(path)
 	var filename = path + v.getCitationVersion(citation) + ".bali"
@@ -148,7 +148,7 @@ func (v *localStorage_) WriteDraft(
 }
 
 func (v *localStorage_) DeleteDraft(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	var filename = path + v.getCitationVersion(citation) + ".bali"
@@ -161,20 +161,20 @@ func (v *localStorage_) DeleteDraft(
 }
 
 func (v *localStorage_) ReadContract(
-	citation fra.ResourceLike,
-) not.Notarized {
+	citation doc.ResourceLike,
+) not.ContractLike {
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	var filename = path + v.getCitationVersion(citation) + ".bali"
 	var source = uti.ReadFile(filename)
-	var document = not.ContractFromString(source)
+	var document = not.Contract(source)
 	return document
 }
 
 func (v *localStorage_) WriteContract(
-	contract not.Notarized,
-) fra.ResourceLike {
+	contract not.ContractLike,
+) doc.ResourceLike {
 	var content = contract.GetContent()
-	var citation = v.notary_.CiteDraft(content)
+	var citation = v.notary_.CiteDocument(content)
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	uti.MakeDirectory(path)
 	var filename = path + v.getCitationVersion(citation) + ".bali"
@@ -184,7 +184,7 @@ func (v *localStorage_) WriteContract(
 }
 
 func (v *localStorage_) DeleteContract(
-	citation fra.ResourceLike,
+	citation doc.ResourceLike,
 ) {
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	var filename = path + v.getCitationVersion(citation) + ".bali"
@@ -201,29 +201,29 @@ func (v *localStorage_) DeleteContract(
 // Private Methods
 
 func (v *localStorage_) getCitationTag(
-	resource fra.ResourceLike,
+	resource doc.ResourceLike,
 ) string {
-	var citation = not.CitationFromResource(resource)
+	var citation = not.Citation(resource)
 	var tag = citation.GetTag()
 	return tag.AsString()[1:] // Remove the leading "#" character.
 }
 
 func (v *localStorage_) getCitationVersion(
-	resource fra.ResourceLike,
+	resource doc.ResourceLike,
 ) string {
-	var citation = not.CitationFromResource(resource)
+	var citation = not.Citation(resource)
 	var version = citation.GetVersion()
 	return version.AsString()
 }
 
 func (v *localStorage_) getNamePath(
-	name fra.NameLike,
+	name doc.NameLike,
 ) string {
 	return v.directory_ + "bali" + name.AsString() + "/"
 }
 
 func (v *localStorage_) getVersionFilename(
-	version fra.VersionLike,
+	version doc.VersionLike,
 ) string {
 	return version.AsString() + ".bali"
 }

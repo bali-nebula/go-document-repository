@@ -32,10 +32,9 @@ on interfaces, not on each other.
 package repository
 
 import (
+	bal "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	doc "github.com/bali-nebula/go-document-repository/v3/documents"
-	fra "github.com/craterdog/go-component-framework/v7"
-	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
 // TYPE DECLARATIONS
@@ -68,52 +67,52 @@ type DocumentRepositoryLike interface {
 	// Principal Methods
 	GetClass() DocumentRepositoryClassLike
 	SaveCertificate(
-		certificate not.CertificateLike,
-	) fra.ResourceLike
+		certificate not.ContractLike,
+	) bal.ResourceLike
 	SaveDraft(
 		draft not.Parameterized,
-	) fra.ResourceLike
+	) bal.ResourceLike
 	RetrieveDraft(
-		citation fra.ResourceLike,
+		citation bal.ResourceLike,
 	) not.Parameterized
 	DiscardDraft(
-		citation fra.ResourceLike,
+		citation bal.ResourceLike,
 	)
 	NotarizeDocument(
-		name fra.NameLike,
-		version fra.VersionLike,
+		name bal.NameLike,
+		version bal.VersionLike,
 		draft not.Parameterized,
-	) not.Notarized
+	) not.ContractLike
 	RetrieveDocument(
-		name fra.NameLike,
-		version fra.VersionLike,
-	) not.Notarized
+		name bal.NameLike,
+		version bal.VersionLike,
+	) not.ContractLike
 	CheckoutDocument(
-		name fra.NameLike,
-		version fra.VersionLike,
-		level uti.Cardinal,
+		name bal.NameLike,
+		version bal.VersionLike,
+		level uint,
 	) not.Parameterized
 	CreateBag(
-		name fra.NameLike,
-		capacity uti.Cardinal,
-		leasetime uti.Cardinal,
-		permissions fra.ResourceLike,
+		name bal.NameLike,
+		capacity uint,
+		leasetime uint,
+		permissions bal.ResourceLike,
 	)
 	RemoveBag(
-		name fra.NameLike,
+		name bal.NameLike,
 	)
 	PostMessage(
-		bag fra.NameLike,
+		bag bal.NameLike,
 		message doc.MessageLike,
 	)
 	RetrieveMessage(
-		bag fra.NameLike,
-	) not.Notarized
+		bag bal.NameLike,
+	) not.ContractLike
 	AcceptMessage(
-		message not.Notarized,
+		message not.ContractLike,
 	)
 	RejectMessage(
-		message not.Notarized,
+		message not.ContractLike,
 	)
 }
 
@@ -125,37 +124,37 @@ persistent data storage mechanisms.
 */
 type Persistent interface {
 	ReadCitation(
-		name fra.NameLike,
-		version fra.VersionLike,
-	) fra.ResourceLike
+		name bal.NameLike,
+		version bal.VersionLike,
+	) bal.ResourceLike
 	WriteCitation(
-		name fra.NameLike,
-		version fra.VersionLike,
-		citation fra.ResourceLike,
+		name bal.NameLike,
+		version bal.VersionLike,
+		citation bal.ResourceLike,
 	)
 	DeleteCitation(
-		name fra.NameLike,
-		version fra.VersionLike,
+		name bal.NameLike,
+		version bal.VersionLike,
 	)
 	ListCitations(
-		path fra.NameLike,
-	) fra.Sequential[fra.ResourceLike]
+		path bal.NameLike,
+	) bal.Sequential[bal.ResourceLike]
 	ReadDraft(
-		citation fra.ResourceLike,
+		citation bal.ResourceLike,
 	) not.Parameterized
 	WriteDraft(
 		draft not.Parameterized,
-	) fra.ResourceLike
+	) bal.ResourceLike
 	DeleteDraft(
-		citation fra.ResourceLike,
+		citation bal.ResourceLike,
 	)
 	ReadContract(
-		citation fra.ResourceLike,
-	) not.Notarized
+		citation bal.ResourceLike,
+	) not.ContractLike
 	WriteContract(
-		contract not.Notarized,
-	) fra.ResourceLike
+		contract not.ContractLike,
+	) bal.ResourceLike
 	DeleteContract(
-		citation fra.ResourceLike,
+		citation bal.ResourceLike,
 	)
 }

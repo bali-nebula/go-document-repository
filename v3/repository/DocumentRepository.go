@@ -14,9 +14,9 @@ package repository
 
 import (
 	fmt "fmt"
+	bal "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	doc "github.com/bali-nebula/go-document-repository/v3/documents"
-	fra "github.com/craterdog/go-component-framework/v7"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -61,8 +61,8 @@ func (v *documentRepository_) GetClass() DocumentRepositoryClassLike {
 }
 
 func (v *documentRepository_) SaveCertificate(
-	certificate not.CertificateLike,
-) fra.ResourceLike {
+	certificate not.ContractLike,
+) bal.ResourceLike {
 	defer v.errorCheck(
 		"An error occurred while attempting to save a certificate document.",
 	)
@@ -72,7 +72,7 @@ func (v *documentRepository_) SaveCertificate(
 
 func (v *documentRepository_) SaveDraft(
 	draft not.Parameterized,
-) fra.ResourceLike {
+) bal.ResourceLike {
 	defer v.errorCheck(
 		"An error occurred while attempting to save a draft document.",
 	)
@@ -81,7 +81,7 @@ func (v *documentRepository_) SaveDraft(
 }
 
 func (v *documentRepository_) RetrieveDraft(
-	citation fra.ResourceLike,
+	citation bal.ResourceLike,
 ) not.Parameterized {
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a draft document.",
@@ -90,7 +90,7 @@ func (v *documentRepository_) RetrieveDraft(
 }
 
 func (v *documentRepository_) DiscardDraft(
-	citation fra.ResourceLike,
+	citation bal.ResourceLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to discard a draft document.",
@@ -99,23 +99,23 @@ func (v *documentRepository_) DiscardDraft(
 }
 
 func (v *documentRepository_) NotarizeDocument(
-	name fra.NameLike,
-	version fra.VersionLike,
+	name bal.NameLike,
+	version bal.VersionLike,
 	draft not.Parameterized,
-) not.Notarized {
+) not.ContractLike {
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a draft document.",
 	)
-	var contract = v.notary_.NotarizeDraft(draft)
+	var contract = v.notary_.NotarizeDocument(draft)
 	var citation = v.storage_.WriteContract(contract)
 	v.storage_.WriteCitation(name, version, citation)
 	return contract
 }
 
 func (v *documentRepository_) RetrieveDocument(
-	name fra.NameLike,
-	version fra.VersionLike,
-) not.Notarized {
+	name bal.NameLike,
+	version bal.VersionLike,
+) not.ContractLike {
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a contract document.",
 	)
@@ -124,16 +124,16 @@ func (v *documentRepository_) RetrieveDocument(
 }
 
 func (v *documentRepository_) CheckoutDocument(
-	name fra.NameLike,
-	version fra.VersionLike,
-	level uti.Cardinal,
+	name bal.NameLike,
+	version bal.VersionLike,
+	level uint,
 ) not.Parameterized {
 	defer v.errorCheck(
 		"An error occurred while attempting to checkout a draft document.",
 	)
 	var citation = v.storage_.ReadCitation(name, version)
 	var content = v.storage_.ReadContract(citation).GetContent()
-	var nextVersion = fra.VersionClass().GetNextVersion(
+	var nextVersion = bal.VersionClass().GetNextVersion(
 		version,
 		level,
 	)
@@ -149,82 +149,84 @@ func (v *documentRepository_) CheckoutDocument(
 }
 
 func (v *documentRepository_) CreateBag(
-	name fra.NameLike,
-	capacity uti.Cardinal,
-	leasetime uti.Cardinal,
-	permissions fra.ResourceLike,
+	name bal.NameLike,
+	capacity uint,
+	leasetime uint,
+	permissions bal.ResourceLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to create a message bag.",
 	)
 	var bag = doc.BagClass().Bag(
 		name,
-		fra.Number(complex(float64(capacity), 0)), // TBD - Need NumberFromInteger().
-		fra.Number(complex(float64(leasetime), 0)),
+		bal.Number(float64(capacity)),
+		bal.Number(float64(leasetime)),
 		permissions,
 	)
-	var contract = v.notary_.NotarizeDraft(bag)
+	var contract = v.notary_.NotarizeDocument(bag)
 	var citation = v.storage_.WriteContract(contract)
-	var version = fra.VersionFromString("v1")
+	var version = bal.Version()
 	v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *documentRepository_) RemoveBag(
-	name fra.NameLike,
+	name bal.NameLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to delete a message bag.",
 	)
-	var version = fra.VersionFromString("v1")
+	var version = bal.Version()
 	var citation = v.storage_.ReadCitation(name, version)
 	v.storage_.DeleteContract(citation)
 	v.storage_.DeleteCitation(name, version)
 }
 
 func (v *documentRepository_) PostMessage(
-	bag fra.NameLike,
+	bag bal.NameLike,
 	message doc.MessageLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to send a message via a bag.",
 	)
 	// TBD - Add checks for bag capacity violations.
-	message.SetObject(bag, fra.Symbol("bag"))
-	var name = fra.NameClass().Concatenate(
+	message.SetObject(bag, bal.Symbol("bag"))
+	var name = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/accessible/"+message.GetTag().AsString()[1:]),
+		bal.Name("/accessible/"+message.GetTag().AsString()[1:]),
 	)
-	var version = fra.VersionFromString("v1")
-	var contract = v.notary_.NotarizeDraft(message)
+	var version = bal.Version()
+	var contract = v.notary_.NotarizeDocument(message)
 	var citation = v.storage_.WriteContract(contract)
 	v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *documentRepository_) RetrieveMessage(
-	bag fra.NameLike,
-) not.Notarized {
+	bag bal.NameLike,
+) not.ContractLike {
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
-	var accessible = fra.NameClass().Concatenate(
+	var accessible = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/accessible"),
+		bal.Name("/accessible"),
 	)
-	var processing = fra.NameClass().Concatenate(
+	var processing = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/processing"),
+		bal.Name("/processing"),
 	)
-	var message not.Notarized
+	var message not.ContractLike
 	for retries := 0; retries < 8; retries++ {
-		var citations = fra.ListFromSequence(v.storage_.ListCitations(accessible))
+		var citations = bal.List[bal.ResourceLike](
+			v.storage_.ListCitations(accessible),
+		)
 		if citations.IsEmpty() {
 			// There are no messages currently in the bag.
 			continue
 		}
 
 		// Select a message from the bag at random.
-		var size = uti.Ordinal(citations.GetSize())
-		var index = uti.Index(fra.Generator().RandomOrdinal(size))
+		var size = citations.GetSize()
+		var index = int(bal.Generator().RandomOrdinal(size))
 		var citation = citations.GetValue(index)
 
 		// Read the message.
@@ -235,12 +237,12 @@ func (v *documentRepository_) RetrieveMessage(
 		}
 
 		// Move the message citation from accessible to processing.
-		var tag = fra.NameFromString(
+		var tag = bal.Name(
 			"/" + message.GetContent().GetTag().AsString()[1:],
 		)
-		accessible = fra.NameClass().Concatenate(accessible, tag)
-		processing = fra.NameClass().Concatenate(processing, tag)
-		var version = fra.VersionFromString("v1")
+		accessible = bal.NameClass().Concatenate(accessible, tag)
+		processing = bal.NameClass().Concatenate(processing, tag)
+		var version = bal.Version()
 		v.storage_.DeleteCitation(accessible, version)
 		v.storage_.WriteCitation(processing, version, citation)
 		break
@@ -249,7 +251,7 @@ func (v *documentRepository_) RetrieveMessage(
 }
 
 func (v *documentRepository_) AcceptMessage(
-	message not.Notarized,
+	message not.ContractLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to accept a processed message.",
@@ -257,40 +259,44 @@ func (v *documentRepository_) AcceptMessage(
 
 	// Delete the message citation from the document storage.
 	var content = message.GetContent()
-	var bag = content.GetObject(fra.Symbol("bag")).GetComponent().GetEntity().(fra.NameLike)
+	var bag = content.GetObject(
+		bal.Symbol("bag"),
+	).GetComponent().GetEntity().(bal.NameLike)
 	var tag = content.GetTag().AsString()[1:]
-	var processing = fra.NameClass().Concatenate(
+	var processing = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/processing/"+tag),
+		bal.Name("/processing/"+tag),
 	)
-	var version = fra.VersionFromString("v1")
+	var version = bal.Version()
 	v.storage_.DeleteCitation(processing, version)
 
 	// Delete the message from the document storage.
-	var citation = v.notary_.CiteDraft(content)
+	var citation = v.notary_.CiteDocument(content)
 	v.storage_.DeleteContract(citation)
 }
 
 func (v *documentRepository_) RejectMessage(
-	message not.Notarized,
+	message not.ContractLike,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to reject a retrieved  message.",
 	)
 	var content = message.GetContent()
-	var bag = content.GetObject(fra.Symbol("bag")).GetComponent().GetEntity().(fra.NameLike)
+	var bag = content.GetObject(
+		bal.Symbol("bag"),
+	).GetComponent().GetEntity().(bal.NameLike)
 	var tag = content.GetTag().AsString()[1:]
-	var accessible = fra.NameClass().Concatenate(
+	var accessible = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/accessible/"+tag),
+		bal.Name("/accessible/"+tag),
 	)
-	var processing = fra.NameClass().Concatenate(
+	var processing = bal.NameClass().Concatenate(
 		bag,
-		fra.NameFromString("/processing/"+tag),
+		bal.Name("/processing/"+tag),
 	)
-	var version = fra.VersionFromString("v1")
+	var version = bal.Version()
 	v.storage_.DeleteCitation(processing, version)
-	var citation = v.notary_.CiteDraft(content)
+	var citation = v.notary_.CiteDocument(content)
 	v.storage_.WriteCitation(accessible, version, citation)
 }
 
