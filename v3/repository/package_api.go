@@ -39,6 +39,21 @@ import (
 
 // TYPE DECLARATIONS
 
+/*
+Status is a constrained type specifying the result of a storage operation.
+*/
+type Status uint8
+
+const (
+	Unavailable Status = iota
+	Forbidden
+	Retrieved
+	Missing
+	Written
+	Deleted
+	Invalid
+)
+
 // FUNCTIONAL DECLARATIONS
 
 // CLASS DECLARATIONS
@@ -68,51 +83,84 @@ type DocumentRepositoryLike interface {
 	GetClass() DocumentRepositoryClassLike
 	SaveCertificate(
 		certificate not.ContractLike,
-	) bal.ResourceLike
+	) (
+		citation bal.ResourceLike,
+		status Status,
+	)
 	SaveDraft(
 		draft not.Parameterized,
-	) bal.ResourceLike
+	) (
+		citation bal.ResourceLike,
+		status Status,
+	)
 	RetrieveDraft(
 		citation bal.ResourceLike,
-	) not.Parameterized
+	) (
+		draft not.Parameterized,
+		status Status,
+	)
 	DiscardDraft(
 		citation bal.ResourceLike,
+	) (
+		status Status,
 	)
 	NotarizeDocument(
 		name bal.NameLike,
 		version bal.VersionLike,
 		draft not.Parameterized,
-	) not.ContractLike
+	) (
+		contract not.ContractLike,
+		status Status,
+	)
 	RetrieveDocument(
 		name bal.NameLike,
 		version bal.VersionLike,
-	) not.ContractLike
+	) (
+		contract not.ContractLike,
+		status Status,
+	)
 	CheckoutDocument(
 		name bal.NameLike,
 		version bal.VersionLike,
 		level uint,
-	) not.Parameterized
+	) (
+		draft not.Parameterized,
+		status Status,
+	)
 	CreateBag(
 		name bal.NameLike,
 		capacity uint,
 		leasetime uint,
 		permissions bal.ResourceLike,
+	) (
+		status Status,
 	)
 	RemoveBag(
 		name bal.NameLike,
+	) (
+		status Status,
 	)
 	PostMessage(
 		bag bal.NameLike,
 		message doc.MessageLike,
+	) (
+		status Status,
 	)
 	RetrieveMessage(
 		bag bal.NameLike,
-	) not.ContractLike
+	) (
+		message not.ContractLike,
+		status Status,
+	)
 	AcceptMessage(
 		message not.ContractLike,
+	) (
+		status Status,
 	)
 	RejectMessage(
 		message not.ContractLike,
+	) (
+		status Status,
 	)
 }
 
@@ -126,35 +174,61 @@ type Persistent interface {
 	ReadCitation(
 		name bal.NameLike,
 		version bal.VersionLike,
-	) bal.ResourceLike
+	) (
+		citation bal.ResourceLike,
+		status Status,
+	)
 	WriteCitation(
 		name bal.NameLike,
 		version bal.VersionLike,
 		citation bal.ResourceLike,
+	) (
+		status Status,
 	)
 	DeleteCitation(
 		name bal.NameLike,
 		version bal.VersionLike,
+	) (
+		status Status,
 	)
 	ListCitations(
 		path bal.NameLike,
-	) bal.Sequential[bal.ResourceLike]
+	) (
+		citations bal.Sequential[bal.ResourceLike],
+		status Status,
+	)
 	ReadDraft(
 		citation bal.ResourceLike,
-	) not.Parameterized
+	) (
+		draft not.Parameterized,
+		status Status,
+	)
 	WriteDraft(
 		draft not.Parameterized,
-	) bal.ResourceLike
+	) (
+		citation bal.ResourceLike,
+		status Status,
+	)
 	DeleteDraft(
 		citation bal.ResourceLike,
+	) (
+		status Status,
 	)
 	ReadContract(
 		citation bal.ResourceLike,
-	) not.ContractLike
+	) (
+		contract not.ContractLike,
+		status Status,
+	)
 	WriteContract(
 		contract not.ContractLike,
-	) bal.ResourceLike
+	) (
+		citation bal.ResourceLike,
+		status Status,
+	)
 	DeleteContract(
 		citation bal.ResourceLike,
+	) (
+		status Status,
 	)
 }

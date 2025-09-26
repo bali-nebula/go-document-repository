@@ -43,14 +43,30 @@ import (
 // Documents
 
 type (
+	BagClassLike     = doc.BagClassLike
 	MessageClassLike = doc.MessageClassLike
 )
 
 type (
+	BagLike     = doc.BagLike
 	MessageLike = doc.MessageLike
 )
 
 // Repository
+
+type (
+	Status = rep.Status
+)
+
+const (
+	Unavailable = rep.Unavailable
+	Forbidden   = rep.Forbidden
+	Retrieved   = rep.Retrieved
+	Missing     = rep.Missing
+	Written     = rep.Written
+	Deleted     = rep.Deleted
+	Invalid     = rep.Invalid
+)
 
 type (
 	DocumentRepositoryClassLike = rep.DocumentRepositoryClassLike
@@ -67,24 +83,50 @@ type (
 // Storage
 
 type (
-	CachedStorageClassLike = sto.CachedStorageClassLike
-	LocalStorageClassLike  = sto.LocalStorageClassLike
-	RemoteStorageClassLike = sto.RemoteStorageClassLike
-	S3StorageClassLike     = sto.S3StorageClassLike
-	SecureStorageClassLike = sto.SecureStorageClassLike
+	CachedStorageClassLike    = sto.CachedStorageClassLike
+	LocalStorageClassLike     = sto.LocalStorageClassLike
+	RemoteStorageClassLike    = sto.RemoteStorageClassLike
+	S3StorageClassLike        = sto.S3StorageClassLike
+	ValidatedStorageClassLike = sto.ValidatedStorageClassLike
 )
 
 type (
-	CachedStorageLike = sto.CachedStorageLike
-	LocalStorageLike  = sto.LocalStorageLike
-	RemoteStorageLike = sto.RemoteStorageLike
-	S3StorageLike     = sto.S3StorageLike
-	SecureStorageLike = sto.SecureStorageLike
+	CachedStorageLike    = sto.CachedStorageLike
+	LocalStorageLike     = sto.LocalStorageLike
+	RemoteStorageLike    = sto.RemoteStorageLike
+	S3StorageLike        = sto.S3StorageLike
+	ValidatedStorageLike = sto.ValidatedStorageLike
 )
 
 // CLASS ACCESSORS
 
 // Documents
+
+func BagClass() BagClassLike {
+	return doc.BagClass()
+}
+
+func Bag(
+	name bal.NameLike,
+	capacity bal.NumberLike,
+	leasetime bal.NumberLike,
+	permissions bal.ResourceLike,
+) BagLike {
+	return BagClass().Bag(
+		name,
+		capacity,
+		leasetime,
+		permissions,
+	)
+}
+
+func BagFromString(
+	source string,
+) BagLike {
+	return BagClass().BagFromString(
+		source,
+	)
+}
 
 func MessageClass() MessageClassLike {
 	return doc.MessageClass()
@@ -180,15 +222,15 @@ func S3Storage(
 	)
 }
 
-func SecureStorageClass() SecureStorageClassLike {
-	return sto.SecureStorageClass()
+func ValidatedStorageClass() ValidatedStorageClassLike {
+	return sto.ValidatedStorageClass()
 }
 
-func SecureStorage(
+func ValidatedStorage(
 	notary not.DigitalNotaryLike,
 	storage rep.Persistent,
-) SecureStorageLike {
-	return SecureStorageClass().SecureStorage(
+) ValidatedStorageLike {
+	return ValidatedStorageClass().ValidatedStorage(
 		notary,
 		storage,
 	)

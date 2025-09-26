@@ -32,7 +32,7 @@ func TestLocalStorage(t *tes.T) {
 	notary.ForgetKey()
 	var certificate = notary.GenerateKey()
 	var storage rep.Persistent = rep.LocalStorage(notary, testDirectory)
-	storage = rep.SecureStorage(notary, storage)
+	storage = rep.ValidatedStorage(notary, storage)
 	storage = rep.CachedStorage(storage)
 	var repository = rep.DocumentRepository(notary, storage)
 

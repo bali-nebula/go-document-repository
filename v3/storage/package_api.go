@@ -91,16 +91,16 @@ type S3StorageClassLike interface {
 }
 
 /*
-SecureStorageClassLike is a class interface that declares the complete set of
+ValidatedStorageClassLike is a class interface that declares the complete set of
 class constructors, constants and functions that must be supported by each
 concrete secure-storage-like class.
 */
-type SecureStorageClassLike interface {
+type ValidatedStorageClassLike interface {
 	// Constructor Methods
-	SecureStorage(
+	ValidatedStorage(
 		notary not.DigitalNotaryLike,
 		storage rep.Persistent,
-	) SecureStorageLike
+	) ValidatedStorageLike
 }
 
 // INSTANCE DECLARATIONS
@@ -158,13 +158,13 @@ type S3StorageLike interface {
 }
 
 /*
-SecureStorageLike is an instance interface that declares the complete set of
+ValidatedStorageLike is an instance interface that declares the complete set of
 principal, attribute and aspect methods that must be supported by each instance
 of a concrete secure-storage-like class.
 */
-type SecureStorageLike interface {
+type ValidatedStorageLike interface {
 	// Principal Methods
-	GetClass() SecureStorageClassLike
+	GetClass() ValidatedStorageClassLike
 
 	// Aspect Interfaces
 	rep.Persistent

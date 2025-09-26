@@ -62,7 +62,10 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 func (v *cachedStorage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
-) doc.ResourceLike {
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
 	return v.storage_.ReadCitation(name, version)
 }
 
@@ -70,72 +73,97 @@ func (v *cachedStorage_) WriteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
-	v.storage_.WriteCitation(name, version, citation)
+	return v.storage_.WriteCitation(name, version, citation)
 }
 
 func (v *cachedStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
+) (
+	status rep.Status,
 ) {
-	v.storage_.DeleteCitation(name, version)
+	return v.storage_.DeleteCitation(name, version)
 }
 
 func (v *cachedStorage_) ListCitations(
 	path doc.NameLike,
-) doc.Sequential[doc.ResourceLike] {
+) (
+	citations doc.Sequential[doc.ResourceLike],
+	status rep.Status,
+) {
 	return v.storage_.ListCitations(path)
 }
 
 func (v *cachedStorage_) ReadDraft(
 	citation doc.ResourceLike,
-) not.Parameterized {
+) (
+	draft not.Parameterized,
+	status rep.Status,
+) {
 	return v.storage_.ReadDraft(citation)
 }
 
 func (v *cachedStorage_) WriteDraft(
 	draft not.Parameterized,
-) doc.ResourceLike {
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
 	return v.storage_.WriteDraft(draft)
 }
 
 func (v *cachedStorage_) DeleteDraft(
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
-	v.storage_.DeleteDraft(citation)
+	return v.storage_.DeleteDraft(citation)
 }
 
 func (v *cachedStorage_) ReadContract(
 	citation doc.ResourceLike,
-) not.ContractLike {
-	// Attempt to read the notarized document from cached storage.
-	var document = v.lookupContract(citation)
-	if uti.IsUndefined(document) {
-		// Read the notarized document from persistent storage.
-		document = v.storage_.ReadContract(citation)
-		if uti.IsDefined(document) {
-			v.cacheContract(citation, document)
-		}
+) (
+	contract not.ContractLike,
+	status rep.Status,
+) {
+	contract = v.lookupContract(citation)
+	if uti.IsDefined(contract) {
+		status = rep.Retrieved
+		return
 	}
-	return document
+	contract, status = v.storage_.ReadContract(citation)
+	if status == rep.Retrieved {
+		v.cacheContract(citation, contract)
+	}
+	return
 }
 
 func (v *cachedStorage_) WriteContract(
 	contract not.ContractLike,
-) doc.ResourceLike {
-	var citation = v.storage_.WriteContract(contract)
-	v.cacheContract(citation, contract)
-	return citation
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
+	citation, status = v.storage_.WriteContract(contract)
+	if status == rep.Written {
+		v.cacheContract(citation, contract)
+	}
+	return
 }
 
 func (v *cachedStorage_) DeleteContract(
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
-	// Delete the notarized document from persistent storage.
-	v.storage_.DeleteContract(citation)
-
-	// Remove the notarized document from cached storage.
-	v.uncacheContract(citation)
+	status = v.storage_.DeleteContract(citation)
+	if status == rep.Deleted {
+		v.uncacheContract(citation)
+	}
+	return
 }
 
 // PROTECTED INTERFACE
@@ -154,7 +182,8 @@ func (v *cachedStorage_) lookupContract(
 	citation doc.ResourceLike,
 ) not.ContractLike {
 	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	return v.cache_.GetValue(key)
+	var contract = v.cache_.GetValue(key)
+	return contract
 }
 
 func (v *cachedStorage_) uncacheContract(

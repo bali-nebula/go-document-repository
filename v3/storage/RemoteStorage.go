@@ -15,6 +15,7 @@ package storage
 import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
+	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 )
 
@@ -65,77 +66,101 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 func (v *remoteStorage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
-) doc.ResourceLike {
-	var result_ doc.ResourceLike
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) WriteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
+	return
 }
 
 func (v *remoteStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
+) (
+	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
+	return
 }
 
 func (v *remoteStorage_) ListCitations(
 	path doc.NameLike,
-) doc.Sequential[doc.ResourceLike] {
-	var result_ doc.Sequential[doc.ResourceLike]
+) (
+	citations doc.Sequential[doc.ResourceLike],
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) ReadDraft(
 	citation doc.ResourceLike,
-) not.Parameterized {
-	var result_ not.Parameterized
+) (
+	draft not.Parameterized,
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) WriteDraft(
 	draft not.Parameterized,
-) doc.ResourceLike {
-	var result_ doc.ResourceLike
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) DeleteDraft(
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
+	return
 }
 
 func (v *remoteStorage_) ReadContract(
 	citation doc.ResourceLike,
-) not.ContractLike {
-	var result_ not.ContractLike
+) (
+	contract not.ContractLike,
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) WriteContract(
 	contract not.ContractLike,
-) doc.ResourceLike {
-	var result_ doc.ResourceLike
+) (
+	citation doc.ResourceLike,
+	status rep.Status,
+) {
 	// TBD - Add the method implementation.
-	return result_
+	return
 }
 
 func (v *remoteStorage_) DeleteContract(
 	citation doc.ResourceLike,
+) (
+	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
+	return
 }
 
 // PROTECTED INTERFACE
