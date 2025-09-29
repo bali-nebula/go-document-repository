@@ -37,20 +37,23 @@ func TestLocalStorage(t *tes.T) {
 	var repository = rep.DocumentRepository(notary, storage)
 
 	// Save the certificate.
+	var status rep.Status
 	var content = certificate.GetContent()
 	var citation = notary.CiteDocument(content)
 	ass.True(t, notary.CitationMatches(citation, content))
-	citation = repository.SaveCertificate(certificate)
+	citation, status = repository.SaveCertificate(certificate)
+	ass.Equal(t, rep.Written, status)
 	ass.True(t, notary.CitationMatches(citation, content))
 	certificate = notary.RefreshKey()
 	content = certificate.GetContent()
 	citation = notary.CiteDocument(content)
 	ass.True(t, notary.CitationMatches(citation, content))
-	citation = repository.SaveCertificate(certificate)
+	citation, status = repository.SaveCertificate(certificate)
+	ass.Equal(t, rep.Written, status)
 	ass.True(t, notary.CitationMatches(citation, content))
 
 	// Save a draft document.
-	var component = doc.Angle("~pi")
+	var component = doc.Angle("~π")
 	var type_ = doc.Resource("<bali:/examples/Angle:v1>")
 	var tag = doc.Tag()
 	var version = doc.Version("v1.2.3")
@@ -64,30 +67,40 @@ func TestLocalStorage(t *tes.T) {
 		permissions,
 		previous,
 	)
-	citation = repository.SaveDraft(draft)
+	citation, status = repository.SaveDraft(draft)
+	ass.Equal(t, rep.Written, status)
 
 	// Retrieve the draft document.
-	var same = repository.RetrieveDraft(citation)
+	var same not.Parameterized
+	same, status = repository.RetrieveDraft(citation)
+	ass.Equal(t, rep.Retrieved, status)
 	ass.Equal(t, draft.AsString(), same.AsString())
-
-	// Discard the draft document
-	repository.DiscardDraft(citation)
 
 	// Create a notarized contract document.
 	var name = doc.Name("/examples/Contract")
-	var contract = repository.NotarizeDocument(name, version, draft)
-	var same2 = repository.RetrieveDocument(name, version)
+	var contract, same2, same3 not.ContractLike
+	contract, status = repository.NotarizeDocument(name, version, draft)
+	ass.Equal(t, rep.Written, status)
+	same2, status = repository.RetrieveDocument(name, version)
+	ass.Equal(t, rep.Retrieved, status)
 	ass.Equal(t, contract.AsString(), same2.AsString())
-	var same3 = repository.RetrieveDocument(name, version)
+	same3, status = repository.RetrieveDocument(name, version)
+	ass.Equal(t, rep.Retrieved, status)
 	ass.Equal(t, same2.AsString(), same3.AsString())
 
 	// Checkout a new draft of the contract document.
-	draft = repository.CheckoutDocument(name, version, uint(2))
+	draft, status = repository.CheckoutDocument(name, version, uint(2))
+	ass.Equal(t, rep.Retrieved, status)
 	ass.NotEqual(t, draft.AsString(), same.AsString())
+
+	// Discard the draft document
+	status = repository.DiscardDraft(citation)
+	ass.Equal(t, rep.Deleted, status)
 
 	// Create a new message bag.
 	var bag = doc.Name("/examples/Bag")
-	repository.CreateBag(bag, 8, 10, permissions)
+	status = repository.CreateBag(bag, 8, 10, permissions)
+	ass.Equal(t, rep.Written, status)
 
 	// Send a message to the bag.
 	var entity = doc.ParseSource(`[
@@ -98,18 +111,24 @@ func TestLocalStorage(t *tes.T) {
 		doc.Resource("<bali:/examples/Message:v1>"),
 		permissions,
 	)
-	repository.PostMessage(bag, message)
+	status = repository.PostMessage(bag, message)
+	ass.Equal(t, rep.Written, status)
 
 	// Retrieve a message from the bag.
-	contract = repository.RetrieveMessage(bag)
+	contract, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Retrieved, status)
 
 	// Reject the message.
-	repository.RejectMessage(contract)
+	status = repository.RejectMessage(contract)
+	ass.Equal(t, rep.Deleted, status)
 
 	// Process the message.
-	contract = repository.RetrieveMessage(bag)
-	repository.AcceptMessage(contract)
+	contract, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Retrieved, status)
+	status = repository.AcceptMessage(contract)
+	ass.Equal(t, rep.Deleted, status)
 
 	// Remove the bag.
-	repository.RemoveBag(bag)
+	status = repository.RemoveBag(bag)
+	ass.Equal(t, rep.Deleted, status)
 }

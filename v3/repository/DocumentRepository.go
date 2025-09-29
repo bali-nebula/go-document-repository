@@ -70,6 +70,11 @@ func (v *documentRepository_) SaveCertificate(
 		"An error occurred while attempting to save a certificate document.",
 	)
 	citation, status = v.storage_.WriteContract(certificate)
+	var content = certificate.GetContent()
+	var tag = content.GetTag()
+	var name = bal.Name("/certificates/" + tag.AsString()[1:])
+	var version = content.GetVersion()
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -324,6 +329,7 @@ func (v *documentRepository_) RetrieveMessage(
 		if status != Written {
 			return
 		}
+		status = Retrieved
 		break
 	}
 	return
@@ -388,6 +394,7 @@ func (v *documentRepository_) RejectMessage(
 	}
 	var citation = v.notary_.CiteDocument(content)
 	status = v.storage_.WriteCitation(accessible, version, citation)
+	status = Deleted
 	return
 }
 
@@ -402,7 +409,7 @@ func (v *documentRepository_) errorCheck(
 ) {
 	if e := recover(); e != nil {
 		message = fmt.Sprintf(
-			"DocumentRepository: %s:\n    %v",
+			"DocumentRepository: %s:\n    %s",
 			message,
 			e,
 		)

@@ -294,7 +294,7 @@ func (v *localStorage_) errorCheck(
 ) {
 	if e := recover(); e != nil {
 		log.Printf(
-			"LocalStorage: %s:\n    %v\n",
+			"LocalStorage: %s:\n    %s\n",
 			message,
 			e,
 		)

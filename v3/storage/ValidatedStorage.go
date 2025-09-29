@@ -17,6 +17,7 @@ import (
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	uti "github.com/craterdog/go-missing-utilities/v7"
+	log "log"
 )
 
 // CLASS INTERFACE
@@ -76,7 +77,6 @@ func (v *validatedStorage_) ReadCitation(
 	}
 	if v.invalidCitation(citation) {
 		status = rep.Invalid
-		return
 	}
 	return
 }
@@ -88,10 +88,6 @@ func (v *validatedStorage_) WriteCitation(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-		return
-	}
 	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
@@ -122,10 +118,6 @@ func (v *validatedStorage_) ReadDraft(
 	draft not.Parameterized,
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-		return
-	}
 	draft, status = v.storage_.ReadDraft(citation)
 	return
 }
@@ -137,12 +129,6 @@ func (v *validatedStorage_) WriteDraft(
 	status rep.Status,
 ) {
 	citation, status = v.storage_.WriteDraft(draft)
-	if status != rep.Written {
-		return
-	}
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-	}
 	return
 }
 
@@ -151,10 +137,6 @@ func (v *validatedStorage_) DeleteDraft(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-		return
-	}
 	status = v.storage_.DeleteDraft(citation)
 	return
 }
@@ -165,10 +147,6 @@ func (v *validatedStorage_) ReadContract(
 	contract not.ContractLike,
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-		return
-	}
 	contract, status = v.storage_.ReadContract(citation)
 	if v.invalidContract(contract) {
 		status = rep.Invalid
@@ -187,12 +165,6 @@ func (v *validatedStorage_) WriteContract(
 		return
 	}
 	citation, status = v.storage_.WriteContract(contract)
-	if status != rep.Written {
-		return
-	}
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-	}
 	return
 }
 
@@ -201,10 +173,6 @@ func (v *validatedStorage_) DeleteContract(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
-		status = rep.Invalid
-		return
-	}
 	status = v.storage_.DeleteContract(citation)
 	return
 }
@@ -216,12 +184,27 @@ func (v *validatedStorage_) DeleteContract(
 func (v *validatedStorage_) invalidCitation(
 	citation doc.ResourceLike,
 ) bool {
-	var contract, status = v.storage_.ReadContract(citation)
+	var status rep.Status
+	var draft not.Parameterized
+	draft, status = v.storage_.ReadDraft(citation)
 	if status != rep.Retrieved {
-		return true
+		var contract not.ContractLike
+		contract, status = v.storage_.ReadContract(citation)
+		if status != rep.Retrieved {
+			log.Printf("The citation does not cite a document: %s\n", citation)
+			return true
+		}
+		draft = contract.GetContent()
 	}
-	var draft = contract.GetContent()
-	return !v.notary_.CitationMatches(citation, draft)
+	var matches = v.notary_.CitationMatches(citation, draft)
+	if !matches {
+		log.Printf(
+			"The citation digest does not match the document: %s %s\n",
+			citation,
+			draft.AsString(),
+		)
+	}
+	return !matches
 }
 
 func (v *validatedStorage_) invalidContract(
@@ -234,12 +217,23 @@ func (v *validatedStorage_) invalidContract(
 		// Not self-signed, read the certificate that signed the contract.
 		var document, status = v.storage_.ReadContract(notary)
 		if status != rep.Retrieved {
+			log.Printf(
+				"ValidatedStorage: The cited notary does not exist: %s\n",
+				notary,
+			)
 			return true
 		}
 		draft = document.GetContent()
 	}
 	var certificate = not.Certificate(draft.AsString())
 	return !v.notary_.SealMatches(contract, certificate)
+}
+
+func (v *validatedStorage_) invalidName(
+	name doc.NameLike,
+	version doc.VersionLike,
+) bool {
+	return true
 }
 
 // Instance Structure
