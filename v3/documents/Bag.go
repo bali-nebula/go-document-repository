@@ -101,19 +101,19 @@ func (v *bag_) AsIntrinsic() doc.ComponentLike {
 }
 
 func (v *bag_) GetName() doc.NameLike {
-	var component = v.GetObject(doc.Symbol("name")).GetComponent()
+	var component = v.GetObject(doc.Symbol("$name")).GetComponent()
 	var name = component.GetEntity().(doc.NameLike)
 	return name
 }
 
 func (v *bag_) GetCapacity() doc.NumberLike {
-	var component = v.GetObject(doc.Symbol("capacity")).GetComponent()
+	var component = v.GetObject(doc.Symbol("$capacity")).GetComponent()
 	var capacity = component.GetEntity().(doc.NumberLike)
 	return capacity
 }
 
 func (v *bag_) GetLeasetime() doc.NumberLike {
-	var component = v.GetObject(doc.Symbol("leasetime")).GetComponent()
+	var component = v.GetObject(doc.Symbol("$leasetime")).GetComponent()
 	var leasetime = component.GetEntity().(doc.NumberLike)
 	return leasetime
 }
@@ -127,33 +127,38 @@ func (v *bag_) GetEntity() any {
 }
 
 func (v *bag_) GetType() doc.ResourceLike {
-	var component = v.GetParameter(doc.Symbol("type"))
+	var component = v.GetParameter(doc.Symbol("$type"))
 	return doc.Resource(doc.FormatComponent(component))
 }
 
 func (v *bag_) GetTag() doc.TagLike {
-	var component = v.GetParameter(doc.Symbol("tag"))
+	var component = v.GetParameter(doc.Symbol("$tag"))
 	return doc.Tag(doc.FormatComponent(component))
 }
 
 func (v *bag_) GetVersion() doc.VersionLike {
-	var component = v.GetParameter(doc.Symbol("version"))
+	var component = v.GetParameter(doc.Symbol("$version"))
 	return doc.Version(doc.FormatComponent(component))
-}
-
-func (v *bag_) GetPermissions() doc.ResourceLike {
-	var component = v.GetParameter(doc.Symbol("permissions"))
-	return doc.Resource(doc.FormatComponent(component))
 }
 
 func (v *bag_) GetOptionalPrevious() doc.ResourceLike {
 	var previous doc.ResourceLike
-	var component = v.GetParameter(doc.Symbol("previous"))
+	var component = v.GetParameter(doc.Symbol("$previous"))
 	var source = doc.FormatComponent(component)
 	if source != "none" {
 		previous = doc.Resource(source)
 	}
 	return previous
+}
+
+func (v *bag_) GetPermissions() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("$permissions"))
+	return doc.Resource(doc.FormatComponent(component))
+}
+
+func (v *bag_) GetAccount() doc.TagLike {
+	var component = v.GetParameter(doc.Symbol("$account"))
+	return doc.Tag(doc.FormatComponent(component))
 }
 
 // PROTECTED INTERFACE

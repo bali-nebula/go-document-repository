@@ -94,6 +94,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.NotEqual(t, draft.AsString(), same.AsString())
 
 	// Discard the draft document
+	citation = notary.CiteDocument(draft)
 	status = repository.DiscardDraft(citation)
 	ass.Equal(t, rep.Deleted, status)
 

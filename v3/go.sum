@@ -1,7 +1,7 @@
 github.com/bali-nebula/go-bali-documents/v3 v3.31.0 h1:mJxckajskl5kPJ71uyv7iUADokMM9EM9SwhJZgBZOn4=
 github.com/bali-nebula/go-bali-documents/v3 v3.31.0/go.mod h1:H64tzwmWq+ZOOAZsbfVxhVheoTUd1WCl1Y8wFmFsItU=
-github.com/bali-nebula/go-digital-notary/v3 v3.33.0 h1:IV6UI20gEVWYGiAqKOnj4MNVM0tXL3AE144DACgjREo=
-github.com/bali-nebula/go-digital-notary/v3 v3.33.0/go.mod h1:GmJ/MhMU9F7YJ3L7U/NB/dvyW2cWvcsfEVi07fE+8HQ=
+github.com/bali-nebula/go-digital-notary/v3 v3.35.0 h1:EvEk0EgI4E1y0xMNJC/Lpy9uuw+qP257zMXO/ZtwWXo=
+github.com/bali-nebula/go-digital-notary/v3 v3.35.0/go.mod h1:GmJ/MhMU9F7YJ3L7U/NB/dvyW2cWvcsfEVi07fE+8HQ=
 github.com/bali-nebula/go-document-notation/v3 v3.24.0 h1:Q6Z0sesDX+uybtz7P56r1Fl/ejTYRkcc5SLxJZeNzXk=
 github.com/bali-nebula/go-document-notation/v3 v3.24.0/go.mod h1:RWRiYo7k/bkjO56bjr+O6KCxBXSvJVp3thVpr+zul6Q=
 github.com/craterdog/go-component-framework/v7 v7.24.0 h1:xMncWrMjErOY+4PXzmJI9JmGZfPnCyN4xGhFcHWs0yo=

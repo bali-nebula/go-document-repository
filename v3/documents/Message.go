@@ -97,7 +97,7 @@ func (v *message_) AsIntrinsic() doc.ComponentLike {
 // Attribute Methods
 
 func (v *message_) GetBag() doc.NameLike {
-	var component = v.GetObject(doc.Symbol("bag")).GetComponent()
+	var component = v.GetObject(doc.Symbol("$bag")).GetComponent()
 	var bag = component.GetEntity().(doc.NameLike)
 	return bag
 }
@@ -105,7 +105,7 @@ func (v *message_) GetBag() doc.NameLike {
 func (v *message_) SetBag(
 	bag doc.NameLike,
 ) {
-	v.SetObject(bag, doc.Symbol("bag"))
+	v.SetObject(bag, doc.Symbol("$bag"))
 }
 
 // Parameterized Methods
@@ -115,33 +115,38 @@ func (v *message_) GetEntity() any {
 }
 
 func (v *message_) GetType() doc.ResourceLike {
-	var component = v.GetParameter(doc.Symbol("type"))
+	var component = v.GetParameter(doc.Symbol("$type"))
 	return doc.Resource(doc.FormatComponent(component))
 }
 
 func (v *message_) GetTag() doc.TagLike {
-	var component = v.GetParameter(doc.Symbol("tag"))
+	var component = v.GetParameter(doc.Symbol("$tag"))
 	return doc.Tag(doc.FormatComponent(component))
 }
 
 func (v *message_) GetVersion() doc.VersionLike {
-	var component = v.GetParameter(doc.Symbol("version"))
+	var component = v.GetParameter(doc.Symbol("$version"))
 	return doc.Version(doc.FormatComponent(component))
-}
-
-func (v *message_) GetPermissions() doc.ResourceLike {
-	var component = v.GetParameter(doc.Symbol("permissions"))
-	return doc.Resource(doc.FormatComponent(component))
 }
 
 func (v *message_) GetOptionalPrevious() doc.ResourceLike {
 	var previous doc.ResourceLike
-	var component = v.GetParameter(doc.Symbol("previous"))
+	var component = v.GetParameter(doc.Symbol("$previous"))
 	var source = doc.FormatComponent(component)
 	if source != "none" {
 		previous = doc.Resource(source)
 	}
 	return previous
+}
+
+func (v *message_) GetPermissions() doc.ResourceLike {
+	var component = v.GetParameter(doc.Symbol("$permissions"))
+	return doc.Resource(doc.FormatComponent(component))
+}
+
+func (v *message_) GetAccount() doc.TagLike {
+	var component = v.GetParameter(doc.Symbol("$account"))
+	return doc.Tag(doc.FormatComponent(component))
 }
 
 // PROTECTED INTERFACE

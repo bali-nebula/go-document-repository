@@ -32,9 +32,8 @@ on interfaces, not on each other.
 package repository
 
 import (
-	bal "github.com/bali-nebula/go-bali-documents/v3"
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	doc "github.com/bali-nebula/go-document-repository/v3/documents"
 )
 
 // TYPE DECLARATIONS
@@ -45,12 +44,11 @@ Status is a constrained type specifying the result of a storage operation.
 type Status uint8
 
 const (
-	Unavailable Status = iota
-	Forbidden
-	Retrieved
+	Problem Status = iota
+	Success
 	Missing
-	Written
-	Deleted
+	Existed
+	Illegal
 	Invalid
 )
 
@@ -82,83 +80,89 @@ type DocumentRepositoryLike interface {
 	// Principal Methods
 	GetClass() DocumentRepositoryClassLike
 	SaveCertificate(
-		certificate not.ContractLike,
+		certificate not.DocumentLike,
 	) (
-		citation bal.ResourceLike,
+		citation not.CitationLike,
 		status Status,
 	)
 	SaveDraft(
-		draft not.Parameterized,
+		document not.DocumentLike,
 	) (
-		citation bal.ResourceLike,
+		citation not.CitationLike,
 		status Status,
 	)
 	RetrieveDraft(
-		citation bal.ResourceLike,
+		citation not.CitationLike,
 	) (
-		draft not.Parameterized,
+		document not.DocumentLike,
 		status Status,
 	)
 	DiscardDraft(
-		citation bal.ResourceLike,
+		citation not.CitationLike,
 	) (
+		document not.DocumentLike,
 		status Status,
 	)
 	NotarizeDocument(
-		name bal.NameLike,
-		version bal.VersionLike,
-		draft not.Parameterized,
+		name doc.NameLike,
+		version doc.VersionLike,
+		document not.DocumentLike,
 	) (
-		contract not.ContractLike,
 		status Status,
 	)
 	RetrieveDocument(
-		name bal.NameLike,
-		version bal.VersionLike,
+		name doc.NameLike,
+		version doc.VersionLike,
 	) (
-		contract not.ContractLike,
+		document not.DocumentLike,
 		status Status,
 	)
 	CheckoutDocument(
-		name bal.NameLike,
-		version bal.VersionLike,
+		name doc.NameLike,
+		version doc.VersionLike,
 		level uint,
 	) (
-		draft not.Parameterized,
+		document not.DocumentLike,
 		status Status,
 	)
 	CreateBag(
-		name bal.NameLike,
-		capacity uint,
-		leasetime uint,
-		permissions bal.ResourceLike,
+		name doc.NameLike,
+		bag not.DocumentLike,
 	) (
 		status Status,
 	)
 	RemoveBag(
-		name bal.NameLike,
+		name doc.NameLike,
 	) (
+		bag not.DocumentLike,
 		status Status,
 	)
 	PostMessage(
-		bag bal.NameLike,
-		message doc.MessageLike,
+		bag doc.NameLike,
+		message not.DocumentLike,
 	) (
 		status Status,
 	)
 	RetrieveMessage(
-		bag bal.NameLike,
+		bag doc.NameLike,
 	) (
-		message not.ContractLike,
+		message not.DocumentLike,
 		status Status,
 	)
 	AcceptMessage(
-		message not.ContractLike,
+		bag doc.NameLike,
+		message not.DocumentLike,
 	) (
 		status Status,
 	)
 	RejectMessage(
-		message not.ContractLike,
+		bag doc.NameLike,
+		message not.DocumentLike,
+	) (
+		status Status,
+	)
+	PublishEvent(
+		event not.DocumentLike,
 	) (
 		status Status,
 	)
@@ -171,64 +175,70 @@ Persistent declares the set of method signatures that must be supported by all
 persistent data storage mechanisms.
 */
 type Persistent interface {
-	ReadCitation(
-		name bal.NameLike,
-		version bal.VersionLike,
+	CreateCitation(
+		name doc.NameLike,
+		version doc.VersionLike,
+		citation not.CitationLike,
 	) (
-		citation bal.ResourceLike,
 		status Status,
 	)
-	WriteCitation(
-		name bal.NameLike,
-		version bal.VersionLike,
-		citation bal.ResourceLike,
+	ReadCitation(
+		name doc.NameLike,
+		version doc.VersionLike,
+	) (
+		citation not.CitationLike,
+		status Status,
+	)
+	UpdateCitation(
+		name doc.NameLike,
+		version doc.VersionLike,
+		citation not.CitationLike,
 	) (
 		status Status,
 	)
 	DeleteCitation(
-		name bal.NameLike,
-		version bal.VersionLike,
+		name doc.NameLike,
+		version doc.VersionLike,
 	) (
+		citation not.CitationLike,
+		status Status,
+	)
+	MoveCitation(
+		oldName doc.NameLike,
+		newName doc.NameLike,
+		version doc.VersionLike,
+	) (
+		citation not.CitationLike,
 		status Status,
 	)
 	ListCitations(
-		path bal.NameLike,
+		path doc.NameLike,
 	) (
-		citations bal.Sequential[bal.ResourceLike],
+		citations doc.Sequential[not.CitationLike],
 		status Status,
 	)
-	ReadDraft(
-		citation bal.ResourceLike,
+	CreateDocument(
+		document not.DocumentLike,
 	) (
-		draft not.Parameterized,
+		citation not.CitationLike,
 		status Status,
 	)
-	WriteDraft(
-		draft not.Parameterized,
+	ReadDocument(
+		citation not.CitationLike,
 	) (
-		citation bal.ResourceLike,
+		document not.DocumentLike,
 		status Status,
 	)
-	DeleteDraft(
-		citation bal.ResourceLike,
+	UpdateDocument(
+		document not.DocumentLike,
 	) (
+		citation not.CitationLike,
 		status Status,
 	)
-	ReadContract(
-		citation bal.ResourceLike,
+	DeleteDocument(
+		citation not.CitationLike,
 	) (
-		contract not.ContractLike,
-		status Status,
-	)
-	WriteContract(
-		contract not.ContractLike,
-	) (
-		citation bal.ResourceLike,
-		status Status,
-	)
-	DeleteContract(
-		citation bal.ResourceLike,
-	) (
+		document not.DocumentLike,
 		status Status,
 	)
 }
