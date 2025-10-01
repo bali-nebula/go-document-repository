@@ -86,7 +86,7 @@ func (v *localStorage_) WriteCitation(
 	var path = v.getNamePath(name)
 	uti.MakeDirectory(path)
 	var filename = path + v.getVersionFilename(version)
-	var source = not.Citation(citation).AsString()
+	var source = citation.AsString()
 	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
@@ -106,7 +106,7 @@ func (v *localStorage_) ReadCitation(
 	), &status)
 	var filename = v.getNamePath(name) + v.getVersionFilename(version)
 	var source = uti.ReadFile(filename)
-	citation = not.Citation(source).AsResource()
+	citation = not.CitationFromString(source)
 	status = rep.Success
 	return
 }
@@ -143,25 +143,44 @@ func (v *localStorage_) DeleteCitation(
 	return
 }
 
-func (v *localStorage_) ListCitations(
-	path doc.NameLike,
+func (v *localStorage_) BorrowCitation(
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
 ) (
-	citations doc.Sequential[not.CitationLike],
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to list citations: %s",
-		path,
-	), &status)
-	var list = doc.List[not.CitationLike]()
-	var directory = v.getNamePath(path)
-	var filenames = uti.ReadDirectory(directory)
-	for _, filename := range filenames {
-		var source = uti.ReadFile(directory + filename + "/v1.bali")
-		var citation = not.Citation(source)
-		list.AppendValue(citation.AsResource())
-	}
-	citations = list
+	var path = v.getNamePath(fromPath)
+	var names = doc.List[string](uti.ReadDirectory(path))
+	var index = int(doc.Generator().RandomOrdinal(names.GetSize()))
+	var name = names.GetValue(index)
+	var filename = path + "/" + name + "/v1.bali"
+	var source = uti.ReadFile(filename)
+	citation = not.CitationFromString(source)
+	uti.RemovePath(filename)
+	path = v.getNamePath(toPath) + "/" + name
+	uti.MakeDirectory(path)
+	filename = path + "/v1.bali"
+	uti.WriteFile(filename, source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) ReturnCitation(
+	citation not.CitationLike,
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
+) (
+	status rep.Status,
+) {
+	var tag = citation.GetTag().AsString()
+	var path = v.getNamePath(fromPath) + "/" + tag
+	uti.RemovePath(path)
+	path = v.getNamePath(toPath) + "/" + tag
+	uti.MakeDirectory(path)
+	var filename = path + "/v1.bali"
+	var source = citation.AsString()
+	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
 }
@@ -176,11 +195,10 @@ func (v *localStorage_) WriteDocument(
 		"An error occurred while attempting to write a document: %s",
 		document,
 	), &status)
-	var content = document.GetContent()
-	citation = v.notary_.CiteDocument(content)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
+	citation = v.notary_.CiteDocument(document)
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
 	uti.MakeDirectory(path)
-	var filename = path + v.getCitationVersion(citation) + ".bali"
+	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = document.AsString()
 	uti.WriteFile(filename, source)
 	status = rep.Success
@@ -197,10 +215,10 @@ func (v *localStorage_) ReadDocument(
 		"An error occurred while attempting to read a document: %s",
 		citation,
 	), &status)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	var filename = path + v.getCitationVersion(citation) + ".bali"
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
+	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = uti.ReadFile(filename)
-	document = not.Document(source)
+	document = not.DocumentFromString(source)
 	status = rep.Success
 	return
 }
@@ -215,8 +233,8 @@ func (v *localStorage_) DeleteDocument(
 		"An error occurred while attempting to delete a document: %s",
 		citation,
 	), &status)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	var filename = path + v.getCitationVersion(citation) + ".bali"
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
+	var filename = path + citation.GetVersion().AsString() + ".bali"
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {
@@ -241,24 +259,8 @@ func (v *localStorage_) errorCheck(
 			message,
 			e,
 		)
-		*pstatus = rep.Unavailable
+		*pstatus = rep.Problem
 	}
-}
-
-func (v *localStorage_) getCitationTag(
-	resource not.CitationLike,
-) string {
-	var citation = not.Citation(resource)
-	var tag = citation.GetTag()
-	return tag.AsString()[1:] // Remove the leading "#" character.
-}
-
-func (v *localStorage_) getCitationVersion(
-	resource not.CitationLike,
-) string {
-	var citation = not.Citation(resource)
-	var version = citation.GetVersion()
-	return version.AsString()
 }
 
 func (v *localStorage_) getNamePath(

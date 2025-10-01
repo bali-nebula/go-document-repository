@@ -83,7 +83,7 @@ func (v *validatedStorage_) ReadCitation(
 	status rep.Status,
 ) {
 	citation, status = v.storage_.ReadCitation(name, version)
-	if status != rep.Retrieved {
+	if status != rep.Success {
 		return
 	}
 	if v.invalidCitation(citation) {
@@ -99,17 +99,29 @@ func (v *validatedStorage_) DeleteCitation(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	status = v.storage_.DeleteCitation(name, version)
+	citation, status = v.storage_.DeleteCitation(name, version)
 	return
 }
 
-func (v *validatedStorage_) ListCitations(
-	path doc.NameLike,
+func (v *validatedStorage_) BorrowCitation(
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
 ) (
-	citations doc.Sequential[not.CitationLike],
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citations, status = v.storage_.ListCitations(path)
+	citation, status = v.storage_.BorrowCitation(fromPath, toPath)
+	return
+}
+
+func (v *validatedStorage_) ReturnCitation(
+	citation not.CitationLike,
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.ReturnCitation(citation, fromPath, toPath)
 	return
 }
 
@@ -146,7 +158,7 @@ func (v *validatedStorage_) DeleteDocument(
 	document not.DocumentLike,
 	status rep.Status,
 ) {
-	status = v.storage_.DeleteDocument(citation)
+	document, status = v.storage_.DeleteDocument(citation)
 	return
 }
 
@@ -158,7 +170,7 @@ func (v *validatedStorage_) invalidCitation(
 	citation not.CitationLike,
 ) bool {
 	var document, status = v.storage_.ReadDocument(citation)
-	if status != rep.Retrieved {
+	if status != rep.Success {
 		log.Printf("The citation does not cite a document: %s\n", citation)
 		return true
 	}
@@ -192,13 +204,6 @@ func (v *validatedStorage_) invalidDocument(
 		}
 	}
 	return !v.notary_.SealMatches(document, certificate)
-}
-
-func (v *validatedStorage_) invalidName(
-	name doc.NameLike,
-	version doc.VersionLike,
-) bool {
-	return true
 }
 
 // Instance Structure

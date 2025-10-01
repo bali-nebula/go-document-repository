@@ -92,25 +92,25 @@ func (v *cachedStorage_) DeleteCitation(
 	return
 }
 
-func (v *cachedStorage_) MoveCitation(
-	oldName doc.NameLike,
-	newName doc.NameLike,
-	version doc.VersionLike,
+func (v *cachedStorage_) BorrowCitation(
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.MoveCitation(oldName, newName, version)
+	citation, status = v.storage_.BorrowCitation(fromPath, toPath)
 	return
 }
 
-func (v *cachedStorage_) ListCitations(
-	path doc.NameLike,
+func (v *cachedStorage_) ReturnCitation(
+	citation not.CitationLike,
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
 ) (
-	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
-	citations, status = v.storage_.ListCitations(path)
+	status = v.storage_.ReturnCitation(citation, fromPath, toPath)
 	return
 }
 

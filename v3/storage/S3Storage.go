@@ -91,10 +91,22 @@ func (v *s3Storage_) DeleteCitation(
 	return
 }
 
-func (v *s3Storage_) ListCitations(
-	path doc.NameLike,
+func (v *s3Storage_) BorrowCitation(
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
 ) (
-	citations doc.Sequential[not.CitationLike],
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *s3Storage_) ReturnCitation(
+	citation not.CitationLike,
+	fromPath doc.NameLike,
+	toPath doc.NameLike,
+) (
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
