@@ -13,6 +13,7 @@
 package module_test
 
 import (
+	fmt "fmt"
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3"
@@ -51,12 +52,14 @@ func TestLocalStorage(t *tes.T) {
 	ass.True(t, notary.CitationMatches(citation, certificate))
 
 	// Save a draft document.
-	var component = doc.Angle("~π")
+	var angle = doc.Angle("~π")
+	var component = doc.Component(angle, nil)
 	var type_ = doc.Resource("<bali:/examples/Angle:v1>")
 	var tag = doc.Tag()
 	var version = doc.Version("v1.2.3")
 	var previous doc.ResourceLike
 	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	fmt.Printf("COMPONENT: %v\n", component)
 	var content = not.Content(
 		component,
 		type_,
@@ -91,17 +94,17 @@ func TestLocalStorage(t *tes.T) {
 
 	// Discard the draft document
 	citation = notary.CiteDocument(document)
-	same, status = repository.DiscardDocument(citation)
+	same, status = repository.DiscardDraft(citation)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsString(), same.AsString())
 
 	// Send a message to a bag.
 	var bag = doc.Name("/examples/bag")
-	component = doc.Quote("Hello World!")
+	var quote = doc.Quote("Hello World!")
+	component = doc.Component(quote, nil)
 	type_ = doc.Resource("<bali:/examples/Message:v1>")
 	tag = doc.Tag()
 	version = doc.Version()
-	var previous doc.ResourceLike
 	permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	content = not.Content(
 		component,
@@ -121,12 +124,14 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, rep.Success, status)
 
 	// Reject the message.
-	status = repository.RejectMessage(message)
+	status = repository.RejectMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 
 	// Process the message.
 	message, status = repository.RetrieveMessage(bag)
 	ass.Equal(t, rep.Success, status)
-	status = repository.AcceptMessage(message)
+
+	// Accept the message.
+	status = repository.AcceptMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 }

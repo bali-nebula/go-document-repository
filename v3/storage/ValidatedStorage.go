@@ -231,6 +231,7 @@ func (v *validatedStorage_) invalidDocument(
 			return true
 		}
 	}
+	log.Printf("CERTIFICATE: %s\n", certificate.AsString())
 	return !v.notary_.SealMatches(document, certificate)
 }
 

@@ -225,7 +225,7 @@ func (v *localStorage_) WriteDocument(
 		document,
 	), &status)
 	citation = v.notary_.CiteDocument(document)
-	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	uti.MakeDirectory(path)
 	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = document.AsString()
@@ -244,7 +244,7 @@ func (v *localStorage_) ReadDocument(
 		"An error occurred while attempting to read a document: %s",
 		citation,
 	), &status)
-	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = uti.ReadFile(filename)
 	document = not.DocumentFromString(source)
@@ -262,7 +262,7 @@ func (v *localStorage_) DeleteDocument(
 		"An error occurred while attempting to delete a document: %s",
 		citation,
 	), &status)
-	var path = v.directory_ + "nebula/" + citation.GetTag().AsString() + "/"
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	var filename = path + citation.GetVersion().AsString() + ".bali"
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
