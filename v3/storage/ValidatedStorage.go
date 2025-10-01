@@ -103,25 +103,53 @@ func (v *validatedStorage_) DeleteCitation(
 	return
 }
 
-func (v *validatedStorage_) BorrowCitation(
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *validatedStorage_) WriteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
-	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.BorrowCitation(fromPath, toPath)
+	status = v.storage_.WriteMessage(bag, message)
 	return
 }
 
-func (v *validatedStorage_) ReturnCitation(
-	citation not.CitationLike,
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *validatedStorage_) ReadMessage(
+	bag doc.NameLike,
+) (
+	message not.CitationLike,
+	status rep.Status,
+) {
+	message, status = v.storage_.ReadMessage(bag)
+	if status != rep.Success {
+		return
+	}
+	if v.invalidCitation(message) {
+		status = rep.Invalid
+	}
+	return
+}
+
+func (v *validatedStorage_) UnreadMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
 	status rep.Status,
 ) {
-	status = v.storage_.ReturnCitation(citation, fromPath, toPath)
+	if v.invalidCitation(message) {
+		status = rep.Invalid
+		return
+	}
+	status = v.storage_.UnreadMessage(bag, message)
+	return
+}
+
+func (v *validatedStorage_) DeleteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
 

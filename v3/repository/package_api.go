@@ -125,18 +125,6 @@ type DocumentRepositoryLike interface {
 		document not.DocumentLike,
 		status Status,
 	)
-	CreateBag(
-		name doc.NameLike,
-		bag not.DocumentLike,
-	) (
-		status Status,
-	)
-	RemoveBag(
-		name doc.NameLike,
-	) (
-		bag not.DocumentLike,
-		status Status,
-	)
 	PostMessage(
 		bag doc.NameLike,
 		message not.DocumentLike,
@@ -196,17 +184,27 @@ type Persistent interface {
 		citation not.CitationLike,
 		status Status,
 	)
-	BorrowCitation(
-		fromPath doc.NameLike,
-		toPath doc.NameLike,
+	WriteMessage(
+		bag doc.NameLike,
+		message not.CitationLike,
 	) (
-		citation not.CitationLike,
 		status Status,
 	)
-	ReturnCitation(
-		citation not.CitationLike,
-		fromPath doc.NameLike,
-		toPath doc.NameLike,
+	ReadMessage(
+		bag doc.NameLike,
+	) (
+		message not.CitationLike,
+		status Status,
+	)
+	UnreadMessage(
+		bag doc.NameLike,
+		message not.CitationLike,
+	) (
+		status Status,
+	)
+	DeleteMessage(
+		bag doc.NameLike,
+		message not.CitationLike,
 	) (
 		status Status,
 	)

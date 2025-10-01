@@ -92,25 +92,43 @@ func (v *cachedStorage_) DeleteCitation(
 	return
 }
 
-func (v *cachedStorage_) BorrowCitation(
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *cachedStorage_) WriteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
-	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.BorrowCitation(fromPath, toPath)
+	status = v.storage_.WriteMessage(bag, message)
 	return
 }
 
-func (v *cachedStorage_) ReturnCitation(
-	citation not.CitationLike,
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *cachedStorage_) ReadMessage(
+	bag doc.NameLike,
+) (
+	message not.CitationLike,
+	status rep.Status,
+) {
+	message, status = v.storage_.ReadMessage(bag)
+	return
+}
+
+func (v *cachedStorage_) UnreadMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
 	status rep.Status,
 ) {
-	status = v.storage_.ReturnCitation(citation, fromPath, toPath)
+	status = v.storage_.UnreadMessage(bag, message)
+	return
+}
+
+func (v *cachedStorage_) DeleteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
 

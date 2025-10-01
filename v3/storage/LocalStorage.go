@@ -83,9 +83,9 @@ func (v *localStorage_) WriteCitation(
 		version,
 		citation,
 	), &status)
-	var path = v.getNamePath(name)
+	var path = v.getPath(name)
 	uti.MakeDirectory(path)
-	var filename = path + v.getVersionFilename(version)
+	var filename = v.getFilename(name, version)
 	var source = citation.AsString()
 	uti.WriteFile(filename, source)
 	status = rep.Success
@@ -104,7 +104,7 @@ func (v *localStorage_) ReadCitation(
 		name,
 		version,
 	), &status)
-	var filename = v.getNamePath(name) + v.getVersionFilename(version)
+	var filename = v.getFilename(name, version)
 	var source = uti.ReadFile(filename)
 	citation = not.CitationFromString(source)
 	status = rep.Success
@@ -124,12 +124,12 @@ func (v *localStorage_) DeleteCitation(
 		version,
 	), &status)
 	// Remove the citation file.
-	var filename = v.getNamePath(name) + v.getVersionFilename(version)
+	var filename = v.getFilename(name, version)
 	uti.RemovePath(filename)
 	status = rep.Success
 
 	// Remove any empty directories in the citation path.
-	var path = v.getNamePath(name)
+	var path = v.getPath(name)
 	for len(path) > 0 {
 		if len(uti.ReadDirectory(path)) > 0 {
 			// The directory is not empty so we are done.
@@ -137,50 +137,79 @@ func (v *localStorage_) DeleteCitation(
 		}
 		uti.RemovePath(path)
 		var directories = sts.Split(path, "/")
-		directories = directories[:len(directories)-2] // Strip off the last one.
+		directories = directories[:len(directories)-1] // Strip off the last one.
 		path = sts.Join(directories, "/")
 	}
 	return
 }
 
-func (v *localStorage_) BorrowCitation(
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *localStorage_) WriteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
-	citation not.CitationLike,
 	status rep.Status,
 ) {
-	var path = v.getNamePath(fromPath)
-	var names = doc.List[string](uti.ReadDirectory(path))
-	var index = int(doc.Generator().RandomOrdinal(names.GetSize()))
-	var name = names.GetValue(index)
-	var filename = path + "/" + name + "/v1.bali"
-	var source = uti.ReadFile(filename)
-	citation = not.CitationFromString(source)
-	uti.RemovePath(filename)
-	path = v.getNamePath(toPath) + "/" + name
-	uti.MakeDirectory(path)
-	filename = path + "/v1.bali"
+	var free = v.getPath(bag) + "/free"
+	uti.MakeDirectory(free)
+	var name = message.GetTag().AsString()[1:] + ".bali"
+	var filename = free + "/" + name
+	var source = message.AsString()
 	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
 }
 
-func (v *localStorage_) ReturnCitation(
-	citation not.CitationLike,
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *localStorage_) ReadMessage(
+	bag doc.NameLike,
+) (
+	message not.CitationLike,
+	status rep.Status,
+) {
+	var free = v.getPath(bag) + "/free"
+	var names = doc.List[string](uti.ReadDirectory(free))
+	var index = int(doc.Generator().RandomOrdinal(names.GetSize()))
+	var name = names.GetValue(index)
+	var filename = free + "/" + name
+	var source = uti.ReadFile(filename)
+	uti.RemovePath(filename)
+	var lent = v.getPath(bag) + "/lent"
+	uti.MakeDirectory(lent)
+	filename = lent + "/" + name
+	uti.WriteFile(filename, source)
+	message = not.CitationFromString(source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) UnreadMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
 	status rep.Status,
 ) {
-	var tag = citation.GetTag().AsString()
-	var path = v.getNamePath(fromPath) + "/" + tag
-	uti.RemovePath(path)
-	path = v.getNamePath(toPath) + "/" + tag
-	uti.MakeDirectory(path)
-	var filename = path + "/v1.bali"
-	var source = citation.AsString()
+	var lent = v.getPath(bag) + "/lent"
+	var name = message.GetTag().AsString()[1:] + ".bali"
+	var filename = lent + "/" + name
+	uti.RemovePath(filename)
+	var free = v.getPath(bag) + "/free"
+	uti.MakeDirectory(free)
+	filename = free + "/" + name
+	var source = message.AsString()
 	uti.WriteFile(filename, source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) DeleteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
+) (
+	status rep.Status,
+) {
+	var lent = v.getPath(bag) + "/lent"
+	var name = message.GetTag().AsString()[1:] + ".bali"
+	var filename = lent + "/" + name
+	uti.RemovePath(filename)
 	status = rep.Success
 	return
 }
@@ -263,16 +292,17 @@ func (v *localStorage_) errorCheck(
 	}
 }
 
-func (v *localStorage_) getNamePath(
+func (v *localStorage_) getPath(
 	name doc.NameLike,
 ) string {
-	return v.directory_ + "bali" + name.AsString() + "/"
+	return v.directory_ + "bali" + name.AsString()
 }
 
-func (v *localStorage_) getVersionFilename(
+func (v *localStorage_) getFilename(
+	name doc.NameLike,
 	version doc.VersionLike,
 ) string {
-	return version.AsString() + ".bali"
+	return v.getPath(name) + "/" + version.AsString() + ".bali"
 }
 
 // Instance Structure

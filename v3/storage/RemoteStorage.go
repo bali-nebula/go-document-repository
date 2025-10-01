@@ -96,21 +96,39 @@ func (v *remoteStorage_) DeleteCitation(
 	return
 }
 
-func (v *remoteStorage_) BorrowCitation(
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *remoteStorage_) WriteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
-	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) ReturnCitation(
-	citation not.CitationLike,
-	fromPath doc.NameLike,
-	toPath doc.NameLike,
+func (v *remoteStorage_) ReadMessage(
+	bag doc.NameLike,
+) (
+	message not.CitationLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) UnreadMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) DeleteMessage(
+	bag doc.NameLike,
+	message not.CitationLike,
 ) (
 	status rep.Status,
 ) {

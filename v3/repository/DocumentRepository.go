@@ -196,49 +196,6 @@ func (v *documentRepository_) CheckoutDocument(
 	return
 }
 
-func (v *documentRepository_) CreateBag(
-	name doc.NameLike,
-	bag not.DocumentLike,
-) (
-	status Status,
-) {
-	defer v.errorCheck(
-		"An error occurred while attempting to create a message bag.",
-	)
-	var citation not.CitationLike
-	bag = v.notary_.NotarizeDocument(bag)
-	citation, status = v.storage_.WriteDocument(bag)
-	if status != Success {
-		return
-	}
-	var version = doc.Version()
-	status = v.storage_.WriteCitation(name, version, citation)
-	return
-}
-
-func (v *documentRepository_) RemoveBag(
-	name doc.NameLike,
-) (
-	bag not.DocumentLike,
-	status Status,
-) {
-	defer v.errorCheck(
-		"An error occurred while attempting to delete a message bag.",
-	)
-	var citation not.CitationLike
-	var version = doc.Version()
-	citation, status = v.storage_.ReadCitation(name, version)
-	if status != Success {
-		return
-	}
-	bag, status = v.storage_.DeleteDocument(citation)
-	if status != Success {
-		return
-	}
-	_, status = v.storage_.DeleteCitation(name, version)
-	return
-}
-
 func (v *documentRepository_) PostMessage(
 	bag doc.NameLike,
 	message not.DocumentLike,
@@ -249,19 +206,13 @@ func (v *documentRepository_) PostMessage(
 		"An error occurred while attempting to send a message via a bag.",
 	)
 	// TBD - Add checks for bag capacity violations.
-	message = v.notary_.NotarizeDocument(message)
-	var content = message.GetContent()
-	var name = doc.NameClass().Concatenate(
-		bag,
-		doc.Name("/accessible/"+content.GetTag().AsString()[1:]),
-	)
 	var citation not.CitationLike
+	message = v.notary_.NotarizeDocument(message)
 	citation, status = v.storage_.WriteDocument(message)
 	if status != Success {
 		return
 	}
-	var version = doc.Version()
-	status = v.storage_.WriteCitation(name, version, citation)
+	status = v.storage_.WriteMessage(bag, citation)
 	return
 }
 
@@ -275,9 +226,7 @@ func (v *documentRepository_) RetrieveMessage(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
 	var citation not.CitationLike
-	var accessible = doc.Name(bag.AsString() + "/accessible")
-	var processing = doc.Name(bag.AsString() + "/processing")
-	citation, status = v.storage_.BorrowCitation(accessible, processing)
+	citation, status = v.storage_.ReadMessage(bag)
 	if status != Success {
 		return
 	}
@@ -294,12 +243,8 @@ func (v *documentRepository_) AcceptMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to accept a processed message.",
 	)
-	var content = message.GetContent()
-	var tag = content.GetTag().AsString()[1:]
-	var name = doc.Name(bag.AsString() + "/processing" + tag)
-	var version = doc.Version()
-	var citation not.CitationLike
-	citation, status = v.storage_.DeleteCitation(name, version)
+	var citation = v.notary_.CiteDocument(message)
+	status = v.storage_.DeleteMessage(bag, citation)
 	if status != Success {
 		return
 	}
@@ -317,9 +262,7 @@ func (v *documentRepository_) RejectMessage(
 		"An error occurred while attempting to reject a retrieved message.",
 	)
 	var citation = v.notary_.CiteDocument(message)
-	var accessible = doc.Name(bag.AsString() + "/accessible")
-	var processing = doc.Name(bag.AsString() + "/processing")
-	status = v.storage_.ReturnCitation(citation, accessible, processing)
+	status = v.storage_.UnreadMessage(bag, citation)
 	return
 }
 

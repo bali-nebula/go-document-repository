@@ -31,26 +31,13 @@ For detailed documentation on this entire module refer to the wiki:
 package module
 
 import (
-	bal "github.com/bali-nebula/go-bali-documents/v3"
+	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
-	doc "github.com/bali-nebula/go-document-repository/v3/documents"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	sto "github.com/bali-nebula/go-document-repository/v3/storage"
 )
 
 // TYPE ALIASES
-
-// Documents
-
-type (
-	BagClassLike     = doc.BagClassLike
-	MessageClassLike = doc.MessageClassLike
-)
-
-type (
-	BagLike     = doc.BagLike
-	MessageLike = doc.MessageLike
-)
 
 // Repository
 
@@ -59,13 +46,12 @@ type (
 )
 
 const (
-	Unavailable = rep.Unavailable
-	Forbidden   = rep.Forbidden
-	Retrieved   = rep.Retrieved
-	Missing     = rep.Missing
-	Written     = rep.Written
-	Deleted     = rep.Deleted
-	Invalid     = rep.Invalid
+	Problem = rep.Problem
+	Success = rep.Success
+	Missing = rep.Missing
+	Existed = rep.Existed
+	Illegal = rep.Illegal
+	Invalid = rep.Invalid
 )
 
 type (
@@ -99,58 +85,6 @@ type (
 )
 
 // CLASS ACCESSORS
-
-// Documents
-
-func BagClass() BagClassLike {
-	return doc.BagClass()
-}
-
-func Bag(
-	name bal.NameLike,
-	capacity bal.NumberLike,
-	leasetime bal.NumberLike,
-	permissions bal.ResourceLike,
-) BagLike {
-	return BagClass().Bag(
-		name,
-		capacity,
-		leasetime,
-		permissions,
-	)
-}
-
-func BagFromString(
-	source string,
-) BagLike {
-	return BagClass().BagFromString(
-		source,
-	)
-}
-
-func MessageClass() MessageClassLike {
-	return doc.MessageClass()
-}
-
-func Message(
-	entity any,
-	type_ bal.ResourceLike,
-	permissions bal.ResourceLike,
-) MessageLike {
-	return MessageClass().Message(
-		entity,
-		type_,
-		permissions,
-	)
-}
-
-func MessageFromString(
-	source string,
-) MessageLike {
-	return MessageClass().MessageFromString(
-		source,
-	)
-}
 
 // Repository
 
@@ -202,7 +136,7 @@ func RemoteStorageClass() RemoteStorageClassLike {
 
 func RemoteStorage(
 	notary not.DigitalNotaryLike,
-	service bal.ResourceLike,
+	service doc.ResourceLike,
 ) RemoteStorageLike {
 	return RemoteStorageClass().RemoteStorage(
 		notary,

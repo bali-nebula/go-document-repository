@@ -38,98 +38,95 @@ func TestLocalStorage(t *tes.T) {
 
 	// Save the certificate.
 	var status rep.Status
-	var content = certificate.GetContent()
-	var citation = notary.CiteDocument(content)
-	ass.True(t, notary.CitationMatches(citation, content))
+	var citation = notary.CiteDocument(certificate)
+	ass.True(t, notary.CitationMatches(citation, certificate))
 	citation, status = repository.SaveCertificate(certificate)
-	ass.Equal(t, rep.Written, status)
-	ass.True(t, notary.CitationMatches(citation, content))
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, notary.CitationMatches(citation, certificate))
 	certificate = notary.RefreshKey()
-	content = certificate.GetContent()
-	citation = notary.CiteDocument(content)
-	ass.True(t, notary.CitationMatches(citation, content))
+	citation = notary.CiteDocument(certificate)
+	ass.True(t, notary.CitationMatches(citation, certificate))
 	citation, status = repository.SaveCertificate(certificate)
-	ass.Equal(t, rep.Written, status)
-	ass.True(t, notary.CitationMatches(citation, content))
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, notary.CitationMatches(citation, certificate))
 
 	// Save a draft document.
 	var component = doc.Angle("~π")
 	var type_ = doc.Resource("<bali:/examples/Angle:v1>")
 	var tag = doc.Tag()
 	var version = doc.Version("v1.2.3")
-	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	var previous doc.ResourceLike
-	var draft not.Parameterized = not.Draft(
+	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	var content = not.Content(
 		component,
 		type_,
 		tag,
 		version,
-		permissions,
 		previous,
+		permissions,
 	)
-	citation, status = repository.SaveDraft(draft)
-	ass.Equal(t, rep.Written, status)
+	var document = not.Document(content)
+	citation, status = repository.SaveDraft(document)
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, notary.CitationMatches(citation, document))
 
 	// Retrieve the draft document.
-	var same not.Parameterized
+	var same not.DocumentLike
 	same, status = repository.RetrieveDraft(citation)
-	ass.Equal(t, rep.Retrieved, status)
-	ass.Equal(t, draft.AsString(), same.AsString())
+	ass.Equal(t, rep.Success, status)
+	ass.Equal(t, document.AsString(), same.AsString())
 
-	// Create a notarized contract document.
-	var name = doc.Name("/examples/Contract")
-	var contract, same2, same3 not.ContractLike
-	contract, status = repository.NotarizeDocument(name, version, draft)
-	ass.Equal(t, rep.Written, status)
-	same2, status = repository.RetrieveDocument(name, version)
-	ass.Equal(t, rep.Retrieved, status)
-	ass.Equal(t, contract.AsString(), same2.AsString())
-	same3, status = repository.RetrieveDocument(name, version)
-	ass.Equal(t, rep.Retrieved, status)
-	ass.Equal(t, same2.AsString(), same3.AsString())
+	// Create a notarized document.
+	var name = doc.Name("/examples/Document")
+	status = repository.NotarizeDocument(name, version, document)
+	ass.Equal(t, rep.Success, status)
+	same, status = repository.RetrieveDocument(name, version)
+	ass.Equal(t, rep.Success, status)
+	ass.Equal(t, document.AsString(), same.AsString())
 
 	// Checkout a new draft of the contract document.
-	draft, status = repository.CheckoutDocument(name, version, uint(2))
-	ass.Equal(t, rep.Retrieved, status)
-	ass.NotEqual(t, draft.AsString(), same.AsString())
+	document, status = repository.CheckoutDocument(name, version, uint(2))
+	ass.Equal(t, rep.Success, status)
+	ass.NotEqual(t, document.AsString(), same.AsString())
 
 	// Discard the draft document
-	citation = notary.CiteDocument(draft)
-	status = repository.DiscardDraft(citation)
-	ass.Equal(t, rep.Deleted, status)
+	citation = notary.CiteDocument(document)
+	same, status = repository.DiscardDocument(citation)
+	ass.Equal(t, rep.Success, status)
+	ass.Equal(t, document.AsString(), same.AsString())
 
-	// Create a new message bag.
-	var bag = doc.Name("/examples/Bag")
-	status = repository.CreateBag(bag, 8, 10, permissions)
-	ass.Equal(t, rep.Written, status)
-
-	// Send a message to the bag.
-	var entity = doc.ParseSource(`[
-    $quote: "Hello World!"
-]`).GetEntity()
-	var message = rep.Message(
-		entity,
-		doc.Resource("<bali:/examples/Message:v1>"),
+	// Send a message to a bag.
+	var bag = doc.Name("/examples/bag")
+	component = doc.Quote("Hello World!")
+	type_ = doc.Resource("<bali:/examples/Message:v1>")
+	tag = doc.Tag()
+	version = doc.Version()
+	var previous doc.ResourceLike
+	permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	content = not.Content(
+		component,
+		type_,
+		tag,
+		version,
+		previous,
 		permissions,
 	)
+
+	var message = not.Document(content)
 	status = repository.PostMessage(bag, message)
-	ass.Equal(t, rep.Written, status)
+	ass.Equal(t, rep.Success, status)
 
 	// Retrieve a message from the bag.
-	contract, status = repository.RetrieveMessage(bag)
-	ass.Equal(t, rep.Retrieved, status)
+	message, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Success, status)
 
 	// Reject the message.
-	status = repository.RejectMessage(contract)
-	ass.Equal(t, rep.Deleted, status)
+	status = repository.RejectMessage(message)
+	ass.Equal(t, rep.Success, status)
 
 	// Process the message.
-	contract, status = repository.RetrieveMessage(bag)
-	ass.Equal(t, rep.Retrieved, status)
-	status = repository.AcceptMessage(contract)
-	ass.Equal(t, rep.Deleted, status)
-
-	// Remove the bag.
-	status = repository.RemoveBag(bag)
-	ass.Equal(t, rep.Deleted, status)
+	message, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Success, status)
+	status = repository.AcceptMessage(message)
+	ass.Equal(t, rep.Success, status)
 }
