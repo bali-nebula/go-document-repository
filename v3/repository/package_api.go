@@ -175,7 +175,7 @@ Persistent declares the set of method signatures that must be supported by all
 persistent data storage mechanisms.
 */
 type Persistent interface {
-	CreateCitation(
+	WriteCitation(
 		name doc.NameLike,
 		version doc.VersionLike,
 		citation not.CitationLike,
@@ -189,13 +189,6 @@ type Persistent interface {
 		citation not.CitationLike,
 		status Status,
 	)
-	UpdateCitation(
-		name doc.NameLike,
-		version doc.VersionLike,
-		citation not.CitationLike,
-	) (
-		status Status,
-	)
 	DeleteCitation(
 		name doc.NameLike,
 		version doc.VersionLike,
@@ -203,21 +196,21 @@ type Persistent interface {
 		citation not.CitationLike,
 		status Status,
 	)
-	MoveCitation(
-		oldName doc.NameLike,
-		newName doc.NameLike,
-		version doc.VersionLike,
+	BorrowCitation(
+		fromPath doc.NameLike,
+		toPath doc.NameLike,
 	) (
 		citation not.CitationLike,
 		status Status,
 	)
-	ListCitations(
-		path doc.NameLike,
+	ReturnCitation(
+		citation not.CitationLike,
+		fromPath doc.NameLike,
+		toPath doc.NameLike,
 	) (
-		citations doc.Sequential[not.CitationLike],
 		status Status,
 	)
-	CreateDocument(
+	WriteDocument(
 		document not.DocumentLike,
 	) (
 		citation not.CitationLike,
@@ -227,12 +220,6 @@ type Persistent interface {
 		citation not.CitationLike,
 	) (
 		document not.DocumentLike,
-		status Status,
-	)
-	UpdateDocument(
-		document not.DocumentLike,
-	) (
-		citation not.CitationLike,
 		status Status,
 	)
 	DeleteDocument(

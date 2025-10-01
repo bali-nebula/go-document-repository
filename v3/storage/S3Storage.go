@@ -58,22 +58,22 @@ func (v *s3Storage_) GetClass() S3StorageClassLike {
 
 // Persistent Methods
 
-func (v *s3Storage_) ReadCitation(
+func (v *s3Storage_) WriteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *s3Storage_) WriteCitation(
+func (v *s3Storage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
-	citation doc.ResourceLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -84,6 +84,7 @@ func (v *s3Storage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -93,65 +94,37 @@ func (v *s3Storage_) DeleteCitation(
 func (v *s3Storage_) ListCitations(
 	path doc.NameLike,
 ) (
-	citations doc.Sequential[doc.ResourceLike],
+	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *s3Storage_) ReadDraft(
-	citation doc.ResourceLike,
+func (v *s3Storage_) WriteDocument(
+	document not.DocumentLike,
 ) (
-	draft not.Parameterized,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *s3Storage_) WriteDraft(
-	draft not.Parameterized,
+func (v *s3Storage_) ReadDocument(
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
+	document not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *s3Storage_) DeleteDraft(
-	citation doc.ResourceLike,
+func (v *s3Storage_) DeleteDocument(
+	citation not.CitationLike,
 ) (
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *s3Storage_) ReadContract(
-	citation doc.ResourceLike,
-) (
-	contract not.ContractLike,
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *s3Storage_) WriteContract(
-	contract not.ContractLike,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *s3Storage_) DeleteContract(
-	citation doc.ResourceLike,
-) (
+	document not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.

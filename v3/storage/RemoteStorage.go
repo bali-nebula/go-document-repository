@@ -63,22 +63,22 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 
 // Persistent Methods
 
-func (v *remoteStorage_) ReadCitation(
+func (v *remoteStorage_) WriteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) WriteCitation(
+func (v *remoteStorage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
-	citation doc.ResourceLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -89,6 +89,7 @@ func (v *remoteStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -98,65 +99,37 @@ func (v *remoteStorage_) DeleteCitation(
 func (v *remoteStorage_) ListCitations(
 	path doc.NameLike,
 ) (
-	citations doc.Sequential[doc.ResourceLike],
+	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) ReadDraft(
-	citation doc.ResourceLike,
+func (v *remoteStorage_) WriteDocument(
+	document not.DocumentLike,
 ) (
-	draft not.Parameterized,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) WriteDraft(
-	draft not.Parameterized,
+func (v *remoteStorage_) ReadDocument(
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
+	document not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) DeleteDraft(
-	citation doc.ResourceLike,
+func (v *remoteStorage_) DeleteDocument(
+	citation not.CitationLike,
 ) (
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *remoteStorage_) ReadContract(
-	citation doc.ResourceLike,
-) (
-	contract not.ContractLike,
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *remoteStorage_) WriteContract(
-	contract not.ContractLike,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	// TBD - Add the method implementation.
-	return
-}
-
-func (v *remoteStorage_) DeleteContract(
-	citation doc.ResourceLike,
-) (
+	document not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.

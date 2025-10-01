@@ -68,12 +68,12 @@ func (v *documentRepository_) SaveCertificate(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a certificate document.",
 	)
-	citation, status = v.storage_.CreateDocument(certificate)
+	citation, status = v.storage_.WriteDocument(certificate)
 	var content = certificate.GetContent()
 	var tag = content.GetTag()
 	var version = content.GetVersion()
 	var name = doc.Name("/certificates/" + tag.AsString()[1:])
-	status = v.storage_.CreateCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -86,7 +86,7 @@ func (v *documentRepository_) SaveDraft(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a draft document.",
 	)
-	citation, status = v.storage_.UpdateDocument(document)
+	citation, status = v.storage_.WriteDocument(document)
 	return
 }
 
@@ -128,11 +128,11 @@ func (v *documentRepository_) NotarizeDocument(
 	)
 	var citation not.CitationLike
 	document = v.notary_.NotarizeDocument(document)
-	citation, status = v.storage_.CreateDocument(document)
+	citation, status = v.storage_.WriteDocument(document)
 	if status != Success {
 		return
 	}
-	status = v.storage_.CreateCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -207,12 +207,12 @@ func (v *documentRepository_) CreateBag(
 	)
 	var citation not.CitationLike
 	bag = v.notary_.NotarizeDocument(bag)
-	citation, status = v.storage_.CreateDocument(bag)
+	citation, status = v.storage_.WriteDocument(bag)
 	if status != Success {
 		return
 	}
 	var version = doc.Version()
-	status = v.storage_.CreateCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -256,12 +256,12 @@ func (v *documentRepository_) PostMessage(
 		doc.Name("/accessible/"+content.GetTag().AsString()[1:]),
 	)
 	var citation not.CitationLike
-	citation, status = v.storage_.CreateDocument(message)
+	citation, status = v.storage_.WriteDocument(message)
 	if status != Success {
 		return
 	}
 	var version = doc.Version()
-	status = v.storage_.CreateCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -274,47 +274,14 @@ func (v *documentRepository_) RetrieveMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
+	var citation not.CitationLike
 	var accessible = doc.Name(bag.AsString() + "/accessible")
 	var processing = doc.Name(bag.AsString() + "/processing")
-	for retries := 0; retries < 8; retries++ {
-		var sequence doc.Sequential[not.CitationLike]
-		sequence, status = v.storage_.ListCitations(accessible)
-		if status != Success {
-			return
-		}
-		var citations = doc.List[not.CitationLike](sequence)
-		if citations.IsEmpty() {
-			// There are no messages currently in the bag.
-			continue
-		}
-
-		// Select a message from the bag at random.
-		var size = citations.GetSize()
-		var index = int(doc.Generator().RandomOrdinal(size))
-		var citation = citations.GetValue(index)
-
-		// Move the message citation from accessible to processing.
-		var tag = doc.Name("/" + citation.GetTag().AsString()[1:])
-		accessible = doc.NameClass().Concatenate(accessible, tag)
-		processing = doc.NameClass().Concatenate(processing, tag)
-		var version = doc.Version()
-		citation, status = v.storage_.MoveCitation(
-			accessible,
-			processing,
-			version,
-		)
-		if status == Missing {
-			// Another process got there first.
-			continue
-		}
-
-		// Read the message.
-		message, status = v.storage_.ReadDocument(citation)
-		if status != Success {
-			return
-		}
-		break
+	citation, status = v.storage_.BorrowCitation(accessible, processing)
+	if status != Success {
+		return
 	}
+	message, status = v.storage_.ReadDocument(citation)
 	return
 }
 
@@ -327,22 +294,15 @@ func (v *documentRepository_) AcceptMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to accept a processed message.",
 	)
-
-	// Delete the message citation from the document storage.
 	var content = message.GetContent()
 	var tag = content.GetTag().AsString()[1:]
-	var name = doc.NameClass().Concatenate(
-		bag,
-		doc.Name("/processing/"+tag),
-	)
+	var name = doc.Name(bag.AsString() + "/processing" + tag)
 	var version = doc.Version()
 	var citation not.CitationLike
 	citation, status = v.storage_.DeleteCitation(name, version)
 	if status != Success {
 		return
 	}
-
-	// Delete the message from the document storage.
 	_, status = v.storage_.DeleteDocument(citation)
 	return
 }
@@ -356,18 +316,10 @@ func (v *documentRepository_) RejectMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to reject a retrieved message.",
 	)
-	var content = message.GetContent()
-	var tag = content.GetTag().AsString()[1:]
-	var accessible = doc.NameClass().Concatenate(
-		bag,
-		doc.Name("/accessible/"+tag),
-	)
-	var processing = doc.NameClass().Concatenate(
-		bag,
-		doc.Name("/processing/"+tag),
-	)
-	var version = doc.Version()
-	_, status = v.storage_.MoveCitation(processing, accessible, version)
+	var citation = v.notary_.CiteDocument(message)
+	var accessible = doc.Name(bag.AsString() + "/accessible")
+	var processing = doc.Name(bag.AsString() + "/processing")
+	status = v.storage_.ReturnCitation(citation, accessible, processing)
 	return
 }
 
@@ -384,11 +336,11 @@ func (v *documentRepository_) PublishEvent(
 	var name = doc.Name("/events/" + content.GetTag().AsString()[1:])
 	var version = content.GetVersion()
 	var citation not.CitationLike
-	citation, status = v.storage_.CreateDocument(event)
+	citation, status = v.storage_.WriteDocument(event)
 	if status != Success {
 		return
 	}
-	status = v.storage_.CreateCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 

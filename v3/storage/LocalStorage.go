@@ -70,29 +70,10 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 
 // Persistent Methods
 
-func (v *localStorage_) ReadCitation(
-	name doc.NameLike,
-	version doc.VersionLike,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to read a citation: %s:%s",
-		name,
-		version,
-	), &status)
-	var filename = v.getNamePath(name) + v.getVersionFilename(version)
-	var source = uti.ReadFile(filename)
-	citation = not.Citation(source).AsResource()
-	status = rep.Retrieved
-	return
-}
-
 func (v *localStorage_) WriteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
-	citation doc.ResourceLike,
+	citation not.CitationLike,
 ) (
 	status rep.Status,
 ) {
@@ -107,7 +88,26 @@ func (v *localStorage_) WriteCitation(
 	var filename = path + v.getVersionFilename(version)
 	var source = not.Citation(citation).AsString()
 	uti.WriteFile(filename, source)
-	status = rep.Written
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) ReadCitation(
+	name doc.NameLike,
+	version doc.VersionLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	defer v.errorCheck(fmt.Sprintf(
+		"An error occurred while attempting to read a citation: %s:%s",
+		name,
+		version,
+	), &status)
+	var filename = v.getNamePath(name) + v.getVersionFilename(version)
+	var source = uti.ReadFile(filename)
+	citation = not.Citation(source).AsResource()
+	status = rep.Success
 	return
 }
 
@@ -115,6 +115,7 @@ func (v *localStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	defer v.errorCheck(fmt.Sprintf(
@@ -125,7 +126,7 @@ func (v *localStorage_) DeleteCitation(
 	// Remove the citation file.
 	var filename = v.getNamePath(name) + v.getVersionFilename(version)
 	uti.RemovePath(filename)
-	status = rep.Deleted
+	status = rep.Success
 
 	// Remove any empty directories in the citation path.
 	var path = v.getNamePath(name)
@@ -145,14 +146,14 @@ func (v *localStorage_) DeleteCitation(
 func (v *localStorage_) ListCitations(
 	path doc.NameLike,
 ) (
-	citations doc.Sequential[doc.ResourceLike],
+	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
 	defer v.errorCheck(fmt.Sprintf(
 		"An error occurred while attempting to list citations: %s",
 		path,
 	), &status)
-	var list = doc.List[doc.ResourceLike]()
+	var list = doc.List[not.CitationLike]()
 	var directory = v.getNamePath(path)
 	var filenames = uti.ReadDirectory(directory)
 	for _, filename := range filenames {
@@ -161,115 +162,57 @@ func (v *localStorage_) ListCitations(
 		list.AppendValue(citation.AsResource())
 	}
 	citations = list
-	status = rep.Retrieved
+	status = rep.Success
 	return
 }
 
-func (v *localStorage_) ReadDraft(
-	citation doc.ResourceLike,
+func (v *localStorage_) WriteDocument(
+	document not.DocumentLike,
 ) (
-	draft not.Parameterized,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to read a draft: %s",
-		citation,
+		"An error occurred while attempting to write a document: %s",
+		document,
 	), &status)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = uti.ReadFile(filename)
-	draft = not.Draft(source)
-	status = rep.Retrieved
-	return
-}
-
-func (v *localStorage_) WriteDraft(
-	draft not.Parameterized,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to write a draft: %s",
-		draft,
-	), &status)
-	citation = v.notary_.CiteDocument(draft)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	uti.MakeDirectory(path)
-	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = draft.AsString()
-	uti.WriteFile(filename, source)
-	status = rep.Written
-	return
-}
-
-func (v *localStorage_) DeleteDraft(
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to delete a draft: %s",
-		citation,
-	), &status)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	var filename = path + v.getCitationVersion(citation) + ".bali"
-	uti.RemovePath(filename)
-	var filenames = uti.ReadDirectory(path)
-	if len(filenames) == 0 {
-		// This was the last version of the draft so delete the directory too.
-		uti.RemovePath(path)
-	}
-	status = rep.Deleted
-	return
-}
-
-func (v *localStorage_) ReadContract(
-	citation doc.ResourceLike,
-) (
-	contract not.ContractLike,
-	status rep.Status,
-) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to read a contract: %s",
-		citation,
-	), &status)
-	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
-	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = uti.ReadFile(filename)
-	contract = not.Contract(source)
-	status = rep.Retrieved
-	return
-}
-
-func (v *localStorage_) WriteContract(
-	contract not.ContractLike,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to write a contract: %s",
-		contract,
-	), &status)
-	var content = contract.GetContent()
+	var content = document.GetContent()
 	citation = v.notary_.CiteDocument(content)
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
 	uti.MakeDirectory(path)
 	var filename = path + v.getCitationVersion(citation) + ".bali"
-	var source = contract.AsString()
+	var source = document.AsString()
 	uti.WriteFile(filename, source)
-	status = rep.Written
+	status = rep.Success
 	return
 }
 
-func (v *localStorage_) DeleteContract(
-	citation doc.ResourceLike,
+func (v *localStorage_) ReadDocument(
+	citation not.CitationLike,
 ) (
+	document not.DocumentLike,
 	status rep.Status,
 ) {
 	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to delete a contract: %s",
+		"An error occurred while attempting to read a document: %s",
+		citation,
+	), &status)
+	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
+	var filename = path + v.getCitationVersion(citation) + ".bali"
+	var source = uti.ReadFile(filename)
+	document = not.Document(source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) DeleteDocument(
+	citation not.CitationLike,
+) (
+	document not.DocumentLike,
+	status rep.Status,
+) {
+	defer v.errorCheck(fmt.Sprintf(
+		"An error occurred while attempting to delete a document: %s",
 		citation,
 	), &status)
 	var path = v.directory_ + "nebula/" + v.getCitationTag(citation) + "/"
@@ -280,7 +223,7 @@ func (v *localStorage_) DeleteContract(
 		// This was the last version of the document so delete the directory too.
 		uti.RemovePath(path)
 	}
-	status = rep.Deleted
+	status = rep.Success
 	return
 }
 
@@ -303,7 +246,7 @@ func (v *localStorage_) errorCheck(
 }
 
 func (v *localStorage_) getCitationTag(
-	resource doc.ResourceLike,
+	resource not.CitationLike,
 ) string {
 	var citation = not.Citation(resource)
 	var tag = citation.GetTag()
@@ -311,7 +254,7 @@ func (v *localStorage_) getCitationTag(
 }
 
 func (v *localStorage_) getCitationVersion(
-	resource doc.ResourceLike,
+	resource not.CitationLike,
 ) string {
 	var citation = not.Citation(resource)
 	var version = citation.GetVersion()

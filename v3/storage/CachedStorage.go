@@ -37,7 +37,7 @@ func (c *cachedStorageClass_) CachedStorage(
 	}
 	var instance = &cachedStorage_{
 		// Initialize the instance attributes.
-		cache_:   doc.Catalog[string, not.ContractLike](),
+		cache_:   doc.Catalog[string, not.DocumentLike](),
 		storage_: storage,
 	}
 	return instance
@@ -59,109 +59,101 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 
 // Persistent Methods
 
+func (v *cachedStorage_) WriteCitation(
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation not.CitationLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.WriteCitation(name, version, citation)
+	return
+}
+
 func (v *cachedStorage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
-	citation doc.ResourceLike,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	return v.storage_.ReadCitation(name, version)
-}
-
-func (v *cachedStorage_) WriteCitation(
-	name doc.NameLike,
-	version doc.VersionLike,
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	return v.storage_.WriteCitation(name, version, citation)
+	citation, status = v.storage_.ReadCitation(name, version)
+	return
 }
 
 func (v *cachedStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	return v.storage_.DeleteCitation(name, version)
+	citation, status = v.storage_.DeleteCitation(name, version)
+	return
+}
+
+func (v *cachedStorage_) MoveCitation(
+	oldName doc.NameLike,
+	newName doc.NameLike,
+	version doc.VersionLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	citation, status = v.storage_.MoveCitation(oldName, newName, version)
+	return
 }
 
 func (v *cachedStorage_) ListCitations(
 	path doc.NameLike,
 ) (
-	citations doc.Sequential[doc.ResourceLike],
+	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
-	return v.storage_.ListCitations(path)
+	citations, status = v.storage_.ListCitations(path)
+	return
 }
 
-func (v *cachedStorage_) ReadDraft(
-	citation doc.ResourceLike,
+func (v *cachedStorage_) WriteDocument(
+	document not.DocumentLike,
 ) (
-	draft not.Parameterized,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	return v.storage_.ReadDraft(citation)
+	citation, status = v.storage_.WriteDocument(document)
+	if status == rep.Success {
+		v.cacheDocument(citation, document)
+	}
+	return
 }
 
-func (v *cachedStorage_) WriteDraft(
-	draft not.Parameterized,
+func (v *cachedStorage_) ReadDocument(
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
+	document not.DocumentLike,
 	status rep.Status,
 ) {
-	return v.storage_.WriteDraft(draft)
-}
-
-func (v *cachedStorage_) DeleteDraft(
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	return v.storage_.DeleteDraft(citation)
-}
-
-func (v *cachedStorage_) ReadContract(
-	citation doc.ResourceLike,
-) (
-	contract not.ContractLike,
-	status rep.Status,
-) {
-	contract = v.lookupContract(citation)
-	if uti.IsDefined(contract) {
-		status = rep.Retrieved
+	document = v.lookupDocument(citation)
+	if uti.IsDefined(document) {
+		status = rep.Success
 		return
 	}
-	contract, status = v.storage_.ReadContract(citation)
-	if status == rep.Retrieved {
-		v.cacheContract(citation, contract)
+	document, status = v.storage_.ReadDocument(citation)
+	if status == rep.Success {
+		v.cacheDocument(citation, document)
 	}
 	return
 }
 
-func (v *cachedStorage_) WriteContract(
-	contract not.ContractLike,
+func (v *cachedStorage_) DeleteDocument(
+	citation not.CitationLike,
 ) (
-	citation doc.ResourceLike,
+	document not.DocumentLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.WriteContract(contract)
-	if status == rep.Written {
-		v.cacheContract(citation, contract)
-	}
-	return
-}
-
-func (v *cachedStorage_) DeleteContract(
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	status = v.storage_.DeleteContract(citation)
-	if status == rep.Deleted {
-		v.uncacheContract(citation)
+	document, status = v.storage_.DeleteDocument(citation)
+	if status == rep.Success {
+		v.uncacheDocument(citation)
 	}
 	return
 }
@@ -170,50 +162,42 @@ func (v *cachedStorage_) DeleteContract(
 
 // Private Methods
 
-func (v *cachedStorage_) cacheContract(
-	citation doc.ResourceLike,
-	contract not.ContractLike,
+func (v *cachedStorage_) cacheDocument(
+	citation not.CitationLike,
+	document not.DocumentLike,
 ) {
-	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	v.cache_.SetValue(key, contract)
+	var key = v.getKey(citation)
+	v.cache_.SetValue(key, document)
 }
 
-func (v *cachedStorage_) lookupContract(
-	citation doc.ResourceLike,
-) not.ContractLike {
-	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
-	var contract = v.cache_.GetValue(key)
-	return contract
+func (v *cachedStorage_) lookupDocument(
+	citation not.CitationLike,
+) not.DocumentLike {
+	var key = v.getKey(citation)
+	var document = v.cache_.GetValue(key)
+	return document
 }
 
-func (v *cachedStorage_) uncacheContract(
-	citation doc.ResourceLike,
+func (v *cachedStorage_) uncacheDocument(
+	citation not.CitationLike,
 ) {
-	var key = v.getCitationTag(citation) + v.getCitationVersion(citation)
+	var key = v.getKey(citation)
 	v.cache_.RemoveValue(key)
 }
 
-func (v *cachedStorage_) getCitationTag(
-	resource doc.ResourceLike,
+func (v *cachedStorage_) getKey(
+	citation not.CitationLike,
 ) string {
-	var citation = not.Citation(resource)
-	var tag = citation.GetTag()
-	return tag.AsString()[1:] // Remove the leading "#" character.
-}
-
-func (v *cachedStorage_) getCitationVersion(
-	resource doc.ResourceLike,
-) string {
-	var citation = not.Citation(resource)
-	var version = citation.GetVersion()
-	return version.AsString()
+	var tag = citation.GetTag().AsString()[1:] // Remove the leading "#" character.
+	var version = citation.GetVersion().AsString()
+	return tag + ":" + version
 }
 
 // Instance Structure
 
 type cachedStorage_ struct {
 	// Declare the instance attributes.
-	cache_   doc.CatalogLike[string, not.ContractLike]
+	cache_   doc.CatalogLike[string, not.DocumentLike]
 	storage_ rep.Persistent
 }
 

@@ -64,11 +64,22 @@ func (v *validatedStorage_) GetClass() ValidatedStorageClassLike {
 
 // Persistent Methods
 
+func (v *validatedStorage_) WriteCitation(
+	name doc.NameLike,
+	version doc.VersionLike,
+	citation not.CitationLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.WriteCitation(name, version, citation)
+	return
+}
+
 func (v *validatedStorage_) ReadCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
-	citation doc.ResourceLike,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	citation, status = v.storage_.ReadCitation(name, version)
@@ -81,21 +92,11 @@ func (v *validatedStorage_) ReadCitation(
 	return
 }
 
-func (v *validatedStorage_) WriteCitation(
-	name doc.NameLike,
-	version doc.VersionLike,
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	status = v.storage_.WriteCitation(name, version, citation)
-	return
-}
-
 func (v *validatedStorage_) DeleteCitation(
 	name doc.NameLike,
 	version doc.VersionLike,
 ) (
+	citation not.CitationLike,
 	status rep.Status,
 ) {
 	status = v.storage_.DeleteCitation(name, version)
@@ -105,75 +106,47 @@ func (v *validatedStorage_) DeleteCitation(
 func (v *validatedStorage_) ListCitations(
 	path doc.NameLike,
 ) (
-	citations doc.Sequential[doc.ResourceLike],
+	citations doc.Sequential[not.CitationLike],
 	status rep.Status,
 ) {
 	citations, status = v.storage_.ListCitations(path)
 	return
 }
 
-func (v *validatedStorage_) ReadDraft(
-	citation doc.ResourceLike,
+func (v *validatedStorage_) WriteDocument(
+	document not.DocumentLike,
 ) (
-	draft not.Parameterized,
+	citation not.CitationLike,
 	status rep.Status,
 ) {
-	draft, status = v.storage_.ReadDraft(citation)
-	return
-}
-
-func (v *validatedStorage_) WriteDraft(
-	draft not.Parameterized,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	citation, status = v.storage_.WriteDraft(draft)
-	return
-}
-
-func (v *validatedStorage_) DeleteDraft(
-	citation doc.ResourceLike,
-) (
-	status rep.Status,
-) {
-	status = v.storage_.DeleteDraft(citation)
-	return
-}
-
-func (v *validatedStorage_) ReadContract(
-	citation doc.ResourceLike,
-) (
-	contract not.ContractLike,
-	status rep.Status,
-) {
-	contract, status = v.storage_.ReadContract(citation)
-	if v.invalidContract(contract) {
-		status = rep.Invalid
-	}
-	return
-}
-
-func (v *validatedStorage_) WriteContract(
-	contract not.ContractLike,
-) (
-	citation doc.ResourceLike,
-	status rep.Status,
-) {
-	if v.invalidContract(contract) {
+	if v.invalidDocument(document) {
 		status = rep.Invalid
 		return
 	}
-	citation, status = v.storage_.WriteContract(contract)
+	citation, status = v.storage_.WriteDocument(document)
 	return
 }
 
-func (v *validatedStorage_) DeleteContract(
-	citation doc.ResourceLike,
+func (v *validatedStorage_) ReadDocument(
+	citation not.CitationLike,
 ) (
+	document not.DocumentLike,
 	status rep.Status,
 ) {
-	status = v.storage_.DeleteContract(citation)
+	document, status = v.storage_.ReadDocument(citation)
+	if v.invalidDocument(document) {
+		status = rep.Invalid
+	}
+	return
+}
+
+func (v *validatedStorage_) DeleteDocument(
+	citation not.CitationLike,
+) (
+	document not.DocumentLike,
+	status rep.Status,
+) {
+	status = v.storage_.DeleteDocument(citation)
 	return
 }
 
@@ -182,51 +155,43 @@ func (v *validatedStorage_) DeleteContract(
 // Private Methods
 
 func (v *validatedStorage_) invalidCitation(
-	citation doc.ResourceLike,
+	citation not.CitationLike,
 ) bool {
-	var status rep.Status
-	var draft not.Parameterized
-	draft, status = v.storage_.ReadDraft(citation)
+	var document, status = v.storage_.ReadDocument(citation)
 	if status != rep.Retrieved {
-		var contract not.ContractLike
-		contract, status = v.storage_.ReadContract(citation)
-		if status != rep.Retrieved {
-			log.Printf("The citation does not cite a document: %s\n", citation)
-			return true
-		}
-		draft = contract.GetContent()
+		log.Printf("The citation does not cite a document: %s\n", citation)
+		return true
 	}
-	var matches = v.notary_.CitationMatches(citation, draft)
+	var matches = v.notary_.CitationMatches(citation, document)
 	if !matches {
 		log.Printf(
 			"The citation digest does not match the document: %s %s\n",
 			citation,
-			draft.AsString(),
+			document.AsString(),
 		)
 	}
 	return !matches
 }
 
-func (v *validatedStorage_) invalidContract(
-	contract not.ContractLike,
+func (v *validatedStorage_) invalidDocument(
+	document not.DocumentLike,
 ) bool {
-	// Retrieve the citation to the certificate that signed the contract.
-	var notary = contract.GetNotary()
-	var draft = contract.GetContent()
-	if !v.notary_.CitationMatches(notary, draft) {
-		// Not self-signed, read the certificate that signed the contract.
-		var document, status = v.storage_.ReadContract(notary)
-		if status != rep.Retrieved {
+	// Retrieve the citation to the certificate that signed the document.
+	var notary = document.GetNotary()
+	var certificate = document
+	var status rep.Status
+	if uti.IsDefined(notary) {
+		// The document is not self-signed, so read the notary certificate.
+		certificate, status = v.storage_.ReadDocument(notary)
+		if status != rep.Success {
 			log.Printf(
-				"ValidatedStorage: The cited notary does not exist: %s\n",
+				"ValidatedStorage: The cited notary certificate does not exist: %s\n",
 				notary,
 			)
 			return true
 		}
-		draft = document.GetContent()
 	}
-	var certificate = not.Certificate(draft.AsString())
-	return !v.notary_.SealMatches(contract, certificate)
+	return !v.notary_.SealMatches(document, certificate)
 }
 
 func (v *validatedStorage_) invalidName(
