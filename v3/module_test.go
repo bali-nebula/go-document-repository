@@ -38,28 +38,24 @@ func TestLocalStorage(t *tes.T) {
 
 	// Save the certificate.
 	var status rep.Status
-	var citation = notary.CiteDocument(certificate)
-	ass.True(t, notary.CitationMatches(citation, certificate))
+	var citation not.CitationLike
 	citation, status = repository.SaveCertificate(certificate)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, notary.CitationMatches(citation, certificate))
 	certificate = notary.RefreshKey()
-	citation = notary.CiteDocument(certificate)
-	ass.True(t, notary.CitationMatches(citation, certificate))
 	citation, status = repository.SaveCertificate(certificate)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, notary.CitationMatches(citation, certificate))
 
 	// Save a draft document.
-	var angle = doc.Angle("~π")
-	var component = doc.Component(angle, nil)
-	var type_ = doc.Resource("<bali:/examples/Angle:v1>")
+	var entity any = doc.Angle("~π")
+	var type_ = doc.Resource("<bali:/examples/Pi:v1>")
 	var tag = doc.Tag()
 	var version = doc.Version("v1.2.3")
 	var previous doc.ResourceLike
 	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	var content = not.Content(
-		component,
+		entity,
 		type_,
 		tag,
 		version,
@@ -69,6 +65,7 @@ func TestLocalStorage(t *tes.T) {
 	var document = not.Document(content)
 	citation, status = repository.SaveDraft(document)
 	ass.Equal(t, rep.Success, status)
+	ass.False(t, document.HasSeal())
 	ass.True(t, notary.CitationMatches(citation, document))
 
 	// Retrieve the draft document.
@@ -81,14 +78,22 @@ func TestLocalStorage(t *tes.T) {
 	var name = doc.Name("/examples/Document")
 	status = repository.NotarizeDocument(name, version, document)
 	ass.Equal(t, rep.Success, status)
+	ass.True(t, document.HasSeal())
 	same, status = repository.RetrieveDocument(name, version)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsString(), same.AsString())
 
-	// Checkout a new draft of the contract document.
+	// Checkout a new draft of the document.
 	document, status = repository.CheckoutDocument(name, version, uint(2))
 	ass.Equal(t, rep.Success, status)
+	ass.False(t, document.HasSeal())
 	ass.NotEqual(t, document.AsString(), same.AsString())
+
+	// Save the new draft document.
+	citation, status = repository.SaveDraft(document)
+	ass.Equal(t, rep.Success, status)
+	ass.False(t, document.HasSeal())
+	ass.True(t, notary.CitationMatches(citation, document))
 
 	// Discard the draft document
 	citation = notary.CiteDocument(document)
@@ -98,14 +103,13 @@ func TestLocalStorage(t *tes.T) {
 
 	// Send a message to a bag.
 	var bag = doc.Name("/examples/bag")
-	var quote = doc.Quote("Hello World!")
-	component = doc.Component(quote, nil)
+	entity = doc.Quote("Hello World!")
 	type_ = doc.Resource("<bali:/examples/Message:v1>")
 	tag = doc.Tag()
 	version = doc.Version()
 	permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	content = not.Content(
-		component,
+		entity,
 		type_,
 		tag,
 		version,
@@ -114,12 +118,15 @@ func TestLocalStorage(t *tes.T) {
 	)
 
 	var message = not.Document(content)
+	ass.False(t, message.HasSeal())
 	status = repository.PostMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
+	ass.True(t, message.HasSeal())
 
 	// Retrieve a message from the bag.
 	message, status = repository.RetrieveMessage(bag)
 	ass.Equal(t, rep.Success, status)
+	ass.True(t, message.HasSeal())
 
 	// Reject the message.
 	status = repository.RejectMessage(bag, message)
@@ -128,6 +135,7 @@ func TestLocalStorage(t *tes.T) {
 	// Process the message.
 	message, status = repository.RetrieveMessage(bag)
 	ass.Equal(t, rep.Success, status)
+	ass.True(t, message.HasSeal())
 
 	// Accept the message.
 	status = repository.AcceptMessage(bag, message)

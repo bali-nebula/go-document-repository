@@ -13,12 +13,10 @@
 package storage
 
 import (
-	fmt "fmt"
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
 	uti "github.com/craterdog/go-missing-utilities/v7"
-	log "log"
 	sts "strings"
 )
 
@@ -77,12 +75,6 @@ func (v *localStorage_) WriteCitation(
 ) (
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to write a citation: %s:%s:%s",
-		name,
-		version,
-		citation,
-	), &status)
 	var path = v.getPath(name)
 	uti.MakeDirectory(path)
 	var filename = v.getFilename(name, version)
@@ -99,11 +91,6 @@ func (v *localStorage_) ReadCitation(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to read a citation: %s:%s",
-		name,
-		version,
-	), &status)
 	var filename = v.getFilename(name, version)
 	var source = uti.ReadFile(filename)
 	citation = not.CitationFromString(source)
@@ -118,11 +105,6 @@ func (v *localStorage_) DeleteCitation(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to delete a citation: %s:%s",
-		name,
-		version,
-	), &status)
 	// Remove the citation file.
 	var filename = v.getFilename(name, version)
 	uti.RemovePath(filename)
@@ -220,10 +202,6 @@ func (v *localStorage_) WriteDocument(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to write a document: %s",
-		document,
-	), &status)
 	citation = v.notary_.CiteDocument(document)
 	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	uti.MakeDirectory(path)
@@ -240,10 +218,6 @@ func (v *localStorage_) ReadDocument(
 	document not.DocumentLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to read a document: %s",
-		citation,
-	), &status)
 	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = uti.ReadFile(filename)
@@ -258,10 +232,6 @@ func (v *localStorage_) DeleteDocument(
 	document not.DocumentLike,
 	status rep.Status,
 ) {
-	defer v.errorCheck(fmt.Sprintf(
-		"An error occurred while attempting to delete a document: %s",
-		citation,
-	), &status)
 	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	var filename = path + citation.GetVersion().AsString() + ".bali"
 	var source = uti.ReadFile(filename)
@@ -279,20 +249,6 @@ func (v *localStorage_) DeleteDocument(
 // PROTECTED INTERFACE
 
 // Private Methods
-
-func (v *localStorage_) errorCheck(
-	message string,
-	pstatus *rep.Status,
-) {
-	if e := recover(); e != nil {
-		log.Printf(
-			"LocalStorage: %s:\n    %s\n",
-			message,
-			e,
-		)
-		*pstatus = rep.Problem
-	}
-}
 
 func (v *localStorage_) getPath(
 	name doc.NameLike,

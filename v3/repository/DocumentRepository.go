@@ -68,11 +68,15 @@ func (v *documentRepository_) SaveCertificate(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a certificate document.",
 	)
-	citation, status = v.storage_.WriteDocument(certificate)
-	var content = certificate.GetContent()
+	if !certificate.HasSeal() {
+		status = Invalid
+		return
+	}
+	var content = not.CertificateFromString(certificate.GetContent().AsString())
 	var tag = content.GetTag()
 	var version = content.GetVersion()
 	var name = doc.Name("/certificates/" + tag.AsString()[1:])
+	citation, status = v.storage_.WriteDocument(certificate)
 	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
@@ -193,7 +197,6 @@ func (v *documentRepository_) CheckoutDocument(
 		permissions,
 	)
 	document = not.Document(content)
-	_, status = v.storage_.WriteDocument(document)
 	return
 }
 
