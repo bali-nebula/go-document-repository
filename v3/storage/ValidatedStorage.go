@@ -216,6 +216,9 @@ func (v *validatedStorage_) invalidCitation(
 func (v *validatedStorage_) invalidDocument(
 	document not.DocumentLike,
 ) bool {
+	if !document.HasSeal() {
+		return false
+	}
 	// Retrieve the citation to the certificate that signed the document.
 	var notary = document.GetNotary()
 	var certificate = document
@@ -231,7 +234,6 @@ func (v *validatedStorage_) invalidDocument(
 			return true
 		}
 	}
-	log.Printf("CERTIFICATE: %s\n", certificate.AsString())
 	return !v.notary_.SealMatches(document, certificate)
 }
 

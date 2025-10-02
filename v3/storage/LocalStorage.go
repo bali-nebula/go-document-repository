@@ -264,6 +264,8 @@ func (v *localStorage_) DeleteDocument(
 	), &status)
 	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
 	var filename = path + citation.GetVersion().AsString() + ".bali"
+	var source = uti.ReadFile(filename)
+	document = not.DocumentFromString(source)
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {

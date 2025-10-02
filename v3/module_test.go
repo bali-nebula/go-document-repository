@@ -13,7 +13,6 @@
 package module_test
 
 import (
-	fmt "fmt"
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3"
@@ -59,7 +58,6 @@ func TestLocalStorage(t *tes.T) {
 	var version = doc.Version("v1.2.3")
 	var previous doc.ResourceLike
 	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
-	fmt.Printf("COMPONENT: %v\n", component)
 	var content = not.Content(
 		component,
 		type_,

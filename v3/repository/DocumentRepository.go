@@ -193,6 +193,7 @@ func (v *documentRepository_) CheckoutDocument(
 		permissions,
 	)
 	document = not.Document(content)
+	_, status = v.storage_.WriteDocument(document)
 	return
 }
 
