@@ -74,15 +74,18 @@ func (v *documentRepository_) SaveCertificate(
 	}
 	var content = not.CertificateFromString(certificate.GetContent().AsString())
 	var tag = content.GetTag()
-	var version = content.GetVersion()
 	var name = doc.Name("/certificates/" + tag.AsString()[1:])
+	var version = content.GetVersion()
 	citation, status = v.storage_.WriteDocument(certificate)
+	if status != Success {
+		return
+	}
 	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
 func (v *documentRepository_) SaveDraft(
-	document not.DocumentLike,
+	draft not.DocumentLike,
 ) (
 	citation not.CitationLike,
 	status Status,
@@ -90,33 +93,41 @@ func (v *documentRepository_) SaveDraft(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a draft document.",
 	)
-	citation, status = v.storage_.WriteDocument(document)
+	if draft.HasSeal() {
+		status = Invalid
+		return
+	}
+	citation, status = v.storage_.WriteDraft(draft)
 	return
 }
 
 func (v *documentRepository_) RetrieveDraft(
 	citation not.CitationLike,
 ) (
-	document not.DocumentLike,
+	draft not.DocumentLike,
 	status Status,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a draft document.",
 	)
-	document, status = v.storage_.ReadDocument(citation)
+	draft, status = v.storage_.ReadDraft(citation)
+	if draft.HasSeal() {
+		status = Invalid
+		return
+	}
 	return
 }
 
 func (v *documentRepository_) DiscardDraft(
 	citation not.CitationLike,
 ) (
-	document not.DocumentLike,
+	draft not.DocumentLike,
 	status Status,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to discard a draft document.",
 	)
-	document, status = v.storage_.DeleteDocument(citation)
+	draft, status = v.storage_.DeleteDraft(citation)
 	return
 }
 
@@ -130,8 +141,9 @@ func (v *documentRepository_) NotarizeDocument(
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a draft document.",
 	)
-	var citation not.CitationLike
-	document = v.notary_.NotarizeDocument(document)
+	var citation = v.notary_.CiteDocument(document)
+	_, status = v.storage_.DeleteDraft(citation)
+	v.notary_.NotarizeDocument(document)
 	citation, status = v.storage_.WriteDocument(document)
 	if status != Success {
 		return
@@ -164,18 +176,19 @@ func (v *documentRepository_) CheckoutDocument(
 	version doc.VersionLike,
 	level uint,
 ) (
-	document not.DocumentLike,
+	draft not.DocumentLike,
 	status Status,
 ) {
 	defer v.errorCheck(
 		"An error occurred while attempting to checkout a draft document.",
 	)
-	var previous not.CitationLike
-	previous, status = v.storage_.ReadCitation(name, version)
+	var citation not.CitationLike
+	citation, status = v.storage_.ReadCitation(name, version)
 	if status != Success {
 		return
 	}
-	document, status = v.storage_.ReadDocument(previous)
+	var document not.DocumentLike
+	document, status = v.storage_.ReadDocument(citation)
 	if status != Success {
 		return
 	}
@@ -187,16 +200,17 @@ func (v *documentRepository_) CheckoutDocument(
 		version,
 		level,
 	)
+	var previous = citation.AsResource()
 	var permissions = content.GetPermissions()
 	content = not.Content(
 		entity,
 		type_,
 		tag,
 		nextVersion,
-		previous.AsResource(),
+		previous,
 		permissions,
 	)
-	document = not.Document(content)
+	draft = not.Document(content)
 	return
 }
 
@@ -209,9 +223,8 @@ func (v *documentRepository_) PostMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to send a message via a bag.",
 	)
-	// TBD - Add checks for bag capacity violations.
+	v.notary_.NotarizeDocument(message)
 	var citation not.CitationLike
-	message = v.notary_.NotarizeDocument(message)
 	citation, status = v.storage_.WriteDocument(message)
 	if status != Success {
 		return
@@ -270,6 +283,32 @@ func (v *documentRepository_) RejectMessage(
 	return
 }
 
+func (v *documentRepository_) SubscribeEvents(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status Status,
+) {
+	defer v.errorCheck(
+		"An error occurred while attempting to subscribe to an event type.",
+	)
+	status = v.storage_.WriteSubscription(bag, type_)
+	return
+}
+
+func (v *documentRepository_) UnsubscribeEvents(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status Status,
+) {
+	defer v.errorCheck(
+		"An error occurred while attempting to unsubscribe from an event type.",
+	)
+	status = v.storage_.DeleteSubscription(bag, type_)
+	return
+}
+
 func (v *documentRepository_) PublishEvent(
 	event not.DocumentLike,
 ) (
@@ -278,16 +317,8 @@ func (v *documentRepository_) PublishEvent(
 	defer v.errorCheck(
 		"An error occurred while attempting to publish an event.",
 	)
-	event = v.notary_.NotarizeDocument(event)
-	var content = event.GetContent()
-	var name = doc.Name("/events/" + content.GetTag().AsString()[1:])
-	var version = content.GetVersion()
-	var citation not.CitationLike
-	citation, status = v.storage_.WriteDocument(event)
-	if status != Success {
-		return
-	}
-	status = v.storage_.WriteCitation(name, version, citation)
+	v.notary_.NotarizeDocument(event)
+	status = v.storage_.WriteEvent(event)
 	return
 }
 

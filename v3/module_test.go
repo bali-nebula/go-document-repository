@@ -140,4 +140,24 @@ func TestLocalStorage(t *tes.T) {
 	// Accept the message.
 	status = repository.AcceptMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
+
+	// Publish an event.
+	entity = doc.Quote("Something happened...")
+	type_ = doc.Resource("<bali:/examples/Event:v1>")
+	tag = doc.Tag()
+	version = doc.Version()
+	permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	content = not.Content(
+		entity,
+		type_,
+		tag,
+		version,
+		previous,
+		permissions,
+	)
+	var event = not.Document(content)
+	ass.False(t, event.HasSeal())
+	status = repository.PublishEvent(event)
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, event.HasSeal())
 }

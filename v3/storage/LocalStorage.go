@@ -196,6 +196,56 @@ func (v *localStorage_) DeleteMessage(
 	return
 }
 
+func (v *localStorage_) WriteDraft(
+	draft not.DocumentLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	citation = v.notary_.CiteDocument(draft)
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
+	uti.MakeDirectory(path)
+	var filename = path + citation.GetVersion().AsString() + ".bali"
+	var source = draft.AsString()
+	uti.WriteFile(filename, source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) ReadDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
+	var filename = path + citation.GetVersion().AsString() + ".bali"
+	var source = uti.ReadFile(filename)
+	draft = not.DocumentFromString(source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) DeleteDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	var path = v.directory_ + "nebula/" + citation.GetTag().AsString()[1:] + "/"
+	var filename = path + citation.GetVersion().AsString() + ".bali"
+	var source = uti.ReadFile(filename)
+	draft = not.DocumentFromString(source)
+	uti.RemovePath(filename)
+	var filenames = uti.ReadDirectory(path)
+	if len(filenames) == 0 {
+		// This was the last version of the document so delete the directory too.
+		uti.RemovePath(path)
+	}
+	status = rep.Success
+	return
+}
+
 func (v *localStorage_) WriteDocument(
 	document not.DocumentLike,
 ) (

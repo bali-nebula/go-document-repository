@@ -132,6 +132,36 @@ func (v *cachedStorage_) DeleteMessage(
 	return
 }
 
+func (v *cachedStorage_) WriteDraft(
+	draft not.DocumentLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	citation, status = v.storage_.WriteDraft(draft)
+	return
+}
+
+func (v *cachedStorage_) ReadDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	draft, status = v.storage_.ReadDraft(citation)
+	return
+}
+
+func (v *cachedStorage_) DeleteDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	draft, status = v.storage_.DeleteDraft(citation)
+	return
+}
+
 func (v *cachedStorage_) WriteDocument(
 	document not.DocumentLike,
 ) (

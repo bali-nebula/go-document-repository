@@ -153,6 +153,43 @@ func (v *validatedStorage_) DeleteMessage(
 	return
 }
 
+func (v *validatedStorage_) WriteDraft(
+	draft not.DocumentLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	if v.invalidDocument(draft) {
+		status = rep.Invalid
+		return
+	}
+	citation, status = v.storage_.WriteDraft(draft)
+	return
+}
+
+func (v *validatedStorage_) ReadDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	draft, status = v.storage_.ReadDraft(citation)
+	if v.invalidDocument(draft) {
+		status = rep.Invalid
+	}
+	return
+}
+
+func (v *validatedStorage_) DeleteDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	draft, status = v.storage_.DeleteDraft(citation)
+	return
+}
+
 func (v *validatedStorage_) WriteDocument(
 	document not.DocumentLike,
 ) (

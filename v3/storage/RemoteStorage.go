@@ -136,6 +136,36 @@ func (v *remoteStorage_) DeleteMessage(
 	return
 }
 
+func (v *remoteStorage_) WriteDraft(
+	draft not.DocumentLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) ReadDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) DeleteDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
 func (v *remoteStorage_) WriteDocument(
 	document not.DocumentLike,
 ) (

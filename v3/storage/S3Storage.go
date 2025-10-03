@@ -131,6 +131,36 @@ func (v *s3Storage_) DeleteMessage(
 	return
 }
 
+func (v *s3Storage_) WriteDraft(
+	draft not.DocumentLike,
+) (
+	citation not.CitationLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *s3Storage_) ReadDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *s3Storage_) DeleteDraft(
+	citation not.CitationLike,
+) (
+	draft not.DocumentLike,
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
 func (v *s3Storage_) WriteDocument(
 	document not.DocumentLike,
 ) (

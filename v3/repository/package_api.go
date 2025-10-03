@@ -86,7 +86,7 @@ type DocumentRepositoryLike interface {
 		status Status,
 	)
 	SaveDraft(
-		document not.DocumentLike,
+		draft not.DocumentLike,
 	) (
 		citation not.CitationLike,
 		status Status,
@@ -94,13 +94,13 @@ type DocumentRepositoryLike interface {
 	RetrieveDraft(
 		citation not.CitationLike,
 	) (
-		document not.DocumentLike,
+		draft not.DocumentLike,
 		status Status,
 	)
 	DiscardDraft(
 		citation not.CitationLike,
 	) (
-		document not.DocumentLike,
+		draft not.DocumentLike,
 		status Status,
 	)
 	NotarizeDocument(
@@ -146,6 +146,18 @@ type DocumentRepositoryLike interface {
 	RejectMessage(
 		bag doc.NameLike,
 		message not.DocumentLike,
+	) (
+		status Status,
+	)
+	SubscribeEvents(
+		bag doc.NameLike,
+		type_ doc.ResourceLike,
+	) (
+		status Status,
+	)
+	UnsubscribeEvents(
+		bag doc.NameLike,
+		type_ doc.ResourceLike,
 	) (
 		status Status,
 	)
@@ -206,6 +218,41 @@ type Persistent interface {
 		bag doc.NameLike,
 		message not.CitationLike,
 	) (
+		status Status,
+	)
+	WriteSubscription(
+		bag doc.NameLike,
+		type_ doc.ResourceLike,
+	) (
+		status Status,
+	)
+	DeleteSubscription(
+		bag doc.NameLike,
+		type_ doc.ResourceLike,
+	) (
+		status Status,
+	)
+	WriteEvent(
+		event not.DocumentLike,
+	) (
+		status Status,
+	)
+	WriteDraft(
+		draft not.DocumentLike,
+	) (
+		citation not.CitationLike,
+		status Status,
+	)
+	ReadDraft(
+		citation not.CitationLike,
+	) (
+		draft not.DocumentLike,
+		status Status,
+	)
+	DeleteDraft(
+		citation not.CitationLike,
+	) (
+		draft not.DocumentLike,
 		status Status,
 	)
 	WriteDocument(

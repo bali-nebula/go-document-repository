@@ -4,7 +4,7 @@ go 1.25
 
 require (
 	github.com/bali-nebula/go-bali-documents/v3 v3.31.0
-	github.com/bali-nebula/go-digital-notary/v3 v3.35.0
+	github.com/bali-nebula/go-digital-notary/v3 v3.36.0
 	github.com/craterdog/go-missing-utilities/v7 v7.17.0
 	github.com/stretchr/testify v1.11.1
 )
