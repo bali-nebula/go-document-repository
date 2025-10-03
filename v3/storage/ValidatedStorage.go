@@ -153,6 +153,35 @@ func (v *validatedStorage_) DeleteMessage(
 	return
 }
 
+func (v *validatedStorage_) WriteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.WriteSubscription(bag, type_)
+	return
+}
+
+func (v *validatedStorage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.DeleteSubscription(bag, type_)
+	return
+}
+
+func (v *validatedStorage_) WriteEvent(
+	event not.DocumentLike,
+) (
+	status rep.Status,
+) {
+	status = v.storage_.WriteEvent(event)
+	return
+}
+
 func (v *validatedStorage_) WriteDraft(
 	draft not.DocumentLike,
 ) (

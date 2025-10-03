@@ -136,6 +136,35 @@ func (v *remoteStorage_) DeleteMessage(
 	return
 }
 
+func (v *remoteStorage_) WriteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *remoteStorage_) WriteEvent(
+	event not.DocumentLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
 func (v *remoteStorage_) WriteDraft(
 	draft not.DocumentLike,
 ) (

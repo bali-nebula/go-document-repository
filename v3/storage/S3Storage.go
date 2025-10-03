@@ -131,6 +131,35 @@ func (v *s3Storage_) DeleteMessage(
 	return
 }
 
+func (v *s3Storage_) WriteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *s3Storage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
+func (v *s3Storage_) WriteEvent(
+	event not.DocumentLike,
+) (
+	status rep.Status,
+) {
+	// TBD - Add the method implementation.
+	return
+}
+
 func (v *s3Storage_) WriteDraft(
 	draft not.DocumentLike,
 ) (

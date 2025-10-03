@@ -13,6 +13,7 @@
 package storage
 
 import (
+	sha "crypto/sha512"
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
@@ -196,6 +197,60 @@ func (v *localStorage_) DeleteMessage(
 	return
 }
 
+func (v *localStorage_) WriteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	var path = v.getPath(doc.Name("/subscriptions"))
+	path += "/" + v.hashString(type_.AsString())
+	uti.MakeDirectory(path)
+	var name = v.hashString(bag.AsString()) + ".bali"
+	var filename = path + "/" + name
+	var source = bag.AsString()
+	uti.WriteFile(filename, source)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
+) (
+	status rep.Status,
+) {
+	var path = v.getPath(doc.Name("/subscriptions"))
+	path += "/" + v.hashString(type_.AsString())
+	var name = v.hashString(bag.AsString()) + ".bali"
+	var filename = path + "/" + name
+	uti.RemovePath(filename)
+	status = rep.Success
+	return
+}
+
+func (v *localStorage_) WriteEvent(
+	event not.DocumentLike,
+) (
+	status rep.Status,
+) {
+	var content = event.GetContent()
+	var type_ = content.GetType()
+	var directory = v.hashString(type_.AsString())
+	var path = v.getPath(doc.Name("/subscriptions")) + "/" + directory
+	uti.MakeDirectory(path)
+	var files = uti.ReadDirectory(path)
+	for _, file := range files {
+		var name = "/subscriptions/" + directory + "/" + file
+		var source = uti.ReadFile(name)
+		var bag = doc.Name(source)
+		var message = v.notary_.CiteDocument(event)
+		v.WriteMessage(bag, message)
+	}
+	status = rep.Success
+	return
+}
+
 func (v *localStorage_) WriteDraft(
 	draft not.DocumentLike,
 ) (
@@ -311,6 +366,15 @@ func (v *localStorage_) getFilename(
 	version doc.VersionLike,
 ) string {
 	return v.getPath(name) + "/" + version.AsString() + ".bali"
+}
+
+func (v *localStorage_) hashString(
+	string_ string,
+) string {
+	var array = sha.Sum512([]byte(string_))
+	var bytes = array[:20] // Convert the array to a slice of the first 20 bytes.
+	var hash = doc.Tag(bytes).AsString()[1:]
+	return hash
 }
 
 // Instance Structure
