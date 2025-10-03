@@ -241,10 +241,20 @@ func (v *localStorage_) WriteEvent(
 	uti.MakeDirectory(path)
 	var files = uti.ReadDirectory(path)
 	for _, file := range files {
-		var name = "/subscriptions/" + directory + "/" + file
+		var name = path + "/" + file
 		var source = uti.ReadFile(name)
 		var bag = doc.Name(source)
-		var message = v.notary_.CiteDocument(event)
+		var content = event.GetContent()
+		content = not.Content(
+			content.GetEntity(),
+			content.GetType(),
+			doc.Tag(), // Only the tag is new.
+			content.GetVersion(),
+			content.GetOptionalPrevious(),
+			content.GetPermissions(),
+		)
+		var document = not.Document(content)
+		var message, _ = v.WriteDocument(document)
 		v.WriteMessage(bag, message)
 	}
 	status = rep.Success

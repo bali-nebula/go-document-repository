@@ -141,9 +141,13 @@ func TestLocalStorage(t *tes.T) {
 	status = repository.AcceptMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 
+	// Subscribe to events.
+	type_ = doc.Resource("<bali:/examples/Event:v1>")
+	status = repository.SubscribeEvents(bag, type_)
+	ass.Equal(t, rep.Success, status)
+
 	// Publish an event.
 	entity = doc.Quote("Something happened...")
-	type_ = doc.Resource("<bali:/examples/Event:v1>")
 	tag = doc.Tag()
 	version = doc.Version()
 	permissions = doc.Resource("<bali:/permissions/Public:v1>")
@@ -160,4 +164,8 @@ func TestLocalStorage(t *tes.T) {
 	status = repository.PublishEvent(event)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, event.HasSeal())
+
+	// Unsubscribe from events.
+	status = repository.SubscribeEvents(bag, type_)
+	ass.Equal(t, rep.Success, status)
 }
