@@ -226,14 +226,15 @@ type Persistent interface {
 	) (
 		status Status,
 	)
+	ReadSubscriptions(
+		type_ doc.ResourceLike,
+	) (
+		bags doc.Sequential[doc.NameLike],
+		status Status,
+	)
 	DeleteSubscription(
 		bag doc.NameLike,
 		type_ doc.ResourceLike,
-	) (
-		status Status,
-	)
-	WriteEvent(
-		event not.DocumentLike,
 	) (
 		status Status,
 	)

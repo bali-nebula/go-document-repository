@@ -146,18 +146,19 @@ func (v *remoteStorage_) WriteSubscription(
 	return
 }
 
-func (v *remoteStorage_) DeleteSubscription(
-	bag doc.NameLike,
+func (v *remoteStorage_) ReadSubscriptions(
 	type_ doc.ResourceLike,
 ) (
+	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *remoteStorage_) WriteEvent(
-	event not.DocumentLike,
+func (v *remoteStorage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
 ) (
 	status rep.Status,
 ) {

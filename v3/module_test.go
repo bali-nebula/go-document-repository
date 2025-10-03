@@ -166,6 +166,15 @@ func TestLocalStorage(t *tes.T) {
 	ass.True(t, event.HasSeal())
 
 	// Unsubscribe from events.
-	status = repository.SubscribeEvents(bag, type_)
+	status = repository.UnsubscribeEvents(bag, type_)
+	ass.Equal(t, rep.Success, status)
+
+	// Retrieve a message from the bag.
+	message, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, message.HasSeal())
+
+	// Accept the message.
+	status = repository.AcceptMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 }

@@ -214,6 +214,28 @@ func (v *localStorage_) WriteSubscription(
 	return
 }
 
+func (v *localStorage_) ReadSubscriptions(
+	type_ doc.ResourceLike,
+) (
+	bags doc.Sequential[doc.NameLike],
+	status rep.Status,
+) {
+	var directory = v.hashString(type_.AsString())
+	var path = v.getPath(doc.Name("/subscriptions")) + "/" + directory
+	uti.MakeDirectory(path)
+	var list = doc.List[doc.NameLike]()
+	var files = uti.ReadDirectory(path)
+	for _, file := range files {
+		var name = path + "/" + file
+		var source = uti.ReadFile(name)
+		var bag = doc.Name(source)
+		list.AppendValue(bag)
+	}
+	bags = list
+	status = rep.Success
+	return
+}
+
 func (v *localStorage_) DeleteSubscription(
 	bag doc.NameLike,
 	type_ doc.ResourceLike,
@@ -225,37 +247,17 @@ func (v *localStorage_) DeleteSubscription(
 	var name = v.hashString(bag.AsString()) + ".bali"
 	var filename = path + "/" + name
 	uti.RemovePath(filename)
-	status = rep.Success
-	return
-}
 
-func (v *localStorage_) WriteEvent(
-	event not.DocumentLike,
-) (
-	status rep.Status,
-) {
-	var content = event.GetContent()
-	var type_ = content.GetType()
-	var directory = v.hashString(type_.AsString())
-	var path = v.getPath(doc.Name("/subscriptions")) + "/" + directory
-	uti.MakeDirectory(path)
-	var files = uti.ReadDirectory(path)
-	for _, file := range files {
-		var name = path + "/" + file
-		var source = uti.ReadFile(name)
-		var bag = doc.Name(source)
-		var content = event.GetContent()
-		content = not.Content(
-			content.GetEntity(),
-			content.GetType(),
-			doc.Tag(), // Only the tag is new.
-			content.GetVersion(),
-			content.GetOptionalPrevious(),
-			content.GetPermissions(),
-		)
-		var document = not.Document(content)
-		var message, _ = v.WriteDocument(document)
-		v.WriteMessage(bag, message)
+	// Remove any empty directories in the citation path.
+	for len(path) > 0 {
+		if len(uti.ReadDirectory(path)) > 0 {
+			// The directory is not empty so we are done.
+			return
+		}
+		uti.RemovePath(path)
+		var directories = sts.Split(path, "/")
+		directories = directories[:len(directories)-1] // Strip off the last one.
+		path = sts.Join(directories, "/")
 	}
 	status = rep.Success
 	return

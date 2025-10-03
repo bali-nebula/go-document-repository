@@ -163,6 +163,16 @@ func (v *validatedStorage_) WriteSubscription(
 	return
 }
 
+func (v *validatedStorage_) ReadSubscriptions(
+	type_ doc.ResourceLike,
+) (
+	bags doc.Sequential[doc.NameLike],
+	status rep.Status,
+) {
+	bags, status = v.storage_.ReadSubscriptions(type_)
+	return
+}
+
 func (v *validatedStorage_) DeleteSubscription(
 	bag doc.NameLike,
 	type_ doc.ResourceLike,
@@ -170,15 +180,6 @@ func (v *validatedStorage_) DeleteSubscription(
 	status rep.Status,
 ) {
 	status = v.storage_.DeleteSubscription(bag, type_)
-	return
-}
-
-func (v *validatedStorage_) WriteEvent(
-	event not.DocumentLike,
-) (
-	status rep.Status,
-) {
-	status = v.storage_.WriteEvent(event)
 	return
 }
 

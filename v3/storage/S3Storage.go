@@ -141,18 +141,19 @@ func (v *s3Storage_) WriteSubscription(
 	return
 }
 
-func (v *s3Storage_) DeleteSubscription(
-	bag doc.NameLike,
+func (v *s3Storage_) ReadSubscriptions(
 	type_ doc.ResourceLike,
 ) (
+	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
 	return
 }
 
-func (v *s3Storage_) WriteEvent(
-	event not.DocumentLike,
+func (v *s3Storage_) DeleteSubscription(
+	bag doc.NameLike,
+	type_ doc.ResourceLike,
 ) (
 	status rep.Status,
 ) {

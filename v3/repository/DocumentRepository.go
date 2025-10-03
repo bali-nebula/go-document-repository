@@ -318,7 +318,17 @@ func (v *documentRepository_) PublishEvent(
 		"An error occurred while attempting to publish an event.",
 	)
 	v.notary_.NotarizeDocument(event)
-	status = v.storage_.WriteEvent(event)
+	var content = event.GetContent()
+	var type_ = content.GetType()
+	var bags, _ = v.storage_.ReadSubscriptions(type_)
+	var iterator = bags.GetIterator()
+	for iterator.HasNext() {
+		var bag = iterator.GetNext()
+		var document = v.copyEvent(event)
+		var message, _ = v.storage_.WriteDocument(document)
+		v.storage_.WriteMessage(bag, message)
+	}
+	status = Success
 	return
 }
 
@@ -327,6 +337,23 @@ func (v *documentRepository_) PublishEvent(
 // PROTECTED INTERFACE
 
 // Private Methods
+
+func (v *documentRepository_) copyEvent(
+	event not.DocumentLike,
+) not.DocumentLike {
+	var content = event.GetContent()
+	content = not.Content(
+		content.GetEntity(),
+		content.GetType(),
+		doc.Tag(), // Only the tag changes.
+		content.GetVersion(),
+		content.GetOptionalPrevious(),
+		content.GetPermissions(),
+	)
+	var document = not.Document(content)
+	v.notary_.NotarizeDocument(document)
+	return document
+}
 
 func (v *documentRepository_) errorCheck(
 	message string,
