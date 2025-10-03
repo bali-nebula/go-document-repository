@@ -109,20 +109,20 @@ func (v *localStorage_) DeleteCitation(
 	// Remove the citation file.
 	var filename = v.getFilename(name, version)
 	uti.RemovePath(filename)
-	status = rep.Success
 
 	// Remove any empty directories in the citation path.
 	var path = v.getPath(name)
 	for len(path) > 0 {
 		if len(uti.ReadDirectory(path)) > 0 {
 			// The directory is not empty so we are done.
-			return
+			break
 		}
 		uti.RemovePath(path)
 		var directories = sts.Split(path, "/")
 		directories = directories[:len(directories)-1] // Strip off the last one.
 		path = sts.Join(directories, "/")
 	}
+	status = rep.Success
 	return
 }
 
@@ -252,7 +252,7 @@ func (v *localStorage_) DeleteSubscription(
 	for len(path) > 0 {
 		if len(uti.ReadDirectory(path)) > 0 {
 			// The directory is not empty so we are done.
-			return
+			break
 		}
 		uti.RemovePath(path)
 		var directories = sts.Split(path, "/")
