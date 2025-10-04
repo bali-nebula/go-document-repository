@@ -219,7 +219,7 @@ func (v *documentRepository_) CheckoutDocument(
 	return
 }
 
-func (v *documentRepository_) PostMessage(
+func (v *documentRepository_) SendMessage(
 	bag doc.NameLike,
 	message not.DocumentLike,
 ) (
@@ -229,12 +229,7 @@ func (v *documentRepository_) PostMessage(
 		"An error occurred while attempting to send a message via a bag.",
 	)
 	v.notary_.NotarizeDocument(message)
-	var citation not.CitationLike
-	citation, status = v.storage_.WriteDocument(message)
-	if status != Success {
-		return
-	}
-	status = v.storage_.WriteMessage(bag, citation)
+	status = v.storage_.WriteMessage(bag, message)
 	return
 }
 
@@ -247,12 +242,7 @@ func (v *documentRepository_) RetrieveMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
-	var citation not.CitationLike
-	citation, status = v.storage_.ReadMessage(bag)
-	if status != Success {
-		return
-	}
-	message, status = v.storage_.ReadDocument(citation)
+	message, status = v.storage_.ReadMessage(bag)
 	return
 }
 
@@ -265,12 +255,7 @@ func (v *documentRepository_) AcceptMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to accept a processed message.",
 	)
-	var citation = v.notary_.CiteDocument(message)
-	status = v.storage_.DeleteMessage(bag, citation)
-	if status != Success {
-		return
-	}
-	_, status = v.storage_.DeleteDocument(citation)
+	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
 
@@ -283,8 +268,7 @@ func (v *documentRepository_) RejectMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to reject a retrieved message.",
 	)
-	var citation = v.notary_.CiteDocument(message)
-	status = v.storage_.UnreadMessage(bag, citation)
+	status = v.storage_.UnreadMessage(bag, message)
 	return
 }
 
@@ -330,8 +314,8 @@ func (v *documentRepository_) PublishEvent(
 	for iterator.HasNext() {
 		var bag = iterator.GetNext()
 		v.group_.Go(func() {
-			var document = v.copyEvent(event)
-			var message, _ = v.storage_.WriteDocument(document)
+			var message = v.copyEvent(event)
+			v.notary_.NotarizeDocument(message)
 			v.storage_.WriteMessage(bag, message)
 		})
 	}
@@ -357,9 +341,7 @@ func (v *documentRepository_) copyEvent(
 		content.GetOptionalPrevious(),
 		content.GetPermissions(),
 	)
-	var document = not.Document(content)
-	v.notary_.NotarizeDocument(document)
-	return document
+	return not.Document(content)
 }
 
 func (v *documentRepository_) errorCheck(

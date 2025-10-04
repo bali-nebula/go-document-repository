@@ -126,7 +126,7 @@ type DocumentRepositoryLike interface {
 		document not.DocumentLike,
 		status Status,
 	)
-	PostMessage(
+	SendMessage(
 		bag doc.NameLike,
 		message not.DocumentLike,
 	) (
@@ -199,25 +199,25 @@ type Persistent interface {
 	)
 	WriteMessage(
 		bag doc.NameLike,
-		message not.CitationLike,
+		message not.DocumentLike,
 	) (
 		status Status,
 	)
 	ReadMessage(
 		bag doc.NameLike,
 	) (
-		message not.CitationLike,
+		message not.DocumentLike,
 		status Status,
 	)
 	UnreadMessage(
 		bag doc.NameLike,
-		message not.CitationLike,
+		message not.DocumentLike,
 	) (
 		status Status,
 	)
 	DeleteMessage(
 		bag doc.NameLike,
-		message not.CitationLike,
+		message not.DocumentLike,
 	) (
 		status Status,
 	)

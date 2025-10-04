@@ -105,7 +105,7 @@ func (v *validatedStorage_) DeleteCitation(
 
 func (v *validatedStorage_) WriteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -116,14 +116,14 @@ func (v *validatedStorage_) WriteMessage(
 func (v *validatedStorage_) ReadMessage(
 	bag doc.NameLike,
 ) (
-	message not.CitationLike,
+	message not.DocumentLike,
 	status rep.Status,
 ) {
 	message, status = v.storage_.ReadMessage(bag)
 	if status != rep.Success {
 		return
 	}
-	if v.invalidCitation(message) {
+	if v.invalidDocument(message) {
 		status = rep.Invalid
 	}
 	return
@@ -131,11 +131,11 @@ func (v *validatedStorage_) ReadMessage(
 
 func (v *validatedStorage_) UnreadMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
-	if v.invalidCitation(message) {
+	if v.invalidDocument(message) {
 		status = rep.Invalid
 		return
 	}
@@ -145,7 +145,7 @@ func (v *validatedStorage_) UnreadMessage(
 
 func (v *validatedStorage_) DeleteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {

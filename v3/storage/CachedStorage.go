@@ -94,7 +94,7 @@ func (v *cachedStorage_) DeleteCitation(
 
 func (v *cachedStorage_) WriteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -105,7 +105,7 @@ func (v *cachedStorage_) WriteMessage(
 func (v *cachedStorage_) ReadMessage(
 	bag doc.NameLike,
 ) (
-	message not.CitationLike,
+	message not.DocumentLike,
 	status rep.Status,
 ) {
 	message, status = v.storage_.ReadMessage(bag)
@@ -114,7 +114,7 @@ func (v *cachedStorage_) ReadMessage(
 
 func (v *cachedStorage_) UnreadMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -124,7 +124,7 @@ func (v *cachedStorage_) UnreadMessage(
 
 func (v *cachedStorage_) DeleteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {

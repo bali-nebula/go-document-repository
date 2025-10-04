@@ -93,7 +93,7 @@ func (v *s3Storage_) DeleteCitation(
 
 func (v *s3Storage_) WriteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -104,7 +104,7 @@ func (v *s3Storage_) WriteMessage(
 func (v *s3Storage_) ReadMessage(
 	bag doc.NameLike,
 ) (
-	message not.CitationLike,
+	message not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -113,7 +113,7 @@ func (v *s3Storage_) ReadMessage(
 
 func (v *s3Storage_) UnreadMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -123,7 +123,7 @@ func (v *s3Storage_) UnreadMessage(
 
 func (v *s3Storage_) DeleteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {

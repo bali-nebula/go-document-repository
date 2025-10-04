@@ -98,7 +98,7 @@ func (v *remoteStorage_) DeleteCitation(
 
 func (v *remoteStorage_) WriteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -109,7 +109,7 @@ func (v *remoteStorage_) WriteMessage(
 func (v *remoteStorage_) ReadMessage(
 	bag doc.NameLike,
 ) (
-	message not.CitationLike,
+	message not.DocumentLike,
 	status rep.Status,
 ) {
 	// TBD - Add the method implementation.
@@ -118,7 +118,7 @@ func (v *remoteStorage_) ReadMessage(
 
 func (v *remoteStorage_) UnreadMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {
@@ -128,7 +128,7 @@ func (v *remoteStorage_) UnreadMessage(
 
 func (v *remoteStorage_) DeleteMessage(
 	bag doc.NameLike,
-	message not.CitationLike,
+	message not.DocumentLike,
 ) (
 	status rep.Status,
 ) {

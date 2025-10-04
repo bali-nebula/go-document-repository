@@ -77,7 +77,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, document.AsString(), same.AsString())
 
 	// Create a notarized document.
-	var name = doc.Name("/examples/Document")
+	var name = doc.Name("/examples/documents/transaction")
 	status = repository.NotarizeDocument(name, version, document)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, document.HasSeal())
@@ -121,7 +121,7 @@ func TestLocalStorage(t *tes.T) {
 
 	var message = not.Document(content)
 	ass.False(t, message.HasSeal())
-	status = repository.PostMessage(bag, message)
+	status = repository.SendMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())
 
