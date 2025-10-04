@@ -30,9 +30,13 @@ func DocumentRepositoryClass() DocumentRepositoryClassLike {
 // Constructor Methods
 
 func (c *documentRepositoryClass_) DocumentRepository(
+	group Synchronized,
 	notary not.DigitalNotaryLike,
 	storage Persistent,
 ) DocumentRepositoryLike {
+	if uti.IsUndefined(group) {
+		panic("The \"group\" attribute is required by this class.")
+	}
 	if uti.IsUndefined(notary) {
 		panic("The \"notary\" attribute is required by this class.")
 	}
@@ -41,6 +45,7 @@ func (c *documentRepositoryClass_) DocumentRepository(
 	}
 	var instance = &documentRepository_{
 		// Initialize the instance attributes.
+		group_:   group,
 		notary_:  notary,
 		storage_: storage,
 	}
@@ -324,9 +329,11 @@ func (v *documentRepository_) PublishEvent(
 	var iterator = bags.GetIterator()
 	for iterator.HasNext() {
 		var bag = iterator.GetNext()
-		var document = v.copyEvent(event)
-		var message, _ = v.storage_.WriteDocument(document)
-		v.storage_.WriteMessage(bag, message)
+		v.group_.Go(func() {
+			var document = v.copyEvent(event)
+			var message, _ = v.storage_.WriteDocument(document)
+			v.storage_.WriteMessage(bag, message)
+		})
 	}
 	status = Success
 	return
@@ -372,6 +379,7 @@ func (v *documentRepository_) errorCheck(
 
 type documentRepository_ struct {
 	// Declare the instance attributes.
+	group_   Synchronized
 	notary_  not.DigitalNotaryLike
 	storage_ Persistent
 }

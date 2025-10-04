@@ -150,6 +150,10 @@ func (v *localStorage_) ReadMessage(
 ) {
 	var free = v.getPath(bag) + "/free"
 	var names = doc.List[string](uti.ReadDirectory(free))
+	if names.IsEmpty() {
+		status = rep.Missing
+		return
+	}
 	var index = int(doc.Generator().RandomOrdinal(names.GetSize()))
 	var name = names.GetValue(index)
 	var filename = free + "/" + name

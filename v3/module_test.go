@@ -18,6 +18,7 @@ import (
 	rep "github.com/bali-nebula/go-document-repository/v3"
 	uti "github.com/craterdog/go-missing-utilities/v7"
 	ass "github.com/stretchr/testify/assert"
+	syn "sync"
 	tes "testing"
 )
 
@@ -25,6 +26,7 @@ const testDirectory = "./test/"
 
 func TestLocalStorage(t *tes.T) {
 	// Initialize the document repository.
+	var group rep.Synchronized = new(syn.WaitGroup)
 	uti.RemakeDirectory(testDirectory)
 	var ssm = not.Ssm(testDirectory)
 	var hsm = ssm
@@ -34,7 +36,7 @@ func TestLocalStorage(t *tes.T) {
 	var storage rep.Persistent = rep.LocalStorage(notary, testDirectory)
 	storage = rep.ValidatedStorage(notary, storage)
 	storage = rep.CachedStorage(storage)
-	var repository = rep.DocumentRepository(notary, storage)
+	var repository = rep.DocumentRepository(group, notary, storage)
 
 	// Save the certificate.
 	var status rep.Status
@@ -164,6 +166,7 @@ func TestLocalStorage(t *tes.T) {
 	status = repository.PublishEvent(event)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, event.HasSeal())
+	group.Wait()
 
 	// Unsubscribe from events.
 	status = repository.UnsubscribeEvents(bag, type_)
