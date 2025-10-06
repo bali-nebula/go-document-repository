@@ -79,6 +79,10 @@ func (v *localStorage_) WriteCitation(
 	var path = v.directory_ + "citations" + name.AsString()
 	uti.MakeDirectory(path)
 	var filename = path + "/" + version.AsString() + ".bali"
+	if uti.PathExists(filename) {
+		status = rep.Existed
+		return
+	}
 	var source = citation.AsString()
 	uti.WriteFile(filename, source)
 	status = rep.Success
@@ -94,6 +98,10 @@ func (v *localStorage_) ReadCitation(
 ) {
 	var path = v.directory_ + "citations" + name.AsString()
 	var filename = path + "/" + version.AsString() + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	citation = not.Citation(source)
 	status = rep.Success
@@ -141,6 +149,10 @@ func (v *localStorage_) WriteMessage(
 	var path = v.directory_ + "citations" + bag.AsString() + "/free"
 	uti.MakeDirectory(path)
 	var filename = path + "/" + name + ".bali"
+	if uti.PathExists(filename) {
+		status = rep.Existed
+		return
+	}
 	var source = citation.AsString()
 	uti.WriteFile(filename, source)
 
@@ -173,6 +185,10 @@ func (v *localStorage_) ReadMessage(
 
 	// Delete the selected message citation from the free directory in local storage.
 	var filename = path + "/" + name
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	uti.RemovePath(filename)
 
@@ -188,6 +204,10 @@ func (v *localStorage_) ReadMessage(
 	path = v.directory_ + "messages"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	source = uti.ReadFile(filename)
 	message = not.Document(source)
 
@@ -212,6 +232,10 @@ func (v *localStorage_) UnreadMessage(
 	path = v.directory_ + "citations" + bag.AsString() + "/free"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
+	if uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = citation.AsString()
 	uti.WriteFile(filename, source)
 
@@ -331,6 +355,10 @@ func (v *localStorage_) ReadDraft(
 	var version = citation.GetVersion().AsString()
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	draft = not.Document(source)
 	status = rep.Success
@@ -347,6 +375,10 @@ func (v *localStorage_) DeleteDraft(
 	var version = citation.GetVersion().AsString()
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	draft = not.Document(source)
 	uti.RemovePath(filename)
@@ -373,6 +405,10 @@ func (v *localStorage_) WriteDocument(
 	var path = v.directory_ + "documents/" + name
 	uti.MakeDirectory(path)
 	var filename = path + "/" + version + ".bali"
+	if uti.PathExists(filename) {
+		status = rep.Existed
+		return
+	}
 	var source = document.AsString()
 	uti.WriteFile(filename, source)
 
@@ -390,6 +426,10 @@ func (v *localStorage_) ReadDocument(
 	var version = citation.GetVersion().AsString()
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	document = not.Document(source)
 	status = rep.Success
@@ -406,6 +446,10 @@ func (v *localStorage_) DeleteDocument(
 	var version = citation.GetVersion().AsString()
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
+	if !uti.PathExists(filename) {
+		status = rep.Missing
+		return
+	}
 	var source = uti.ReadFile(filename)
 	document = not.Document(source)
 	uti.RemovePath(filename)
