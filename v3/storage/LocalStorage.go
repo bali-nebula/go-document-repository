@@ -95,7 +95,7 @@ func (v *localStorage_) ReadCitation(
 	var path = v.directory_ + "citations" + name.AsString()
 	var filename = path + "/" + version.AsString() + ".bali"
 	var source = uti.ReadFile(filename)
-	citation = not.CitationFromString(source)
+	citation = not.Citation(source)
 	status = rep.Success
 	return
 }
@@ -183,13 +183,13 @@ func (v *localStorage_) ReadMessage(
 	uti.WriteFile(filename, source)
 
 	// Read the message from the messages directory in local storage.
-	var citation = not.CitationFromString(source)
+	var citation = not.Citation(source)
 	name = citation.GetTag().AsString()[1:]
 	path = v.directory_ + "messages"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
 	source = uti.ReadFile(filename)
-	message = not.DocumentFromString(source)
+	message = not.Document(source)
 
 	status = rep.Success
 	return
@@ -332,7 +332,7 @@ func (v *localStorage_) ReadDraft(
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
 	var source = uti.ReadFile(filename)
-	draft = not.DocumentFromString(source)
+	draft = not.Document(source)
 	status = rep.Success
 	return
 }
@@ -348,7 +348,7 @@ func (v *localStorage_) DeleteDraft(
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
 	var source = uti.ReadFile(filename)
-	draft = not.DocumentFromString(source)
+	draft = not.Document(source)
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {
@@ -391,7 +391,7 @@ func (v *localStorage_) ReadDocument(
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
 	var source = uti.ReadFile(filename)
-	document = not.DocumentFromString(source)
+	document = not.Document(source)
 	status = rep.Success
 	return
 }
@@ -407,7 +407,7 @@ func (v *localStorage_) DeleteDocument(
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
 	var source = uti.ReadFile(filename)
-	document = not.DocumentFromString(source)
+	document = not.Document(source)
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {

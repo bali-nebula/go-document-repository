@@ -77,7 +77,7 @@ func (v *documentRepository_) SaveCertificate(
 		status = Invalid
 		return
 	}
-	var content = not.CertificateFromString(certificate.GetContent().AsString())
+	var content = not.Certificate(certificate.GetContent().AsString())
 	var tag = content.GetTag()
 	var name = doc.Name("/certificates/" + tag.AsString()[1:])
 	var version = content.GetVersion()
@@ -116,10 +116,6 @@ func (v *documentRepository_) RetrieveDraft(
 		"An error occurred while attempting to retrieve a draft document.",
 	)
 	draft, status = v.storage_.ReadDraft(citation)
-	if draft.HasSeal() {
-		status = Invalid
-		return
-	}
 	return
 }
 
@@ -146,6 +142,10 @@ func (v *documentRepository_) NotarizeDocument(
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a draft document.",
 	)
+	if document.HasSeal() {
+		status = Invalid
+		return
+	}
 	var citation = v.notary_.CiteDocument(document)
 	_, status = v.storage_.DeleteDraft(citation)
 	v.notary_.NotarizeDocument(document)
@@ -165,7 +165,7 @@ func (v *documentRepository_) RetrieveDocument(
 	status Status,
 ) {
 	defer v.errorCheck(
-		"An error occurred while attempting to notarize a document.",
+		"An error occurred while attempting to retrieve a document.",
 	)
 	var citation not.CitationLike
 	citation, status = v.storage_.ReadCitation(name, version)
@@ -228,6 +228,10 @@ func (v *documentRepository_) SendMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to send a message via a bag.",
 	)
+	if message.HasSeal() {
+		status = Invalid
+		return
+	}
 	v.notary_.NotarizeDocument(message)
 	status = v.storage_.WriteMessage(bag, message)
 	return
@@ -306,10 +310,15 @@ func (v *documentRepository_) PublishEvent(
 	defer v.errorCheck(
 		"An error occurred while attempting to publish an event.",
 	)
+	if event.HasSeal() {
+		status = Invalid
+		return
+	}
 	v.notary_.NotarizeDocument(event)
 	var content = event.GetContent()
 	var type_ = content.GetType()
-	var bags, _ = v.storage_.ReadSubscriptions(type_)
+	var bags doc.Sequential[doc.NameLike]
+	bags, status = v.storage_.ReadSubscriptions(type_)
 	var iterator = bags.GetIterator()
 	for iterator.HasNext() {
 		var bag = iterator.GetNext()
@@ -319,7 +328,6 @@ func (v *documentRepository_) PublishEvent(
 			v.storage_.WriteMessage(bag, message)
 		})
 	}
-	status = Success
 	return
 }
 
