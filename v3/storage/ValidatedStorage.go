@@ -71,6 +71,10 @@ func (v *validatedStorage_) WriteCitation(
 ) (
 	status rep.Status,
 ) {
+	if v.invalidCitation(citation) {
+		status = rep.Invalid
+		return
+	}
 	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
@@ -109,6 +113,10 @@ func (v *validatedStorage_) WriteMessage(
 ) (
 	status rep.Status,
 ) {
+	if v.invalidDocument(message) {
+		status = rep.Invalid
+		return
+	}
 	status = v.storage_.WriteMessage(bag, message)
 	return
 }
@@ -149,6 +157,10 @@ func (v *validatedStorage_) DeleteMessage(
 ) (
 	status rep.Status,
 ) {
+	if v.invalidDocument(message) {
+		status = rep.Invalid
+		return
+	}
 	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
@@ -189,11 +201,15 @@ func (v *validatedStorage_) WriteDraft(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	if v.invalidDocument(draft) {
+	var content = draft.GetContent()
+	switch {
+	case draft.HasSeal():
 		status = rep.Invalid
-		return
+	case v.invalidContent(content):
+		status = rep.Invalid
+	default:
+		citation, status = v.storage_.WriteDraft(draft)
 	}
-	citation, status = v.storage_.WriteDraft(draft)
 	return
 }
 
@@ -204,7 +220,7 @@ func (v *validatedStorage_) ReadDraft(
 	status rep.Status,
 ) {
 	draft, status = v.storage_.ReadDraft(citation)
-	if v.invalidDocument(draft) {
+	if v.invalidContent(draft.GetContent()) {
 		status = rep.Invalid
 	}
 	return
@@ -226,6 +242,10 @@ func (v *validatedStorage_) WriteDocument(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
+	if v.invalidContent(document.GetContent()) {
+		status = rep.Invalid
+		return
+	}
 	if v.invalidDocument(document) {
 		status = rep.Invalid
 		return
@@ -264,29 +284,72 @@ func (v *validatedStorage_) DeleteDocument(
 func (v *validatedStorage_) invalidCitation(
 	citation not.CitationLike,
 ) bool {
+	// Validate that the citation refers to a document.
 	var document, status = v.storage_.ReadDocument(citation)
 	if status != rep.Success {
-		log.Printf("The citation does not cite a document: %s\n", citation)
+		log.Printf(
+			"ValidatedStorage: "+
+				"The following citation doesn't cite a document: %s\n",
+			citation,
+		)
 		return true
 	}
-	var matches = v.notary_.CitationMatches(citation, document)
-	if !matches {
+
+	// Validate the digest of the cited document.
+	var doesNotMatch = !v.notary_.CitationMatches(citation, document)
+	if doesNotMatch {
 		log.Printf(
-			"The citation digest does not match the document: %s %s\n",
+			"ValidataedStorage: "+
+				"The following digest doesn't match the cited document: %s %s\n",
 			citation,
 			document.AsString(),
 		)
 	}
-	return !matches
+	return doesNotMatch
+}
+
+func (v *validatedStorage_) invalidContent(
+	content not.Parameterized,
+) bool {
+	// Validate the citation to the previous version of the document.
+	var previous = content.GetOptionalPrevious()
+	if uti.IsDefined(previous) {
+		var citation = not.Citation(previous)
+		if v.invalidCitation(citation) {
+			log.Printf(
+				"ValidataedStorage: "+
+					"The previous citation doesn't cite an existing document: %s\n",
+				content.AsString(),
+			)
+			return true
+		}
+	}
+	return false
 }
 
 func (v *validatedStorage_) invalidDocument(
 	document not.DocumentLike,
 ) bool {
-	if !document.HasSeal() {
-		return false
+	// Validate the content of the document.
+	var content = document.GetContent()
+	if v.invalidContent(content) {
+		log.Printf(
+			"ValidataedStorage: "+
+				"The content for the following document isn't valid: %s\n",
+			document.AsString(),
+		)
+		return true
 	}
-	// Retrieve the citation to the certificate that signed the document.
+
+	// Validate the signature on the notarized document.
+	if !document.HasSeal() {
+		log.Printf(
+			"ValidataedStorage: "+
+				"The following document is missing a notary seal: %s\n",
+			document.AsString(),
+		)
+		return true
+	}
 	var notary = document.GetNotary()
 	var certificate = document
 	var status rep.Status
@@ -295,13 +358,24 @@ func (v *validatedStorage_) invalidDocument(
 		certificate, status = v.storage_.ReadDocument(notary)
 		if status != rep.Success {
 			log.Printf(
-				"ValidatedStorage: The cited notary certificate does not exist: %s\n",
+				"ValidatedStorage: "+
+					"The cited notary certificate doesn't exist: %s\n",
 				notary,
 			)
 			return true
 		}
 	}
-	return !v.notary_.SealMatches(document, certificate)
+	var doesNotMatch = !v.notary_.SealMatches(document, certificate)
+	if doesNotMatch {
+		log.Printf(
+			"ValidatedStorage: "+
+				"The notary seal doesn't match the notarized document: %s %s\n",
+			document.AsString(),
+			certificate,
+		)
+		return true
+	}
+	return false
 }
 
 // Instance Structure
