@@ -71,11 +71,12 @@ func (v *validatedStorage_) WriteCitation(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidCitation(citation) {
+	switch {
+	case v.invalidCitation(citation):
 		status = rep.Invalid
-		return
+	default:
+		status = v.storage_.WriteCitation(name, version, citation)
 	}
-	status = v.storage_.WriteCitation(name, version, citation)
 	return
 }
 
@@ -87,10 +88,9 @@ func (v *validatedStorage_) ReadCitation(
 	status rep.Status,
 ) {
 	citation, status = v.storage_.ReadCitation(name, version)
-	if status != rep.Success {
-		return
-	}
-	if v.invalidCitation(citation) {
+	switch {
+	case status != rep.Success:
+	case v.invalidCitation(citation):
 		status = rep.Invalid
 	}
 	return
@@ -113,11 +113,12 @@ func (v *validatedStorage_) WriteMessage(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidDocument(message) {
+	switch {
+	case v.invalidDocument(message):
 		status = rep.Invalid
-		return
+	default:
+		status = v.storage_.WriteMessage(bag, message)
 	}
-	status = v.storage_.WriteMessage(bag, message)
 	return
 }
 
@@ -128,10 +129,9 @@ func (v *validatedStorage_) ReadMessage(
 	status rep.Status,
 ) {
 	message, status = v.storage_.ReadMessage(bag)
-	if status != rep.Success {
-		return
-	}
-	if v.invalidDocument(message) {
+	switch {
+	case status != rep.Success:
+	case v.invalidDocument(message):
 		status = rep.Invalid
 	}
 	return
@@ -143,11 +143,12 @@ func (v *validatedStorage_) UnreadMessage(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidDocument(message) {
+	switch {
+	case v.invalidDocument(message):
 		status = rep.Invalid
-		return
+	default:
+		status = v.storage_.UnreadMessage(bag, message)
 	}
-	status = v.storage_.UnreadMessage(bag, message)
 	return
 }
 
@@ -157,11 +158,12 @@ func (v *validatedStorage_) DeleteMessage(
 ) (
 	status rep.Status,
 ) {
-	if v.invalidDocument(message) {
+	switch {
+	case v.invalidDocument(message):
 		status = rep.Invalid
-		return
+	default:
+		status = v.storage_.DeleteMessage(bag, message)
 	}
-	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
 
@@ -242,15 +244,14 @@ func (v *validatedStorage_) WriteDocument(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	if v.invalidContent(document.GetContent()) {
+	switch {
+	case v.invalidContent(document.GetContent()):
 		status = rep.Invalid
-		return
-	}
-	if v.invalidDocument(document) {
+	case v.invalidDocument(document):
 		status = rep.Invalid
-		return
+	default:
+		citation, status = v.storage_.WriteDocument(document)
 	}
-	citation, status = v.storage_.WriteDocument(document)
 	return
 }
 
