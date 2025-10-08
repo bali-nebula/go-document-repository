@@ -64,7 +64,7 @@ concrete document-repository-like class.
 type DocumentRepositoryClassLike interface {
 	// Constructor Methods
 	DocumentRepository(
-		group Synchronized,
+		group doc.Synchronized,
 		notary not.DigitalNotaryLike,
 		storage Persistent,
 	) DocumentRepositoryLike
@@ -275,15 +275,4 @@ type Persistent interface {
 		document not.DocumentLike,
 		status Status,
 	)
-}
-
-/*
-Synchronized declares the set of method signatures that must be supported by all
-Go wait groups.
-*/
-type Synchronized interface {
-	Go(
-		f func(),
-	)
-	Wait()
 }

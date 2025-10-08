@@ -316,6 +316,8 @@ func (v *validatedStorage_) invalidCitation(
 func (v *validatedStorage_) invalidContent(
 	content not.Parameterized,
 ) bool {
+	// TBD - Validate the citations to the type and permissions documents.
+
 	// Validate the citation to the previous version of the document.
 	var previous = content.GetOptionalPrevious()
 	if uti.IsDefined(previous) {

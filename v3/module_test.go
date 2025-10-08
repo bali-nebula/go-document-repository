@@ -26,7 +26,7 @@ const testDirectory = "./test/"
 
 func TestLocalStorage(t *tes.T) {
 	// Initialize the document repository.
-	var group rep.Synchronized = new(syn.WaitGroup)
+	var group doc.Synchronized = new(syn.WaitGroup)
 	uti.RemakeDirectory(testDirectory)
 	var ssm = not.Ssm(testDirectory)
 	var hsm = ssm

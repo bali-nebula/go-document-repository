@@ -63,8 +63,7 @@ type (
 )
 
 type (
-	Persistent   = rep.Persistent
-	Synchronized = rep.Synchronized
+	Persistent = rep.Persistent
 )
 
 // Storage
@@ -94,7 +93,7 @@ func DocumentRepositoryClass() DocumentRepositoryClassLike {
 }
 
 func DocumentRepository(
-	group Synchronized,
+	group doc.Synchronized,
 	notary not.DigitalNotaryLike,
 	storage rep.Persistent,
 ) DocumentRepositoryLike {

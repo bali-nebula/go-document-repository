@@ -31,7 +31,7 @@ func DocumentRepositoryClass() DocumentRepositoryClassLike {
 // Constructor Methods
 
 func (c *documentRepositoryClass_) DocumentRepository(
-	group Synchronized,
+	group doc.Synchronized,
 	notary not.DigitalNotaryLike,
 	storage Persistent,
 ) DocumentRepositoryLike {
@@ -379,7 +379,7 @@ func (v *documentRepository_) errorCheck(
 type documentRepository_ struct {
 	// Declare the instance attributes.
 	mutex_   syn.Mutex
-	group_   Synchronized
+	group_   doc.Synchronized
 	notary_  not.DigitalNotaryLike
 	storage_ Persistent
 }
