@@ -44,6 +44,8 @@ func TestLocalStorage(t *tes.T) {
 	citation, status = repository.SaveCertificate(certificate)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, notary.CitationMatches(citation, certificate))
+	_, status = repository.SaveCertificate(certificate)
+	ass.Equal(t, rep.Existed, status)
 	certificate = notary.RefreshKey()
 	citation, status = repository.SaveCertificate(certificate)
 	ass.Equal(t, rep.Success, status)
@@ -65,9 +67,11 @@ func TestLocalStorage(t *tes.T) {
 		permissions,
 	)
 	var document = not.Document(content)
-	citation, status = repository.SaveDraft(document)
+	_, status = repository.SaveDraft(document)
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
+	citation, status = repository.SaveDraft(document)
+	ass.Equal(t, rep.Success, status)
 	ass.True(t, notary.CitationMatches(citation, document))
 
 	// Retrieve the draft document.
@@ -84,8 +88,14 @@ func TestLocalStorage(t *tes.T) {
 	same, status = repository.RetrieveDocument(name, version)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsString(), same.AsString())
+	_, status = repository.RetrieveDraft(citation)
+	ass.Equal(t, rep.Missing, status)
 
 	// Checkout a new draft of the document.
+	document, status = repository.CheckoutDocument(name, version, uint(2))
+	ass.Equal(t, rep.Success, status)
+	ass.False(t, document.HasSeal())
+	ass.NotEqual(t, document.AsString(), same.AsString())
 	document, status = repository.CheckoutDocument(name, version, uint(2))
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
@@ -102,6 +112,8 @@ func TestLocalStorage(t *tes.T) {
 	same, status = repository.DiscardDraft(citation)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsString(), same.AsString())
+	_, status = repository.RetrieveDraft(citation)
+	ass.Equal(t, rep.Missing, status)
 
 	// Send a message to a bag.
 	var bag = doc.Name("/examples/bag")
@@ -118,30 +130,28 @@ func TestLocalStorage(t *tes.T) {
 		previous,
 		permissions,
 	)
-
 	var message = not.Document(content)
 	ass.False(t, message.HasSeal())
 	status = repository.SendMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())
 
-	// Retrieve a message from the bag.
-	message, status = repository.RetrieveMessage(bag)
+	// Send another message to a bag.
+	entity = doc.Quote("Hello Again...")
+	tag = doc.Tag()
+	content = not.Content(
+		entity,
+		type_,
+		tag,
+		version,
+		previous,
+		permissions,
+	)
+	message = not.Document(content)
+	ass.False(t, message.HasSeal())
+	status = repository.SendMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())
-
-	// Reject the message.
-	status = repository.RejectMessage(bag, message)
-	ass.Equal(t, rep.Success, status)
-
-	// Process the message.
-	message, status = repository.RetrieveMessage(bag)
-	ass.Equal(t, rep.Success, status)
-	ass.True(t, message.HasSeal())
-
-	// Accept the message.
-	status = repository.AcceptMessage(bag, message)
-	ass.Equal(t, rep.Success, status)
 
 	// Subscribe to events.
 	type_ = doc.Resource("<bali:/examples/Event:v1>")
@@ -151,8 +161,6 @@ func TestLocalStorage(t *tes.T) {
 	// Publish an event.
 	entity = doc.Quote("Something happened...")
 	tag = doc.Tag()
-	version = doc.Version()
-	permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	content = not.Content(
 		entity,
 		type_,
@@ -173,6 +181,15 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, rep.Success, status)
 
 	// Retrieve a message from the bag.
+	message, status = repository.RetrieveMessage(bag)
+	ass.Equal(t, rep.Success, status)
+	ass.True(t, message.HasSeal())
+
+	// Reject the message.
+	status = repository.RejectMessage(bag, message)
+	ass.Equal(t, rep.Success, status)
+
+	// Process the message.
 	message, status = repository.RetrieveMessage(bag)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())

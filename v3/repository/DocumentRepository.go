@@ -17,6 +17,7 @@ import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	uti "github.com/craterdog/go-missing-utilities/v7"
+	syn "sync"
 )
 
 // CLASS INTERFACE
@@ -77,6 +78,8 @@ func (v *documentRepository_) SaveCertificate(
 	var tag = content.GetTag()
 	var name = doc.Name("/certificates/" + tag.AsString()[1:])
 	var version = content.GetVersion()
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	citation, status = v.storage_.WriteDocument(certificate)
 	if status != Success {
 		return
@@ -94,6 +97,8 @@ func (v *documentRepository_) SaveDraft(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a draft document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	citation, status = v.storage_.WriteDraft(draft)
 	return
 }
@@ -107,6 +112,8 @@ func (v *documentRepository_) RetrieveDraft(
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a draft document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	draft, status = v.storage_.ReadDraft(citation)
 	return
 }
@@ -120,6 +127,8 @@ func (v *documentRepository_) DiscardDraft(
 	defer v.errorCheck(
 		"An error occurred while attempting to discard a draft document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	draft, status = v.storage_.DeleteDraft(citation)
 	return
 }
@@ -134,6 +143,8 @@ func (v *documentRepository_) NotarizeDocument(
 	defer v.errorCheck(
 		"An error occurred while attempting to notarize a draft document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	var citation = v.notary_.CiteDocument(document)
 	_, status = v.storage_.DeleteDraft(citation)
 	v.notary_.NotarizeDocument(document)
@@ -155,6 +166,8 @@ func (v *documentRepository_) RetrieveDocument(
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	var citation not.CitationLike
 	citation, status = v.storage_.ReadCitation(name, version)
 	if status != Success {
@@ -175,6 +188,8 @@ func (v *documentRepository_) CheckoutDocument(
 	defer v.errorCheck(
 		"An error occurred while attempting to checkout a draft document.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	var citation not.CitationLike
 	citation, status = v.storage_.ReadCitation(name, version)
 	if status != Success {
@@ -216,6 +231,8 @@ func (v *documentRepository_) SendMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to send a message via a bag.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	v.notary_.NotarizeDocument(message)
 	status = v.storage_.WriteMessage(bag, message)
 	return
@@ -230,6 +247,8 @@ func (v *documentRepository_) RetrieveMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to retrieve a message from a bag.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	message, status = v.storage_.ReadMessage(bag)
 	return
 }
@@ -243,6 +262,8 @@ func (v *documentRepository_) AcceptMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to accept a processed message.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	status = v.storage_.DeleteMessage(bag, message)
 	return
 }
@@ -256,6 +277,8 @@ func (v *documentRepository_) RejectMessage(
 	defer v.errorCheck(
 		"An error occurred while attempting to reject a retrieved message.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	status = v.storage_.UnreadMessage(bag, message)
 	return
 }
@@ -269,6 +292,8 @@ func (v *documentRepository_) SubscribeEvents(
 	defer v.errorCheck(
 		"An error occurred while attempting to subscribe to an event type.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	status = v.storage_.WriteSubscription(bag, type_)
 	return
 }
@@ -282,6 +307,8 @@ func (v *documentRepository_) UnsubscribeEvents(
 	defer v.errorCheck(
 		"An error occurred while attempting to unsubscribe from an event type.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	status = v.storage_.DeleteSubscription(bag, type_)
 	return
 }
@@ -294,6 +321,8 @@ func (v *documentRepository_) PublishEvent(
 	defer v.errorCheck(
 		"An error occurred while attempting to publish an event.",
 	)
+	defer v.mutex_.Unlock()
+	v.mutex_.Lock()
 	v.notary_.NotarizeDocument(event)
 	var content = event.GetContent()
 	var type_ = content.GetType()
@@ -349,6 +378,7 @@ func (v *documentRepository_) errorCheck(
 
 type documentRepository_ struct {
 	// Declare the instance attributes.
+	mutex_   syn.Mutex
 	group_   Synchronized
 	notary_  not.DigitalNotaryLike
 	storage_ Persistent

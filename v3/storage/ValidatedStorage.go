@@ -222,7 +222,9 @@ func (v *validatedStorage_) ReadDraft(
 	status rep.Status,
 ) {
 	draft, status = v.storage_.ReadDraft(citation)
-	if v.invalidContent(draft.GetContent()) {
+	switch {
+	case status != rep.Success:
+	case v.invalidContent(draft.GetContent()):
 		status = rep.Invalid
 	}
 	return
@@ -262,7 +264,9 @@ func (v *validatedStorage_) ReadDocument(
 	status rep.Status,
 ) {
 	document, status = v.storage_.ReadDocument(citation)
-	if v.invalidDocument(document) {
+	switch {
+	case status != rep.Success:
+	case v.invalidDocument(document):
 		status = rep.Invalid
 	}
 	return
