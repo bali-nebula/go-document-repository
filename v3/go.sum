@@ -1,9 +1,9 @@
-github.com/bali-nebula/go-bali-documents/v3 v3.33.0 h1:89O9tMhB80KazfTGlMp+3vkTUbLXKhZSH0+flmY1sOk=
-github.com/bali-nebula/go-bali-documents/v3 v3.33.0/go.mod h1:ULdDfBzrlyWnMU9ZlfAuCyF0962SMRtTdj80bjQYEgg=
-github.com/bali-nebula/go-digital-notary/v3 v3.40.0 h1:318zJNAbJPaM4QvIaR7PogQcuWDyZPCLz1TDhjCaDUk=
-github.com/bali-nebula/go-digital-notary/v3 v3.40.0/go.mod h1:zVyJ/ojJXwGHxshR/jO/Eu9IYOFmLDJp5+BsakDWODI=
-github.com/bali-nebula/go-document-notation/v3 v3.25.0 h1:9Bnkq9129uod7Tl8KJqDPLEuZ148OWJQ8l3eFvTmL0c=
-github.com/bali-nebula/go-document-notation/v3 v3.25.0/go.mod h1:koq8jRDxsgmfRSEEq5uwXkg2twr/zDOBt4rKEXQi/xc=
+github.com/bali-nebula/go-bali-documents/v3 v3.35.0 h1:J2LGllRPuP5e4OBlszFaELctoQDq+lZjI2+oPOQyHaY=
+github.com/bali-nebula/go-bali-documents/v3 v3.35.0/go.mod h1:tutt4XEexsvTO+gvuwWXgyuXuNZf10kMGZHge8/8NE0=
+github.com/bali-nebula/go-digital-notary/v3 v3.41.0 h1:1m7/jyF5+OVQxmcgXYM4rP2V1xdIMCoOSF33vZpvBqY=
+github.com/bali-nebula/go-digital-notary/v3 v3.41.0/go.mod h1:XYqupz32LW8rskAMpESauGwRXaRDrjNHgGjgZ+n/914=
+github.com/bali-nebula/go-document-notation/v3 v3.26.0 h1:kfYUnJ2OOXSdQeD/HwDJzjlJj83j0nkyKxnMd/pYGGI=
+github.com/bali-nebula/go-document-notation/v3 v3.26.0/go.mod h1:koq8jRDxsgmfRSEEq5uwXkg2twr/zDOBt4rKEXQi/xc=
 github.com/craterdog/go-component-framework/v7 v7.25.0 h1:9jdbbBnGunqGB7DDrjMVUlhp7g2yL3MSppjOceeDlIo=
 github.com/craterdog/go-component-framework/v7 v7.25.0/go.mod h1:n/BIzP+8Iyqnmf/h/yddytklJxNH4timuUpvzZtlS10=
 github.com/craterdog/go-missing-utilities/v7 v7.18.0 h1:hdGOuBj8gx+1M+MOcxSU0qfldKbquPrBM184l+fScjE=
