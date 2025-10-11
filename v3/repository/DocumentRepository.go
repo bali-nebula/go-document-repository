@@ -76,15 +76,17 @@ func (v *documentRepository_) SaveCertificate(
 	)
 	var content = not.Certificate(certificate.GetContent().AsString())
 	var tag = content.GetTag()
-	var name = doc.Name("/certificates/" + tag.AsString()[1:])
 	var version = content.GetVersion()
+	var name = doc.Name(
+		"/certificates/" + tag.AsString()[1:] + "/" + version.AsString(),
+	)
 	defer v.mutex_.Unlock()
 	v.mutex_.Lock()
 	citation, status = v.storage_.WriteDocument(certificate)
 	if status != Success {
 		return
 	}
-	status = v.storage_.WriteCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, citation)
 	return
 }
 
@@ -135,7 +137,6 @@ func (v *documentRepository_) DiscardDraft(
 
 func (v *documentRepository_) NotarizeDocument(
 	name doc.NameLike,
-	version doc.VersionLike,
 	document not.DocumentLike,
 ) (
 	status Status,
@@ -152,13 +153,12 @@ func (v *documentRepository_) NotarizeDocument(
 	if status != Success {
 		return
 	}
-	status = v.storage_.WriteCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, citation)
 	return
 }
 
 func (v *documentRepository_) RetrieveDocument(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	document not.DocumentLike,
 	status Status,
@@ -169,7 +169,7 @@ func (v *documentRepository_) RetrieveDocument(
 	defer v.mutex_.Unlock()
 	v.mutex_.Lock()
 	var citation not.CitationLike
-	citation, status = v.storage_.ReadCitation(name, version)
+	citation, status = v.storage_.ReadCitation(name)
 	if status != Success {
 		return
 	}
@@ -179,7 +179,6 @@ func (v *documentRepository_) RetrieveDocument(
 
 func (v *documentRepository_) CheckoutDocument(
 	name doc.NameLike,
-	version doc.VersionLike,
 	level uint,
 ) (
 	draft not.DocumentLike,
@@ -191,7 +190,7 @@ func (v *documentRepository_) CheckoutDocument(
 	defer v.mutex_.Unlock()
 	v.mutex_.Lock()
 	var citation not.CitationLike
-	citation, status = v.storage_.ReadCitation(name, version)
+	citation, status = v.storage_.ReadCitation(name)
 	if status != Success {
 		return
 	}
@@ -204,19 +203,20 @@ func (v *documentRepository_) CheckoutDocument(
 	var entity = content.GetEntity()
 	var type_ = content.GetType()
 	var tag = content.GetTag()
+	var version = content.GetVersion()
 	var nextVersion = doc.VersionClass().GetNextVersion(
 		version,
 		level,
 	)
-	var previous = citation.AsResource()
 	var permissions = content.GetPermissions()
+	var previous = citation.AsResource()
 	content = not.Content(
 		entity,
 		type_,
 		tag,
 		nextVersion,
-		previous,
 		permissions,
+		previous,
 	)
 	draft = not.Document(content)
 	return
@@ -285,7 +285,7 @@ func (v *documentRepository_) RejectMessage(
 
 func (v *documentRepository_) SubscribeEvents(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status Status,
 ) {
@@ -300,7 +300,7 @@ func (v *documentRepository_) SubscribeEvents(
 
 func (v *documentRepository_) UnsubscribeEvents(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status Status,
 ) {
@@ -355,8 +355,8 @@ func (v *documentRepository_) copyEvent(
 		content.GetType(),
 		doc.Tag(), // Only the tag changes.
 		content.GetVersion(),
-		content.GetOptionalPrevious(),
 		content.GetPermissions(),
+		content.GetOptionalPrevious(),
 	)
 	return not.Document(content)
 }

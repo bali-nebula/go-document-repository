@@ -60,7 +60,6 @@ func (v *s3Storage_) GetClass() S3StorageClassLike {
 
 func (v *s3Storage_) WriteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 	citation not.CitationLike,
 ) (
 	status rep.Status,
@@ -71,7 +70,6 @@ func (v *s3Storage_) WriteCitation(
 
 func (v *s3Storage_) ReadCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
@@ -82,7 +80,6 @@ func (v *s3Storage_) ReadCitation(
 
 func (v *s3Storage_) DeleteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
@@ -133,7 +130,7 @@ func (v *s3Storage_) DeleteMessage(
 
 func (v *s3Storage_) WriteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
@@ -142,7 +139,7 @@ func (v *s3Storage_) WriteSubscription(
 }
 
 func (v *s3Storage_) ReadSubscriptions(
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
@@ -153,7 +150,7 @@ func (v *s3Storage_) ReadSubscriptions(
 
 func (v *s3Storage_) DeleteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {

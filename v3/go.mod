@@ -3,14 +3,14 @@ module github.com/bali-nebula/go-document-repository/v3
 go 1.25
 
 require (
-	github.com/bali-nebula/go-bali-documents/v3 v3.35.0
-	github.com/bali-nebula/go-digital-notary/v3 v3.41.0
+	github.com/bali-nebula/go-bali-documents/v3 v3.36.0
+	github.com/bali-nebula/go-digital-notary/v3 v3.42.0
 	github.com/craterdog/go-missing-utilities/v7 v7.18.0
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
-	github.com/bali-nebula/go-document-notation/v3 v3.26.0 // indirect
+	github.com/bali-nebula/go-document-notation/v3 v3.27.0 // indirect
 	github.com/craterdog/go-component-framework/v7 v7.25.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

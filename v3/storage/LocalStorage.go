@@ -71,14 +71,13 @@ func (v *localStorage_) GetClass() LocalStorageClassLike {
 
 func (v *localStorage_) WriteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 	citation not.CitationLike,
 ) (
 	status rep.Status,
 ) {
-	var path = v.directory_ + "citations" + name.AsString()
+	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
+	var path = v.extractPath(filename)
 	uti.MakeDirectory(path)
-	var filename = path + "/" + version.AsString() + ".bali"
 	if uti.PathExists(filename) {
 		status = rep.Existed
 		return
@@ -91,13 +90,11 @@ func (v *localStorage_) WriteCitation(
 
 func (v *localStorage_) ReadCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	var path = v.directory_ + "citations" + name.AsString()
-	var filename = path + "/" + version.AsString() + ".bali"
+	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
 	if !uti.PathExists(filename) {
 		status = rep.Missing
 		return
@@ -110,14 +107,13 @@ func (v *localStorage_) ReadCitation(
 
 func (v *localStorage_) DeleteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
 	// Remove the citation file.
-	var path = v.directory_ + "citations" + name.AsString()
-	var filename = path + "/" + version.AsString() + ".bali"
+	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
+	var path = v.extractPath(filename)
 	uti.RemovePath(filename)
 
 	// Remove any empty directories in the citation path.
@@ -127,9 +123,7 @@ func (v *localStorage_) DeleteCitation(
 			break
 		}
 		uti.RemovePath(path)
-		var directories = sts.Split(path, "/")
-		directories = directories[:len(directories)-1] // Strip off the last one.
-		path = sts.Join(directories, "/")
+		path = v.extractPath(path)
 	}
 	status = rep.Success
 	return
@@ -143,12 +137,12 @@ func (v *localStorage_) WriteMessage(
 ) {
 	// Generate the message citation.
 	var citation = v.notary_.CiteDocument(message)
-	var name = citation.GetTag().AsString()[1:]
 
 	// Write the message citation to the free directory in local storage.
 	var path = v.directory_ + "citations" + bag.AsString() + "/free"
-	uti.MakeDirectory(path)
+	var name = citation.GetTag().AsString()[1:]
 	var filename = path + "/" + name + ".bali"
+	uti.MakeDirectory(path)
 	if uti.PathExists(filename) {
 		status = rep.Existed
 		return
@@ -269,12 +263,11 @@ func (v *localStorage_) DeleteMessage(
 
 func (v *localStorage_) WriteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
-	var path = v.directory_ + "subscriptions"
-	path += "/" + v.hashString(type_.AsString())
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
 	uti.MakeDirectory(path)
 	var name = v.hashString(bag.AsString()) + ".bali"
 	var filename = path + "/" + name
@@ -285,13 +278,12 @@ func (v *localStorage_) WriteSubscription(
 }
 
 func (v *localStorage_) ReadSubscriptions(
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
 ) {
-	var name = "/" + v.hashString(type_.AsString())
-	var path = v.directory_ + "subscriptions" + name
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
 	uti.MakeDirectory(path)
 	var list = doc.List[doc.NameLike]()
 	var files = uti.ReadDirectory(path)
@@ -308,12 +300,11 @@ func (v *localStorage_) ReadSubscriptions(
 
 func (v *localStorage_) DeleteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
-	var name = "/" + v.hashString(type_.AsString())
-	var path = v.directory_ + "subscriptions" + name
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
 	var filename = path + "/" + v.hashString(bag.AsString()) + ".bali"
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
@@ -464,6 +455,15 @@ func (v *localStorage_) DeleteDocument(
 // PROTECTED INTERFACE
 
 // Private Methods
+
+func (v *localStorage_) extractPath(
+	name string,
+) string {
+	var folders = sts.Split(name, "/")
+	folders = folders[:len(folders)-1] // Strip off the last one.
+	var path = sts.Join(folders, "/")
+	return path
+}
 
 func (v *localStorage_) hashString(
 	string_ string,

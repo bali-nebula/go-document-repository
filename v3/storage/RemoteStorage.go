@@ -65,7 +65,6 @@ func (v *remoteStorage_) GetClass() RemoteStorageClassLike {
 
 func (v *remoteStorage_) WriteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 	citation not.CitationLike,
 ) (
 	status rep.Status,
@@ -76,7 +75,6 @@ func (v *remoteStorage_) WriteCitation(
 
 func (v *remoteStorage_) ReadCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
@@ -87,7 +85,6 @@ func (v *remoteStorage_) ReadCitation(
 
 func (v *remoteStorage_) DeleteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
@@ -138,7 +135,7 @@ func (v *remoteStorage_) DeleteMessage(
 
 func (v *remoteStorage_) WriteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
@@ -147,7 +144,7 @@ func (v *remoteStorage_) WriteSubscription(
 }
 
 func (v *remoteStorage_) ReadSubscriptions(
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
@@ -158,7 +155,7 @@ func (v *remoteStorage_) ReadSubscriptions(
 
 func (v *remoteStorage_) DeleteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {

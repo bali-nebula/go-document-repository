@@ -61,34 +61,31 @@ func (v *cachedStorage_) GetClass() CachedStorageClassLike {
 
 func (v *cachedStorage_) WriteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 	citation not.CitationLike,
 ) (
 	status rep.Status,
 ) {
-	status = v.storage_.WriteCitation(name, version, citation)
+	status = v.storage_.WriteCitation(name, citation)
 	return
 }
 
 func (v *cachedStorage_) ReadCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.ReadCitation(name, version)
+	citation, status = v.storage_.ReadCitation(name)
 	return
 }
 
 func (v *cachedStorage_) DeleteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.DeleteCitation(name, version)
+	citation, status = v.storage_.DeleteCitation(name)
 	return
 }
 
@@ -134,7 +131,7 @@ func (v *cachedStorage_) DeleteMessage(
 
 func (v *cachedStorage_) WriteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
@@ -143,7 +140,7 @@ func (v *cachedStorage_) WriteSubscription(
 }
 
 func (v *cachedStorage_) ReadSubscriptions(
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
@@ -154,7 +151,7 @@ func (v *cachedStorage_) ReadSubscriptions(
 
 func (v *cachedStorage_) DeleteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {

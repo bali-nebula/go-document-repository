@@ -66,7 +66,6 @@ func (v *validatedStorage_) GetClass() ValidatedStorageClassLike {
 
 func (v *validatedStorage_) WriteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 	citation not.CitationLike,
 ) (
 	status rep.Status,
@@ -75,19 +74,18 @@ func (v *validatedStorage_) WriteCitation(
 	case v.invalidCitation(citation):
 		status = rep.Invalid
 	default:
-		status = v.storage_.WriteCitation(name, version, citation)
+		status = v.storage_.WriteCitation(name, citation)
 	}
 	return
 }
 
 func (v *validatedStorage_) ReadCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.ReadCitation(name, version)
+	citation, status = v.storage_.ReadCitation(name)
 	switch {
 	case status != rep.Success:
 	case v.invalidCitation(citation):
@@ -98,12 +96,11 @@ func (v *validatedStorage_) ReadCitation(
 
 func (v *validatedStorage_) DeleteCitation(
 	name doc.NameLike,
-	version doc.VersionLike,
 ) (
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	citation, status = v.storage_.DeleteCitation(name, version)
+	citation, status = v.storage_.DeleteCitation(name)
 	return
 }
 
@@ -169,7 +166,7 @@ func (v *validatedStorage_) DeleteMessage(
 
 func (v *validatedStorage_) WriteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {
@@ -178,7 +175,7 @@ func (v *validatedStorage_) WriteSubscription(
 }
 
 func (v *validatedStorage_) ReadSubscriptions(
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
@@ -189,7 +186,7 @@ func (v *validatedStorage_) ReadSubscriptions(
 
 func (v *validatedStorage_) DeleteSubscription(
 	bag doc.NameLike,
-	type_ doc.ResourceLike,
+	type_ doc.NameLike,
 ) (
 	status rep.Status,
 ) {

@@ -53,18 +53,18 @@ func TestLocalStorage(t *tes.T) {
 
 	// Save a draft document.
 	var entity any = doc.Angle("~π")
-	var type_ = doc.Resource("<bali:/examples/Pi:v1>")
+	var type_ = doc.Name("/bali/examples/Pi/v1")
 	var tag = doc.Tag()
 	var version = doc.Version("v1.2.3")
+	var permissions = doc.Name("/bali/permissions/Public/v1")
 	var previous doc.ResourceLike
-	var permissions = doc.Resource("<bali:/permissions/Public:v1>")
 	var content = not.Content(
 		entity,
 		type_,
 		tag,
 		version,
-		previous,
 		permissions,
+		previous,
 	)
 	var document = not.Document(content)
 	_, status = repository.SaveDraft(document)
@@ -81,22 +81,22 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, document.AsString(), same.AsString())
 
 	// Create a notarized document.
-	var name = doc.Name("/examples/documents/transaction")
-	status = repository.NotarizeDocument(name, version, document)
+	var name = doc.Name("/examples/documents/transaction/v1.2.3")
+	status = repository.NotarizeDocument(name, document)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, document.HasSeal())
-	same, status = repository.RetrieveDocument(name, version)
+	same, status = repository.RetrieveDocument(name)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsString(), same.AsString())
 	_, status = repository.RetrieveDraft(citation)
 	ass.Equal(t, rep.Missing, status)
 
 	// Checkout a new draft of the document.
-	document, status = repository.CheckoutDocument(name, version, uint(2))
+	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
 	ass.NotEqual(t, document.AsString(), same.AsString())
-	document, status = repository.CheckoutDocument(name, version, uint(2))
+	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
 	ass.NotEqual(t, document.AsString(), same.AsString())
@@ -118,17 +118,17 @@ func TestLocalStorage(t *tes.T) {
 	// Send a message to a bag.
 	var bag = doc.Name("/examples/bag")
 	entity = doc.Quote("Hello World!")
-	type_ = doc.Resource("<bali:/examples/Message:v1>")
+	type_ = doc.Name("/bali/examples/Message/v1")
 	tag = doc.Tag()
 	version = doc.Version()
-	permissions = doc.Resource("<bali:/permissions/Public:v1>")
+	permissions = doc.Name("/bali/permissions/Public/v1")
 	content = not.Content(
 		entity,
 		type_,
 		tag,
 		version,
-		previous,
 		permissions,
+		previous,
 	)
 	var message = not.Document(content)
 	ass.False(t, message.HasSeal())
@@ -144,8 +144,8 @@ func TestLocalStorage(t *tes.T) {
 		type_,
 		tag,
 		version,
-		previous,
 		permissions,
+		previous,
 	)
 	message = not.Document(content)
 	ass.False(t, message.HasSeal())
@@ -154,7 +154,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.True(t, message.HasSeal())
 
 	// Subscribe to events.
-	type_ = doc.Resource("<bali:/examples/Event:v1>")
+	type_ = doc.Name("/bali/examples/Event/v1")
 	status = repository.SubscribeEvents(bag, type_)
 	ass.Equal(t, rep.Success, status)
 
@@ -166,8 +166,8 @@ func TestLocalStorage(t *tes.T) {
 		type_,
 		tag,
 		version,
-		previous,
 		permissions,
+		previous,
 	)
 	var event = not.Document(content)
 	ass.False(t, event.HasSeal())

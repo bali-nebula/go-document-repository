@@ -106,21 +106,18 @@ type DocumentRepositoryLike interface {
 	)
 	NotarizeDocument(
 		name doc.NameLike,
-		version doc.VersionLike,
 		document not.DocumentLike,
 	) (
 		status Status,
 	)
 	RetrieveDocument(
 		name doc.NameLike,
-		version doc.VersionLike,
 	) (
 		document not.DocumentLike,
 		status Status,
 	)
 	CheckoutDocument(
 		name doc.NameLike,
-		version doc.VersionLike,
 		level uint,
 	) (
 		document not.DocumentLike,
@@ -152,13 +149,13 @@ type DocumentRepositoryLike interface {
 	)
 	SubscribeEvents(
 		bag doc.NameLike,
-		type_ doc.ResourceLike,
+		type_ doc.NameLike,
 	) (
 		status Status,
 	)
 	UnsubscribeEvents(
 		bag doc.NameLike,
-		type_ doc.ResourceLike,
+		type_ doc.NameLike,
 	) (
 		status Status,
 	)
@@ -178,21 +175,18 @@ persistent data storage mechanisms.
 type Persistent interface {
 	WriteCitation(
 		name doc.NameLike,
-		version doc.VersionLike,
 		citation not.CitationLike,
 	) (
 		status Status,
 	)
 	ReadCitation(
 		name doc.NameLike,
-		version doc.VersionLike,
 	) (
 		citation not.CitationLike,
 		status Status,
 	)
 	DeleteCitation(
 		name doc.NameLike,
-		version doc.VersionLike,
 	) (
 		citation not.CitationLike,
 		status Status,
@@ -223,19 +217,19 @@ type Persistent interface {
 	)
 	WriteSubscription(
 		bag doc.NameLike,
-		type_ doc.ResourceLike,
+		type_ doc.NameLike,
 	) (
 		status Status,
 	)
 	ReadSubscriptions(
-		type_ doc.ResourceLike,
+		type_ doc.NameLike,
 	) (
 		bags doc.Sequential[doc.NameLike],
 		status Status,
 	)
 	DeleteSubscription(
 		bag doc.NameLike,
-		type_ doc.ResourceLike,
+		type_ doc.NameLike,
 	) (
 		status Status,
 	)
