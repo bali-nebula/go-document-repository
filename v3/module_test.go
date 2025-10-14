@@ -78,7 +78,7 @@ func TestLocalStorage(t *tes.T) {
 	var same not.DocumentLike
 	same, status = repository.RetrieveDraft(citation)
 	ass.Equal(t, rep.Success, status)
-	ass.Equal(t, document.AsString(), same.AsString())
+	ass.Equal(t, document.AsSource(), same.AsSource())
 
 	// Create a notarized document.
 	var name = doc.Name("/examples/documents/transaction/v1.2.3")
@@ -87,7 +87,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.True(t, document.HasSeal())
 	same, status = repository.RetrieveDocument(name)
 	ass.Equal(t, rep.Success, status)
-	ass.Equal(t, document.AsString(), same.AsString())
+	ass.Equal(t, document.AsSource(), same.AsSource())
 	_, status = repository.RetrieveDraft(citation)
 	ass.Equal(t, rep.Missing, status)
 
@@ -95,11 +95,11 @@ func TestLocalStorage(t *tes.T) {
 	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
-	ass.NotEqual(t, document.AsString(), same.AsString())
+	ass.NotEqual(t, document.AsSource(), same.AsSource())
 	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
 	ass.False(t, document.HasSeal())
-	ass.NotEqual(t, document.AsString(), same.AsString())
+	ass.NotEqual(t, document.AsSource(), same.AsSource())
 
 	// Save the new draft document.
 	citation, status = repository.SaveDraft(document)
@@ -111,7 +111,7 @@ func TestLocalStorage(t *tes.T) {
 	citation = notary.CiteDocument(document)
 	same, status = repository.DiscardDraft(citation)
 	ass.Equal(t, rep.Success, status)
-	ass.Equal(t, document.AsString(), same.AsString())
+	ass.Equal(t, document.AsSource(), same.AsSource())
 	_, status = repository.RetrieveDraft(citation)
 	ass.Equal(t, rep.Missing, status)
 

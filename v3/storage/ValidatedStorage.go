@@ -304,7 +304,7 @@ func (v *validatedStorage_) invalidCitation(
 			"ValidataedStorage: "+
 				"The following digest doesn't match the cited document: %s %s\n",
 			citation,
-			document.AsString(),
+			document.AsSource(),
 		)
 	}
 	return doesNotMatch
@@ -323,7 +323,7 @@ func (v *validatedStorage_) invalidContent(
 			log.Printf(
 				"ValidataedStorage: "+
 					"The previous citation doesn't cite an existing document: %s\n",
-				content.AsString(),
+				content.AsSource(),
 			)
 			return true
 		}
@@ -340,7 +340,7 @@ func (v *validatedStorage_) invalidDocument(
 		log.Printf(
 			"ValidataedStorage: "+
 				"The content for the following document isn't valid: %s\n",
-			document.AsString(),
+			document.AsSource(),
 		)
 		return true
 	}
@@ -350,7 +350,7 @@ func (v *validatedStorage_) invalidDocument(
 		log.Printf(
 			"ValidataedStorage: "+
 				"The following document is missing a notary seal: %s\n",
-			document.AsString(),
+			document.AsSource(),
 		)
 		return true
 	}
@@ -374,7 +374,7 @@ func (v *validatedStorage_) invalidDocument(
 		log.Printf(
 			"ValidatedStorage: "+
 				"The notary seal doesn't match the notarized document: %s %s\n",
-			document.AsString(),
+			document.AsSource(),
 			certificate,
 		)
 		return true

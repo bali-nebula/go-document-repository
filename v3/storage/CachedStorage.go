@@ -263,8 +263,8 @@ func (v *cachedStorage_) uncacheDocument(
 func (v *cachedStorage_) getKey(
 	citation not.CitationLike,
 ) string {
-	var tag = citation.GetTag().AsString()[1:] // Remove the leading "#" character.
-	var version = citation.GetVersion().AsString()
+	var tag = citation.GetTag().AsSource()[1:] // Remove the leading "#" character.
+	var version = citation.GetVersion().AsSource()
 	return tag + ":" + version
 }
 

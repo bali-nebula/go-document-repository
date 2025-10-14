@@ -75,14 +75,14 @@ func (v *localStorage_) WriteCitation(
 ) (
 	status rep.Status,
 ) {
-	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
+	var filename = v.directory_ + "citations" + name.AsSource() + ".bali"
 	var path = v.extractPath(filename)
 	uti.MakeDirectory(path)
 	if uti.PathExists(filename) {
 		status = rep.Existed
 		return
 	}
-	var source = citation.AsString()
+	var source = citation.AsSource()
 	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
@@ -94,7 +94,7 @@ func (v *localStorage_) ReadCitation(
 	citation not.CitationLike,
 	status rep.Status,
 ) {
-	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
+	var filename = v.directory_ + "citations" + name.AsSource() + ".bali"
 	if !uti.PathExists(filename) {
 		status = rep.Missing
 		return
@@ -112,7 +112,7 @@ func (v *localStorage_) DeleteCitation(
 	status rep.Status,
 ) {
 	// Remove the citation file.
-	var filename = v.directory_ + "citations" + name.AsString() + ".bali"
+	var filename = v.directory_ + "citations" + name.AsSource() + ".bali"
 	var path = v.extractPath(filename)
 	uti.RemovePath(filename)
 
@@ -139,22 +139,22 @@ func (v *localStorage_) WriteMessage(
 	var citation = v.notary_.CiteDocument(message)
 
 	// Write the message citation to the free directory in local storage.
-	var path = v.directory_ + "citations" + bag.AsString() + "/free"
-	var name = citation.GetTag().AsString()[1:]
+	var path = v.directory_ + "citations" + bag.AsSource() + "/free"
+	var name = citation.GetTag().AsSource()[1:]
 	var filename = path + "/" + name + ".bali"
 	uti.MakeDirectory(path)
 	if uti.PathExists(filename) {
 		status = rep.Existed
 		return
 	}
-	var source = citation.AsString()
+	var source = citation.AsSource()
 	uti.WriteFile(filename, source)
 
 	// Write the message to the messages directory in local storage.
 	path = v.directory_ + "messages"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
-	source = message.AsString()
+	source = message.AsSource()
 	uti.WriteFile(filename, source)
 
 	status = rep.Success
@@ -168,7 +168,7 @@ func (v *localStorage_) ReadMessage(
 	status rep.Status,
 ) {
 	// Select a random message citation from the free directory in local storage.
-	var path = v.directory_ + "citations" + bag.AsString() + "/free"
+	var path = v.directory_ + "citations" + bag.AsSource() + "/free"
 	var names = doc.List[string](uti.ReadDirectory(path))
 	if names.IsEmpty() {
 		status = rep.Missing
@@ -187,14 +187,14 @@ func (v *localStorage_) ReadMessage(
 	uti.RemovePath(filename)
 
 	// Write the selected message citation to the lent directory in local storage.
-	path = v.directory_ + "citations" + bag.AsString() + "/lent"
+	path = v.directory_ + "citations" + bag.AsSource() + "/lent"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name
 	uti.WriteFile(filename, source)
 
 	// Read the message from the messages directory in local storage.
 	var citation = not.Citation(source)
-	name = citation.GetTag().AsString()[1:]
+	name = citation.GetTag().AsSource()[1:]
 	path = v.directory_ + "messages"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
@@ -217,20 +217,20 @@ func (v *localStorage_) UnreadMessage(
 ) {
 	// Generate the message citation.
 	var citation = v.notary_.CiteDocument(message)
-	var name = citation.GetTag().AsString()[1:]
+	var name = citation.GetTag().AsSource()[1:]
 
 	// Move the message citation in local storage from lent to free.
-	var path = v.directory_ + "citations" + bag.AsString() + "/lent"
+	var path = v.directory_ + "citations" + bag.AsSource() + "/lent"
 	var filename = path + "/" + name + ".bali"
 	uti.RemovePath(filename)
-	path = v.directory_ + "citations" + bag.AsString() + "/free"
+	path = v.directory_ + "citations" + bag.AsSource() + "/free"
 	uti.MakeDirectory(path)
 	filename = path + "/" + name + ".bali"
 	if uti.PathExists(filename) {
 		status = rep.Missing
 		return
 	}
-	var source = citation.AsString()
+	var source = citation.AsSource()
 	uti.WriteFile(filename, source)
 
 	status = rep.Success
@@ -245,7 +245,7 @@ func (v *localStorage_) DeleteMessage(
 ) {
 	// Generate the message citation.
 	var citation = v.notary_.CiteDocument(message)
-	var name = citation.GetTag().AsString()[1:]
+	var name = citation.GetTag().AsSource()[1:]
 
 	// Delete the message from local storage.
 	var path = v.directory_ + "messages"
@@ -253,7 +253,7 @@ func (v *localStorage_) DeleteMessage(
 	uti.RemovePath(filename)
 
 	// Delete the message citation from local storage.
-	path = v.directory_ + "citations" + bag.AsString() + "/lent"
+	path = v.directory_ + "citations" + bag.AsSource() + "/lent"
 	filename = path + "/" + name + ".bali"
 	uti.RemovePath(filename)
 
@@ -267,11 +267,11 @@ func (v *localStorage_) WriteSubscription(
 ) (
 	status rep.Status,
 ) {
-	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsSource())
 	uti.MakeDirectory(path)
-	var name = v.hashString(bag.AsString()) + ".bali"
+	var name = v.hashString(bag.AsSource()) + ".bali"
 	var filename = path + "/" + name
-	var source = bag.AsString()
+	var source = bag.AsSource()
 	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
@@ -283,7 +283,7 @@ func (v *localStorage_) ReadSubscriptions(
 	bags doc.Sequential[doc.NameLike],
 	status rep.Status,
 ) {
-	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsSource())
 	uti.MakeDirectory(path)
 	var list = doc.List[doc.NameLike]()
 	var files = uti.ReadDirectory(path)
@@ -304,8 +304,8 @@ func (v *localStorage_) DeleteSubscription(
 ) (
 	status rep.Status,
 ) {
-	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsString())
-	var filename = path + "/" + v.hashString(bag.AsString()) + ".bali"
+	var path = v.directory_ + "subscriptions/" + v.hashString(type_.AsSource())
+	var filename = path + "/" + v.hashString(bag.AsSource()) + ".bali"
 	uti.RemovePath(filename)
 	var filenames = uti.ReadDirectory(path)
 	if len(filenames) == 0 {
@@ -323,14 +323,14 @@ func (v *localStorage_) WriteDraft(
 ) {
 	// Generate the draft document citation.
 	citation = v.notary_.CiteDocument(draft)
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 
 	// Write the draft document to local storage.
 	var path = v.directory_ + "drafts/" + name
 	uti.MakeDirectory(path)
 	var filename = path + "/" + version + ".bali"
-	var source = draft.AsString()
+	var source = draft.AsSource()
 	uti.WriteFile(filename, source)
 	status = rep.Success
 	return
@@ -342,8 +342,8 @@ func (v *localStorage_) ReadDraft(
 	draft not.DocumentLike,
 	status rep.Status,
 ) {
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
 	if !uti.PathExists(filename) {
@@ -362,8 +362,8 @@ func (v *localStorage_) DeleteDraft(
 	draft not.DocumentLike,
 	status rep.Status,
 ) {
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 	var path = v.directory_ + "drafts/" + name
 	var filename = path + "/" + version + ".bali"
 	if !uti.PathExists(filename) {
@@ -389,8 +389,8 @@ func (v *localStorage_) WriteDocument(
 ) {
 	// Generate the document citation.
 	citation = v.notary_.CiteDocument(document)
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 
 	// Write the document to local storage.
 	var path = v.directory_ + "documents/" + name
@@ -400,7 +400,7 @@ func (v *localStorage_) WriteDocument(
 		status = rep.Existed
 		return
 	}
-	var source = document.AsString()
+	var source = document.AsSource()
 	uti.WriteFile(filename, source)
 
 	status = rep.Success
@@ -413,8 +413,8 @@ func (v *localStorage_) ReadDocument(
 	document not.DocumentLike,
 	status rep.Status,
 ) {
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
 	if !uti.PathExists(filename) {
@@ -433,8 +433,8 @@ func (v *localStorage_) DeleteDocument(
 	document not.DocumentLike,
 	status rep.Status,
 ) {
-	var name = citation.GetTag().AsString()[1:]
-	var version = citation.GetVersion().AsString()
+	var name = citation.GetTag().AsSource()[1:]
+	var version = citation.GetVersion().AsSource()
 	var path = v.directory_ + "documents/" + name
 	var filename = path + "/" + version + ".bali"
 	if !uti.PathExists(filename) {
@@ -470,7 +470,7 @@ func (v *localStorage_) hashString(
 ) string {
 	var array = sha.Sum512([]byte(string_))
 	var bytes = array[:20] // Convert the array to a slice of the first 20 bytes.
-	var hash = doc.Tag(bytes).AsString()[1:]
+	var hash = doc.Tag(bytes).AsSource()[1:]
 	return hash
 }
 
