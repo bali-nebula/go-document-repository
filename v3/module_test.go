@@ -181,7 +181,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, rep.Success, status)
 
 	// Retrieve a message from the bag.
-	message, status = repository.RetrieveMessage(bag)
+	message, status = repository.ReceiveMessage(bag)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())
 
@@ -190,7 +190,7 @@ func TestLocalStorage(t *tes.T) {
 	ass.Equal(t, rep.Success, status)
 
 	// Process the message.
-	message, status = repository.RetrieveMessage(bag)
+	message, status = repository.ReceiveMessage(bag)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, message.HasSeal())
 

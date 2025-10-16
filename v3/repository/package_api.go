@@ -129,7 +129,7 @@ type DocumentRepositoryLike interface {
 	) (
 		status Status,
 	)
-	RetrieveMessage(
+	ReceiveMessage(
 		bag doc.NameLike,
 	) (
 		message not.DocumentLike,

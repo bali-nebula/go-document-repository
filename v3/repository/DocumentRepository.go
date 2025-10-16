@@ -238,14 +238,14 @@ func (v *documentRepository_) SendMessage(
 	return
 }
 
-func (v *documentRepository_) RetrieveMessage(
+func (v *documentRepository_) ReceiveMessage(
 	bag doc.NameLike,
 ) (
 	message not.DocumentLike,
 	status Status,
 ) {
 	defer v.errorCheck(
-		"An error occurred while attempting to retrieve a message from a bag.",
+		"An error occurred while attempting to receive a message from a bag.",
 	)
 	defer v.mutex_.Unlock()
 	v.mutex_.Lock()
