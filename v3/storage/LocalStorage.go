@@ -17,7 +17,7 @@ import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	rep "github.com/bali-nebula/go-document-repository/v3/repository"
-	uti "github.com/craterdog/go-missing-utilities/v7"
+	uti "github.com/craterdog/go-missing-utilities/v8"
 	sts "strings"
 )
 
@@ -174,7 +174,7 @@ func (v *localStorage_) ReadMessage(
 		status = rep.Missing
 		return
 	}
-	var index = int(doc.Generator().RandomOrdinal(names.GetSize()))
+	var index = int(uti.RandomOrdinal(names.GetSize()))
 	var name = names.GetValue(index)
 
 	// Delete the selected message citation from the free directory in local storage.
