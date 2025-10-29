@@ -1,9 +1,9 @@
-github.com/bali-nebula/go-bali-documents/v3 v3.46.0 h1:O6pRovo+otF6PzwBNhGrfKDDmgw6Yh/2PrYGgarg9MU=
-github.com/bali-nebula/go-bali-documents/v3 v3.46.0/go.mod h1:4OXcEltz5nI/sm/4OOjmkqH0FgWQXotOqvMGc2uBDu0=
-github.com/bali-nebula/go-digital-notary/v3 v3.52.0 h1:gimiYJQ/8Ebh14eIj1PWE9w7EGhhTf7sMfQCj7BMetk=
-github.com/bali-nebula/go-digital-notary/v3 v3.52.0/go.mod h1:0Ut84MF0jojbJ+k2Okvd2nv640skUUL9C6/CNPwIugI=
-github.com/bali-nebula/go-document-notation/v3 v3.39.0 h1:wDtKRWId9mkZ/1WLl+5SLX69/2XL/7ZLD0Q+qnLRMr0=
-github.com/bali-nebula/go-document-notation/v3 v3.39.0/go.mod h1:NoyfJ4pmcGW9ylqYfr7ZMXEDMqz0YwNu5dpBF1g2kl4=
+github.com/bali-nebula/go-bali-documents/v3 v3.47.0 h1:99eS8rGLCyWRGFcxhL7enqDbvN/aYCbmnl3BYxUbFH4=
+github.com/bali-nebula/go-bali-documents/v3 v3.47.0/go.mod h1:kvhAE6s0eD2FB7wwzpvJjWK9IN1ov+wbiHUcLT3znKk=
+github.com/bali-nebula/go-digital-notary/v3 v3.53.0 h1:tS7Mw41lVhcAR+1+4iSx2b86GHTFjk17GjchS65zXiQ=
+github.com/bali-nebula/go-digital-notary/v3 v3.53.0/go.mod h1:FwaFE+cT/AVs15xC2jQfwNsjSSxrSsnribSAtXsIB4w=
+github.com/bali-nebula/go-document-notation/v3 v3.40.0 h1:eWhqck6BfvD4fRdYgmRdXyGQFuaacZhWJrAvh897D7A=
+github.com/bali-nebula/go-document-notation/v3 v3.40.0/go.mod h1:NoyfJ4pmcGW9ylqYfr7ZMXEDMqz0YwNu5dpBF1g2kl4=
 github.com/craterdog/go-essential-composites/v8 v8.2.0 h1:rPimXi8ymnxFZ8lP/jO/P+90MirtxlQ+B6H+ubhH0o0=
 github.com/craterdog/go-essential-composites/v8 v8.2.0/go.mod h1:hTD4Lcu1o67/8XYjdRwCC6PmQeLMepUtMWH2LlYhooA=
 github.com/craterdog/go-essential-primitives/v8 v8.3.0 h1:S83FiFBdB7tj1hk0U8awiplZvdj0hEEas4dZmeT9Nro=
