@@ -58,7 +58,7 @@ func TestLocalStorage(t *tes.T) {
 	var version = doc.Version("v1.2.3")
 	var permissions = doc.Name("/bali/permissions/Public/v1")
 	var previous doc.ResourceLike
-	var content = not.Content(
+	var content = not.Draft(
 		entity,
 		type_,
 		tag,
@@ -122,7 +122,7 @@ func TestLocalStorage(t *tes.T) {
 	tag = doc.Tag()
 	version = doc.Version()
 	permissions = doc.Name("/bali/permissions/Public/v1")
-	content = not.Content(
+	content = not.Draft(
 		entity,
 		type_,
 		tag,
@@ -139,7 +139,7 @@ func TestLocalStorage(t *tes.T) {
 	// Send another message to a bag.
 	entity = doc.Quote("Hello Again...")
 	tag = doc.Tag()
-	content = not.Content(
+	content = not.Draft(
 		entity,
 		type_,
 		tag,
@@ -161,7 +161,7 @@ func TestLocalStorage(t *tes.T) {
 	// Publish an event.
 	entity = doc.Quote("Something happened...")
 	tag = doc.Tag()
-	content = not.Content(
+	content = not.Draft(
 		entity,
 		type_,
 		tag,

@@ -210,7 +210,7 @@ func (v *documentRepository_) CheckoutDocument(
 	)
 	var permissions = content.GetPermissions()
 	var previous = citation.AsResource()
-	content = not.Content(
+	content = not.Draft(
 		entity,
 		type_,
 		tag,
@@ -350,7 +350,7 @@ func (v *documentRepository_) copyEvent(
 	event not.DocumentLike,
 ) not.DocumentLike {
 	var content = event.GetContent()
-	content = not.Content(
+	content = not.Draft(
 		content.GetEntity(),
 		content.GetType(),
 		doc.Tag(), // Only the tag changes.
