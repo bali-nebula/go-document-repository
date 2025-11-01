@@ -1,7 +1,7 @@
 github.com/bali-nebula/go-bali-documents/v3 v3.48.0 h1:AgW16zd7iSNGK9oM9/QwxXm4xhwfIP1r01j90C/snT0=
 github.com/bali-nebula/go-bali-documents/v3 v3.48.0/go.mod h1:5v/SXvzPJoR9NAKV48Jn40cxYUjYCVbHmFK5hT8khIE=
-github.com/bali-nebula/go-digital-notary/v3 v3.56.0 h1:qgUG0M37oY0rNX1cL70hKnnc/r8gf+GGeN1lWnOdYSk=
-github.com/bali-nebula/go-digital-notary/v3 v3.56.0/go.mod h1:WVQCJFgixUpPNoz8gC5+J/+MiPLCmdGaYovHfvTD71c=
+github.com/bali-nebula/go-digital-notary/v3 v3.57.0 h1:lBX95GDa2rLnDwLfkahTkusj1vdiPzxRWDg+CiB8p1g=
+github.com/bali-nebula/go-digital-notary/v3 v3.57.0/go.mod h1:WVQCJFgixUpPNoz8gC5+J/+MiPLCmdGaYovHfvTD71c=
 github.com/bali-nebula/go-document-notation/v3 v3.41.0 h1:4l8HJNgTIyG/bEzx7Tc3WReIafN6f98mWfGgEuiqiSo=
 github.com/bali-nebula/go-document-notation/v3 v3.41.0/go.mod h1:NoyfJ4pmcGW9ylqYfr7ZMXEDMqz0YwNu5dpBF1g2kl4=
 github.com/craterdog/go-essential-composites/v8 v8.2.0 h1:rPimXi8ymnxFZ8lP/jO/P+90MirtxlQ+B6H+ubhH0o0=
