@@ -28,8 +28,8 @@ func TestLocalStorage(t *tes.T) {
 	// Initialize the document repository.
 	var group doc.Synchronized = new(syn.WaitGroup)
 	uti.RemakeDirectory(testDirectory)
-	var ssm = not.Ssm(testDirectory)
-	var hsm = ssm
+	var ssm = not.SsmP1()
+	var hsm = not.TsmP1(testDirectory)
 	var notary = not.DigitalNotary(testDirectory, ssm, hsm)
 	notary.ForgetKey()
 	var certificate = notary.GenerateKey()
