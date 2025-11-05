@@ -22,18 +22,43 @@ import (
 	tes "testing"
 )
 
-const testDirectory = "./test/"
+const directory = "./test/"
+
+var identity = not.Identity(`[
+    $surname: "Norton"
+    $birthname: "Derk David"
+    $birthdate: <1966-04-04>
+    $birthplace: "Boulder, Colorado, USA"
+    $birthsex: $male
+    $nationality: "USA"
+    $address: ">
+        123 Main Street
+        Louisville, Colorado, 80027
+    <"
+    $mobile: "303-555-1212"
+    $email: "craterdog@gmail.com"
+    $mugshot: '>
+        oVVGU2Wa/n+kdOHtZ8Zidq5jD9UZ3G60QOXMdAh6cqg
+    <'
+](
+    $type: /bali/types/notary/Identity/v3
+    $tag: #BDBK83JS4YDAZJKAT9D646Z3PAXY4SXJ
+    $version: v1
+    $permissions: /bali/permissions/Public/v3
+    $previous: none
+)`)
 
 func TestLocalStorage(t *tes.T) {
 	// Initialize the document repository.
 	var group doc.Synchronized = new(syn.WaitGroup)
-	uti.RemakeDirectory(testDirectory)
-	var ssm = not.SsmP1()
-	var hsm = not.TsmP1(testDirectory)
-	var notary = not.DigitalNotary(testDirectory, ssm, hsm)
+	uti.RemakeDirectory(directory)
+	var authority = not.Document(identity)
+	var ssm = not.SsmSha512()
+	var hsm = HsmEd25519TestClass().HsmEd25519(directory)
+	var notary = not.DigitalNotary(authority, ssm, hsm)
 	notary.ForgetKey()
 	var certificate = notary.GenerateKey()
-	var storage rep.Persistent = rep.LocalStorage(notary, testDirectory)
+	var storage rep.Persistent = rep.LocalStorage(notary, directory)
 	storage = rep.ValidatedStorage(notary, storage)
 	storage = rep.CachedStorage(storage)
 	var repository = rep.DocumentRepository(group, notary, storage)
@@ -58,7 +83,7 @@ func TestLocalStorage(t *tes.T) {
 	var version = doc.Version("v1.2.3")
 	var permissions = doc.Name("/bali/permissions/Public/v1")
 	var previous doc.ResourceLike
-	var content = not.Draft(
+	var content = not.Content(
 		entity,
 		type_,
 		tag,
@@ -122,7 +147,7 @@ func TestLocalStorage(t *tes.T) {
 	tag = doc.Tag()
 	version = doc.Version()
 	permissions = doc.Name("/bali/permissions/Public/v1")
-	content = not.Draft(
+	content = not.Content(
 		entity,
 		type_,
 		tag,
@@ -139,7 +164,7 @@ func TestLocalStorage(t *tes.T) {
 	// Send another message to a bag.
 	entity = doc.Quote("Hello Again...")
 	tag = doc.Tag()
-	content = not.Draft(
+	content = not.Content(
 		entity,
 		type_,
 		tag,
@@ -161,7 +186,7 @@ func TestLocalStorage(t *tes.T) {
 	// Publish an event.
 	entity = doc.Quote("Something happened...")
 	tag = doc.Tag()
-	content = not.Draft(
+	content = not.Content(
 		entity,
 		type_,
 		tag,

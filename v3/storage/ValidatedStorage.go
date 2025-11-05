@@ -354,12 +354,12 @@ func (v *validatedStorage_) invalidDocument(
 		)
 		return true
 	}
-	var notary = document.GetNotary()
-	var certificate = document
+	var notary not.DocumentLike
 	var status rep.Status
-	if uti.IsDefined(notary) {
+	var citation = document.GetNotary()
+	if uti.IsDefined(citation) {
 		// The document is not self-signed, so read the notary certificate.
-		certificate, status = v.storage_.ReadDocument(notary)
+		notary, status = v.storage_.ReadDocument(citation)
 		if status != rep.Success {
 			log.Printf(
 				"ValidatedStorage: "+
@@ -369,6 +369,7 @@ func (v *validatedStorage_) invalidDocument(
 			return true
 		}
 	}
+	var certificate = notary.GetContent().(not.CertificateLike)
 	var doesNotMatch = !v.notary_.SealMatches(document, certificate)
 	if doesNotMatch {
 		log.Printf(

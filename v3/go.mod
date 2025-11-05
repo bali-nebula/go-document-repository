@@ -3,8 +3,8 @@ module github.com/bali-nebula/go-document-repository/v3
 go 1.25
 
 require (
-	github.com/bali-nebula/go-bali-documents/v3 v3.48.0
-	github.com/bali-nebula/go-digital-notary/v3 v3.57.0
+	github.com/bali-nebula/go-bali-documents/v3 v3.50.0
+	github.com/bali-nebula/go-digital-notary/v3 v3.58.0
 	github.com/craterdog/go-essential-utilities/v8 v8.2.0
 	github.com/stretchr/testify v1.11.1
 )
