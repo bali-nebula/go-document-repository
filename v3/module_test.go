@@ -22,24 +22,30 @@ import (
 	tes "testing"
 )
 
-const directory = "./test/"
+const testDirectory = "./test/"
 
 var identity = not.Identity(`[
-    $surname: "Norton"
-    $birthname: "Derk David"
-    $birthdate: <1966-04-04>
-    $birthplace: "Boulder, Colorado, USA"
-    $birthsex: $male
-    $nationality: "USA"
-    $address: ">
-        123 Main Street
-        Louisville, Colorado, 80027
-    <"
-    $mobile: "303-555-1212"
-    $email: "craterdog@gmail.com"
-    $mugshot: '>
-        oVVGU2Wa/n+kdOHtZ8Zidq5jD9UZ3G60QOXMdAh6cqg
+    $algorithm: "ED25519"
+    $key: '>
+        uR+AQ8Gs45g9hHcPUWMu7VXzgadQdSubVnssoE16YrA
     <'
+    $attributes: [
+        $surname: "Norton"
+        $birthname: "Derk David"
+        $birthdate: <1966-04-04>
+        $birthplace: "Boulder, Colorado, USA"
+        $birthsex: $male
+        $nationality: "USA"
+        $address: ">
+            123 Main Street
+            Louisville, Colorado, 80027
+        <"
+        $mobile: "303-555-1212"
+        $email: "craterdog@gmail.com"
+        $mugshot: '>
+            oVVGU2Wa/n+kdOHtZ8Zidq5jD9UZ3G60QOXMdAh6cqg
+        <'
+    ]
 ](
     $type: /bali/types/notary/Identity/v3
     $tag: #BDBK83JS4YDAZJKAT9D646Z3PAXY4SXJ
@@ -51,14 +57,17 @@ var identity = not.Identity(`[
 func TestLocalStorage(t *tes.T) {
 	// Initialize the document repository.
 	var group doc.Synchronized = new(syn.WaitGroup)
-	uti.RemakeDirectory(directory)
-	var authority = not.Document(identity)
+	uti.RemakeDirectory(testDirectory)
+	uti.MakeDirectory(testDirectory + "hsmEd25519/")
 	var ssm = not.SsmSha512()
-	var hsm = HsmEd25519TestClass().HsmEd25519(directory)
-	var notary = not.DigitalNotary(authority, ssm, hsm)
+	var device = "dummy"
+	var secret = "#ACH22TPZL7QSSFFH6GGG8D21N3S6Y5RQ"
+	var hsm = HsmEd25519TestClass().HsmEd25519(device, secret)
+	var notary = not.DigitalNotary(ssm, hsm)
 	notary.ForgetKey()
-	var certificate = notary.GenerateKey()
-	var storage rep.Persistent = rep.LocalStorage(notary, directory)
+	var attributes = identity.GetAttributes()
+	var certificate = notary.GenerateKey(attributes)
+	var storage rep.Persistent = rep.LocalStorage(notary, testDirectory)
 	storage = rep.ValidatedStorage(notary, storage)
 	storage = rep.CachedStorage(storage)
 	var repository = rep.DocumentRepository(group, notary, storage)
@@ -94,7 +103,7 @@ func TestLocalStorage(t *tes.T) {
 	var document = not.Document(content)
 	_, status = repository.SaveDraft(document)
 	ass.Equal(t, rep.Success, status)
-	ass.False(t, document.HasSeal())
+	ass.False(t, document.IsNotarized())
 	citation, status = repository.SaveDraft(document)
 	ass.Equal(t, rep.Success, status)
 	ass.True(t, notary.CitationMatches(citation, document))
@@ -109,7 +118,7 @@ func TestLocalStorage(t *tes.T) {
 	var name = doc.Name("/examples/documents/transaction/v1.2.3")
 	status = repository.NotarizeDocument(name, document)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, document.HasSeal())
+	ass.True(t, document.IsNotarized())
 	same, status = repository.RetrieveDocument(name)
 	ass.Equal(t, rep.Success, status)
 	ass.Equal(t, document.AsSource(), same.AsSource())
@@ -119,17 +128,17 @@ func TestLocalStorage(t *tes.T) {
 	// Checkout a new draft of the document.
 	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
-	ass.False(t, document.HasSeal())
+	ass.False(t, document.IsNotarized())
 	ass.NotEqual(t, document.AsSource(), same.AsSource())
 	document, status = repository.CheckoutDocument(name, uint(2))
 	ass.Equal(t, rep.Success, status)
-	ass.False(t, document.HasSeal())
+	ass.False(t, document.IsNotarized())
 	ass.NotEqual(t, document.AsSource(), same.AsSource())
 
 	// Save the new draft document.
 	citation, status = repository.SaveDraft(document)
 	ass.Equal(t, rep.Success, status)
-	ass.False(t, document.HasSeal())
+	ass.False(t, document.IsNotarized())
 	ass.True(t, notary.CitationMatches(citation, document))
 
 	// Discard the draft document
@@ -156,10 +165,10 @@ func TestLocalStorage(t *tes.T) {
 		previous,
 	)
 	var message = not.Document(content)
-	ass.False(t, message.HasSeal())
+	ass.False(t, message.IsNotarized())
 	status = repository.SendMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, message.HasSeal())
+	ass.True(t, message.IsNotarized())
 
 	// Send another message to a bag.
 	entity = doc.Quote("Hello Again...")
@@ -173,10 +182,10 @@ func TestLocalStorage(t *tes.T) {
 		previous,
 	)
 	message = not.Document(content)
-	ass.False(t, message.HasSeal())
+	ass.False(t, message.IsNotarized())
 	status = repository.SendMessage(bag, message)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, message.HasSeal())
+	ass.True(t, message.IsNotarized())
 
 	// Subscribe to events.
 	type_ = doc.Name("/bali/examples/Event/v1")
@@ -195,10 +204,10 @@ func TestLocalStorage(t *tes.T) {
 		previous,
 	)
 	var event = not.Document(content)
-	ass.False(t, event.HasSeal())
+	ass.False(t, event.IsNotarized())
 	status = repository.PublishEvent(event)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, event.HasSeal())
+	ass.True(t, event.IsNotarized())
 	group.Wait()
 
 	// Unsubscribe from events.
@@ -208,7 +217,7 @@ func TestLocalStorage(t *tes.T) {
 	// Retrieve a message from the bag.
 	message, status = repository.ReceiveMessage(bag)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, message.HasSeal())
+	ass.True(t, message.IsNotarized())
 
 	// Reject the message.
 	status = repository.RejectMessage(bag, message)
@@ -217,7 +226,7 @@ func TestLocalStorage(t *tes.T) {
 	// Process the message.
 	message, status = repository.ReceiveMessage(bag)
 	ass.Equal(t, rep.Success, status)
-	ass.True(t, message.HasSeal())
+	ass.True(t, message.IsNotarized())
 
 	// Accept the message.
 	status = repository.AcceptMessage(bag, message)

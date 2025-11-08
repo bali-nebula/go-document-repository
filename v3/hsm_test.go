@@ -18,7 +18,6 @@ import (
 	doc "github.com/bali-nebula/go-bali-documents/v3"
 	not "github.com/bali-nebula/go-digital-notary/v3"
 	uti "github.com/craterdog/go-essential-utilities/v8"
-	sts "strings"
 )
 
 // CLASS INTERFACE
@@ -32,28 +31,23 @@ func HsmEd25519TestClass() not.HsmEd25519ClassLike {
 // Constructor Methods
 
 func (c *hsmEd25519Class_) HsmEd25519(
-	directory string,
+	device string,
+	tag string,
 ) not.HsmEd25519Like {
-	if uti.IsUndefined(directory) {
-		panic("The \"directory\" attribute is required by this class.")
+	if uti.IsUndefined(tag) {
+		panic("The \"tag\" attribute is required by this class.")
 	}
-	if !sts.HasSuffix(directory, "/") {
-		directory += "/"
-	}
-	directory += "hsmEd25519/"
-	uti.MakeDirectory(directory)
+	var filename = testDirectory + "hsmEd25519/Configuration.bali"
 	var controller = uti.Controller(c.events_, c.transitions_, c.keyless_)
 	var instance = &hsmEd25519_{
 		// Initialize the instance attributes.
-		directory_:  directory,
-		filename_:   "Configuration.bali",
+		filename_:   filename,
 		controller_: controller,
 	}
-	var filename = directory + instance.filename_
 	if uti.PathExists(filename) {
-		instance.readConfiguration()
+		instance.readConfiguration(tag)
 	} else {
-		instance.createConfiguration()
+		instance.createConfiguration(tag)
 	}
 	return instance
 }
@@ -80,6 +74,10 @@ func (v *hsmEd25519_) GetTag() string {
 
 func (v *hsmEd25519_) GetSignatureAlgorithm() string {
 	return hsmEd25519Class().algorithm_
+}
+
+func (v *hsmEd25519_) GetPublicKey() []byte {
+	return v.publicKey_
 }
 
 func (v *hsmEd25519_) GenerateKeys() []byte {
@@ -154,15 +152,22 @@ func (v *hsmEd25519_) EraseKeys() {
 		"An error occurred while attempting to erase the keys",
 	)
 
-	v.createConfiguration()
+	v.createConfiguration(v.tag_)
 }
 
 // PROTECTED INTERFACE
 
 // Private Methods
 
-func (v *hsmEd25519_) createConfiguration() {
-	v.tag_ = doc.Tag().AsSource() // Results in a 32 character tag.
+func (v *hsmEd25519_) createConfiguration(
+	tag string,
+) {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to create a new HSM configuration",
+	)
+
+	v.tag_ = tag
 	v.publicKey_ = nil
 	v.privateKey_ = nil
 	v.previousKey_ = nil
@@ -187,15 +192,23 @@ func (v *hsmEd25519_) errorCheck(
 	}
 }
 
-func (v *hsmEd25519_) readConfiguration() {
-	var filename = v.directory_ + v.filename_
-	var source = uti.ReadFile(filename)
+func (v *hsmEd25519_) readConfiguration(
+	tag string,
+) {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to read in the HSM configuration",
+	)
+
+	var source = uti.ReadFile(v.filename_)
 	var component = doc.ParseComponent(source)
-	fmt.Println(filename)
 
 	v.tag_ = doc.FormatComponent(
 		component.GetSubcomponent(doc.Symbol("$tag")),
 	)
+	if v.tag_ != tag {
+		panic("The specified tag does not match the HSM tag.")
+	}
 
 	var publicKey = doc.FormatComponent(
 		component.GetSubcomponent(doc.Symbol("$publicKey")),
@@ -234,6 +247,11 @@ func (v *hsmEd25519_) readConfiguration() {
 }
 
 func (v *hsmEd25519_) writeConfiguration() {
+	// Check for any errors at the end.
+	defer v.errorCheck(
+		"An error occurred while attempting to write out the HSM configuration",
+	)
+
 	var tag = v.tag_
 
 	var state string
@@ -273,8 +291,7 @@ func (v *hsmEd25519_) writeConfiguration() {
     $type: /bali/types/notary/HsmEd25519/v3
 )
 `
-	var filename = v.directory_ + v.filename_
-	uti.WriteFile(filename, source)
+	uti.WriteFile(v.filename_, source)
 }
 
 // Instance Structure
@@ -285,7 +302,6 @@ type hsmEd25519_ struct {
 	publicKey_   []byte
 	privateKey_  []byte
 	previousKey_ []byte
-	directory_   string
 	filename_    string
 	controller_  uti.Stateful
 }

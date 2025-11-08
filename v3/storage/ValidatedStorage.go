@@ -202,7 +202,7 @@ func (v *validatedStorage_) WriteDraft(
 ) {
 	var content = draft.GetContent()
 	switch {
-	case draft.HasSeal():
+	case draft.IsNotarized():
 		status = rep.Invalid
 	case v.invalidContent(content):
 		status = rep.Invalid
@@ -304,7 +304,7 @@ func (v *validatedStorage_) invalidCitation(
 			"ValidataedStorage: "+
 				"The following digest doesn't match the cited document: %s %s\n",
 			citation,
-			document.AsSource(),
+			document,
 		)
 	}
 	return doesNotMatch
@@ -323,7 +323,7 @@ func (v *validatedStorage_) invalidContent(
 			log.Printf(
 				"ValidataedStorage: "+
 					"The previous citation doesn't cite an existing document: %s\n",
-				content.AsSource(),
+				content,
 			)
 			return true
 		}
@@ -340,42 +340,43 @@ func (v *validatedStorage_) invalidDocument(
 		log.Printf(
 			"ValidataedStorage: "+
 				"The content for the following document isn't valid: %s\n",
-			document.AsSource(),
+			document,
 		)
 		return true
 	}
 
 	// Validate the signature on the notarized document.
-	if !document.HasSeal() {
+	if !document.IsNotarized() {
 		log.Printf(
 			"ValidataedStorage: "+
-				"The following document is missing a notary seal: %s\n",
-			document.AsSource(),
+				"The following document has not been notarized: %s\n",
+			document,
 		)
 		return true
 	}
-	var notary not.DocumentLike
+	var certificate not.DocumentLike
 	var status rep.Status
-	var citation = document.GetNotary()
+	var citation = document.GetNotaryCitation()
 	if uti.IsDefined(citation) {
 		// The document is not self-signed, so read the notary certificate.
-		notary, status = v.storage_.ReadDocument(citation)
+		certificate, status = v.storage_.ReadDocument(citation)
 		if status != rep.Success {
 			log.Printf(
 				"ValidatedStorage: "+
 					"The cited notary certificate doesn't exist: %s\n",
-				notary,
+				citation,
 			)
 			return true
 		}
+	} else {
+		certificate = document
 	}
-	var certificate = notary.GetContent().(not.CertificateLike)
 	var doesNotMatch = !v.notary_.SealMatches(document, certificate)
 	if doesNotMatch {
 		log.Printf(
 			"ValidatedStorage: "+
 				"The notary seal doesn't match the notarized document: %s %s\n",
-			document.AsSource(),
+			document,
 			certificate,
 		)
 		return true

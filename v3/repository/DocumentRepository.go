@@ -74,7 +74,7 @@ func (v *documentRepository_) SaveCertificate(
 	defer v.errorCheck(
 		"An error occurred while attempting to save a certificate document.",
 	)
-	var content = not.Certificate(certificate.GetContent().AsSource())
+	var content = certificate.GetContent()
 	var tag = content.GetTag()
 	var version = content.GetVersion()
 	var name = doc.Name(
