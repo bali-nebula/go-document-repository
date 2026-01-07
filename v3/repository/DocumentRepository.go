@@ -200,7 +200,7 @@ func (v *documentRepository_) CheckoutDocument(
 		return
 	}
 	var content = document.GetContent()
-	var entity = content.GetEntity()
+	var literal = content.GetLiteral()
 	var type_ = content.GetType()
 	var tag = content.GetTag()
 	var version = content.GetVersion()
@@ -211,7 +211,7 @@ func (v *documentRepository_) CheckoutDocument(
 	var permissions = content.GetPermissions()
 	var previous = citation.AsResource()
 	content = not.Content(
-		entity,
+		literal,
 		type_,
 		tag,
 		nextVersion,
@@ -351,7 +351,7 @@ func (v *documentRepository_) copyEvent(
 ) not.DocumentLike {
 	var content = event.GetContent()
 	content = not.Content(
-		content.GetEntity(),
+		content.GetLiteral(),
 		content.GetType(),
 		doc.Tag(), // Only the tag changes.
 		content.GetVersion(),
